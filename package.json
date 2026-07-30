@@ -1,0 +1,32 @@
+{
+  "name": "magicos-webpage",
+  "version": "1.0.0",
+  "description": "Web oficial de MagicOS — SO premium enfocado en privacidad radical",
+  "main": "backend/app.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node backend/app.js",
+    "seed": "node backend/seed.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Josesepin3/MagicOS-Webpage.git"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Josesepin3/MagicOS-Webpage/issues"
+  },
+  "homepage": "https://github.com/Josesepin3/MagicOS-Webpage#readme",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^13.0.2",
+    "dotenv": "^17.4.2",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3"
+  }
+}

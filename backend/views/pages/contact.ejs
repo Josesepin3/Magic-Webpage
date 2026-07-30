@@ -1,0 +1,24 @@
+<%- include('../partials/header') %>
+
+    <main>
+        <section>
+            <h2>Contacto</h2>
+            <p>Estaremos encantados de escucharte.</p>
+            <form action="/api/contact" method="POST" style="max-width: 500px; margin: 40px auto; display: flex; flex-direction: column; gap: 16px;">
+                <input type="text" name="name" placeholder="Tu nombre" required
+                    style="padding: 12px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(255,255,255,0.05); color: inherit; font: inherit;">
+                <input type="email" name="email" placeholder="Tu correo electrónico" required
+                    style="padding: 12px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(255,255,255,0.05); color: inherit; font: inherit;">
+                <input type="text" name="subject" placeholder="Asunto"
+                    style="padding: 12px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(255,255,255,0.05); color: inherit; font: inherit;">
+                <textarea name="message" placeholder="Tu mensaje" required rows="6"
+                    style="padding: 12px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(255,255,255,0.05); color: inherit; font: inherit; resize: vertical;"></textarea>
+                <button type="submit"
+                    style="padding: 12px 24px; border: none; border-radius: 8px; background: rgba(129, 61, 156, 0.9); color: #fff; font: inherit; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+                    Enviar mensaje
+                </button>
+            </form>
+        </section>
+    </main>
+
+<%- include('../partials/footer') %>
