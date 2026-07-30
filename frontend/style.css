@@ -1,14 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* ═══════════════════════════════════════════════════
+   1. RESET & BASE STYLES
+   ═══════════════════════════════════════════════════ */
+
 html, body {
 	height: 100%;
 	margin: 0;
-}
-
-/* Desktop: ensure toggle is hidden and navbar visible */
-@media (min-width: 601px) {
-	.menu-toggle { display: none !important; }
-	.navbar { display: flex !important; position: static !important; }
 }
 
 *,
@@ -37,6 +35,16 @@ a {
 	color: inherit;
 	text-decoration: underline;
 }
+
+/* ═══════════════════════════════════════════════════
+   2. UTILITIES
+   ═══════════════════════════════════════════════════ */
+
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* ═══════════════════════════════════════════════════
+   3. HEADER & NAVIGATION
+   ═══════════════════════════════════════════════════ */
 
 /* Header / Navbar */
 .site-header {
@@ -81,7 +89,9 @@ a {
 	color: inherit;
 }
 
-.visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+/* ═══════════════════════════════════════════════════
+   4. HERO SECTION
+   ═══════════════════════════════════════════════════ */
 
 /* Hero image with overlay text at bottom */
 .hero {
@@ -112,91 +122,6 @@ a {
 	z-index: 1;
 }
 
-#funciones h2,
-#get_involved h2,
-#get_involved h3 {
-	text-align: center;
-}
-
-#get_involved {
-	background: rgba(129, 61, 156, 0.92);
-	color: #ffffff;
-	width: calc(100% + (var(--page-padding) * 2));
-	max-width: 100vw;
-	margin-left: calc(var(--page-padding) * -1);
-	padding: 32px var(--page-padding) 32px;
-}
-
-#get_involved h2,
-#get_involved h3,
-#get_involved ul,
-#get_involved li {
-	color: inherit;
-}
-
-.steps-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(180px, 240px));
-	gap: 16px;
-	margin: 24px 0 0;
-	padding: 0;
-	list-style: none;
-	max-width: 100%;
-}
-
-.steps-grid li {
-	background: rgba(255, 255, 255, 0.06);
-	border-radius: 12px;
-	padding: 18px 12px;
-	min-height: 96px;
-	display: grid;
-	grid-template-rows: auto 1fr;
-	align-items: start;
-	justify-items: center;
-	gap: 8px;
-	transition: background 0.18s ease, transform 0.18s ease;
-}
-
-/* Center wrapped rows: when items wrap to a new row, keep them centered */
-.steps-grid {
-	justify-content: center; /* center the grid within its container */
-}
-
-/* For smaller viewports where grid collapses to multiple rows, ensure children align center */
-@media (max-width: 720px) {
-	.steps-grid {
-		grid-template-columns: repeat(auto-fit, minmax(160px, 220px));
-		justify-items: center;
-	}
-}
-
-.steps-grid li:hover {
-	background: rgba(255, 255, 255, 0.12);
-	transform: translateY(-3px);
-}
-
-.steps-grid .step-number {
-	width: 40px;
-	height: 40px;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	background: rgba(255,255,255,0.08);
-	border-radius: 50%;
-	font-weight: 700;
-}
-
-.steps-grid li p { margin: 0; text-align: center; }
-
-footer {
-	background: rgba(129, 61, 156, 0.92);
-	color: #ffffff;
-	width: calc(100% + (var(--page-padding) * 2));
-	margin-left: calc(var(--page-padding) * -1);
-	padding: 24px var(--page-padding);
-	text-align: center;
-}
-
 .hero::after {
 	content: '';
 	position: absolute;
@@ -209,6 +134,165 @@ footer {
 	z-index: 0;
 }
 
+/* ═══════════════════════════════════════════════════
+   5. FEATURES GRID — SHARED STYLES
+      (aplican tanto en desktop como en responsive)
+   ═══════════════════════════════════════════════════ */
+
+#funciones h2,
+#get_involved h2,
+#get_involved h3 {
+	text-align: center;
+}
+
+/* Shared feature-card structure for both desktop and responsive modes */
+.feature-card {
+	border-radius: 12px;
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+	transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.18s ease;
+}
+
+.feature-media {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.feature-icon-img {
+	width: 48px;
+	height: 48px;
+	display: block;
+}
+
+.card-title {
+	margin: 0;
+	font-size: 1.05rem;
+}
+
+.card-body {
+	max-height: 0;
+	opacity: 0;
+	overflow: hidden;
+	margin: 0;
+	transition: max-height 0.36s cubic-bezier(.2,.8,.2,1), opacity 0.28s ease;
+}
+
+.card-desc {
+	margin: 0;
+	line-height: 1.5;
+	font-size: 0.95rem;
+}
+
+.card-title {
+	transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.25s ease;
+	overflow: hidden;
+}
+
+.feature-media,
+.feature-icon,
+.feature-icon-img,
+.step-number {
+	transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.feature-card.size-small { min-height: 160px; }
+.feature-card.size-medium { min-height: 220px; }
+.feature-card.size-large { min-height: 300px; }
+
+/* Allow a feature card to span multiple grid columns (kanban-like) */
+.feature-card.span-2 {
+	grid-column: span 2;
+}
+
+/* Internal two-column layout for large visual cards */
+.card-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 18px;
+	width: 100%;
+}
+
+/* Larger span variant: span 3 columns and give more space to visual */
+.feature-card.span-3 {
+	grid-column: span 3;
+}
+
+.feature-card.span-3 .card-grid {
+	grid-template-columns: 1fr 2fr; /* text = 1/3, visual = 2/3 */
+}
+
+.card-content {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 6px 0;
+}
+
+/* Interfaz de usuario: keep description under title and left aligned */
+.feature-card.feature-card-ui .card-content {
+	justify-content: flex-start;
+}
+.feature-card.feature-card-ui .card-content .card-title,
+.feature-card.feature-card-ui .card-content .card-body,
+.feature-card.feature-card-ui .card-content .card-desc {
+	text-align: left;
+	align-self: stretch;
+}
+
+.feature-card .card-title {
+	font-size: 1.2rem;
+}
+
+/* Ensure the title and description in the span-2 / span-3 cards are left-aligned */
+.feature-card.span-2 .card-content { align-items: stretch; }
+.feature-card.span-2 .card-title,
+.feature-card.span-2 .card-body,
+.feature-card.span-2 .card-desc,
+.feature-card.span-3 .card-title,
+.feature-card.span-3 .card-body,
+.feature-card.span-3 .card-desc { text-align: left; align-self: stretch; }
+
+.card-visual {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 12px; /* respect card padding */
+}
+
+.card-visual img {
+	max-width: 100%;
+	max-height: calc(100% - 24px);
+	width: auto;
+	height: auto;
+	object-fit: contain;
+}
+
+.feature-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 10px;
+	background: rgba(255, 255, 255, 0.08);
+	border-radius: 50%;
+	margin: 0 auto 10px;
+}
+
+.feature-icon-img {
+	width: 32px;
+	height: 32px;
+	display: block;
+}
+
+.feature-card p {
+	margin: 16px 0 0;
+	line-height: 1.6;
+}
+
+/* Legacy masonry grid (not currently in use) */
 .features-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -219,6 +303,11 @@ footer {
     padding: 0;
     list-style: none;
 }
+
+/* ═══════════════════════════════════════════════════
+   6. FEATURES GRID — MODO DESKTOP (≥ 1061px)
+      Las cards se muestran en un grid fijo de 4 columnas
+   ═══════════════════════════════════════════════════ */
 
 /* Manual fixed-size grid (explicit placement). Each cell = 200px × 200px with 20px gap */
 
@@ -323,117 +412,10 @@ footer {
     width: 100%;
 }
 
-/* Compatibilidad desktop: imagen arriba y texto abajo */
-@media (min-width: 1061px) {
-	.manual-features-grid .feature-card.feature-card-compat > .card-grid {
-		display: grid;
-		grid-template-columns: 1fr;
-		grid-template-rows: auto auto;
-		gap: 18px;
-		width: 100%;
-		align-items: stretch;
-	}
-
-	.manual-features-grid .feature-card.feature-card-compat .card-visual {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 12px;
-	}
-
-	.manual-features-grid .feature-card.feature-card-compat .card-content {
-		justify-content: flex-start;
-	}
-}
-
 /* Ensure the internal card-grid stretches to fill the manual card cell */
 .manual-features-grid .feature-card > .card-grid {
 	flex: 1 1 auto;
 	min-height: 0; /* allow flex children to shrink properly inside the manual cell */
-}
-
-/* Variant for image-top, title and body below: image takes available space */
-.feature-card.span-2x2 {
-	grid-column: span 2;
-	grid-row: span 2;
-}
-
-.card-grid.variant-2x2 {
-	display: grid;
-	grid-template-columns: 1fr !important;
-	grid-template-rows: 88px 1fr auto !important;
-	gap: 12px;
-	width: 100%;
-}
-
-.card-grid.variant-2x2 .card-visual.top {
-	grid-row: 1;
-	width: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 8px 0;
-	height: 88px;
-}
-
-.card-grid.variant-2x2 .card-title { grid-row: 3; grid-column: 1 / -1; text-align: left; align-self: start; }
-.card-grid.variant-2x2 .card-body { grid-row: 3; grid-column: 1 / -1; text-align: left; align-self: start; }
-
-@media (max-width: 900px) {
-	.feature-card.span-2x2 { grid-column: span 1; grid-row: span 1; }
-	.card-grid.variant-2x2 { grid-template-rows: auto auto auto; }
-}
-
-/* Shared feature-card structure for both desktop and responsive modes */
-.feature-card {
-	border-radius: 12px;
-	display: flex;
-	flex-direction: column;
-	text-align: center;
-	transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.18s ease;
-}
-
-.feature-media {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.feature-icon-img {
-	width: 48px;
-	height: 48px;
-	display: block;
-}
-
-.card-title {
-	margin: 0;
-	font-size: 1.05rem;
-}
-
-.card-body {
-	max-height: 0;
-	opacity: 0;
-	overflow: hidden;
-	margin: 0;
-	transition: max-height 0.36s cubic-bezier(.2,.8,.2,1), opacity 0.28s ease;
-}
-
-.card-desc {
-	margin: 0;
-	line-height: 1.5;
-	font-size: 0.95rem;
-}
-
-.card-title {
-	transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.25s ease;
-	overflow: hidden;
-}
-
-.feature-media,
-.feature-icon,
-.feature-icon-img,
-.step-number {
-	transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 /* Desktop manual grid mode */
@@ -484,212 +466,60 @@ footer {
 	margin-top: 0;
 }
 
-/* Responsive list mode overrides */
-@media (max-width: 1060px) {
-	.manual-features-grid .feature-card {
-		min-height: auto;
-		width: 100%;
-		background: rgba(255, 255, 255, 0.05);
-		border: none;
-		border-radius: 12px;
-		padding: 14px 16px;
-		box-shadow: none;
-		transform: none;
-		cursor: default;
-		pointer-events: auto;
-	}
-
-	.manual-features-grid .feature-card:hover,
-	.manual-features-grid .feature-card:active,
-	.manual-features-grid .feature-card:focus,
-	.manual-features-grid .feature-card.expanded {
-		background: rgba(255, 255, 255, 0.05) !important;
-		transform: none !important;
-		border: none !important;
-	}
-
-	.manual-features-grid .feature-card .card-body {
-		max-height: none !important;
-		opacity: 1 !important;
-		margin-top: 8px;
-	}
-
-	.manual-features-grid .feature-card .card-title {
-		opacity: 1 !important;
-		transform: none !important;
-	}
-
-	.manual-features-grid .feature-card.expanded .card-title,
-	.manual-features-grid .feature-card.expanded .card-body,
-	.manual-features-grid .feature-card.expanded .card-desc {
-		color: inherit !important;
-	}
-}
-
-.feature-card.size-small { min-height: 160px; }
-.feature-card.size-medium { min-height: 220px; }
-.feature-card.size-large { min-height: 300px; }
-
-/* Allow a feature card to span multiple grid columns (kanban-like) */
-.feature-card.span-2 {
+/* Variant for image-top, title and body below: image takes available space */
+.feature-card.span-2x2 {
 	grid-column: span 2;
+	grid-row: span 2;
 }
 
-/* Internal two-column layout for large visual cards */
-.card-grid {
+.card-grid.variant-2x2 {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 18px;
+	grid-template-columns: 1fr !important;
+	grid-template-rows: 88px 1fr auto !important;
+	gap: 12px;
 	width: 100%;
 }
 
-/* Larger span variant: span 3 columns and give more space to visual */
-.feature-card.span-3 {
-	grid-column: span 3;
-}
-
-.feature-card.span-3 .card-grid {
-	grid-template-columns: 1fr 2fr; /* text = 1/3, visual = 2/3 */
-}
-
-/* On narrow screens, collapse span-3 to single column for readability */
-@media (max-width: 900px) {
-	.feature-card.span-3 { grid-column: span 1; }
-	.feature-card.span-3 .card-grid { grid-template-columns: 1fr; }
-	.feature-card.span-3 .card-visual { order: -1; } /* visual on top on small screens */
-}
-
-.card-content {
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-start;
-	align-items: flex-start;
-	gap: 10px;
-	padding: 6px 0;
-}
-
-/* Interfaz de usuario: keep description under title and left aligned */
-.feature-card.feature-card-ui .card-content {
-	justify-content: flex-start;
-}
-.feature-card.feature-card-ui .card-content .card-title,
-.feature-card.feature-card-ui .card-content .card-body,
-.feature-card.feature-card-ui .card-content .card-desc {
-	text-align: left;
-	align-self: stretch;
-}
-
-.feature-card .card-title {
-	font-size: 1.2rem;
-}
-
-/* Ensure the title and description in the span-2 / span-3 cards are left-aligned */
-.feature-card.span-2 .card-content,
-.feature-card.span-2 .card-content { align-items: stretch; }
-.feature-card.span-2 .card-title,
-.feature-card.span-2 .card-body,
-.feature-card.span-2 .card-desc,
-.feature-card.span-3 .card-title,
-.feature-card.span-3 .card-body,
-.feature-card.span-3 .card-desc { text-align: left; align-self: stretch; }
-
-.card-visual {
+.card-grid.variant-2x2 .card-visual.top {
+	grid-row: 1;
+	width: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 12px; /* respect card padding */
+	padding: 8px 0;
+	height: 88px;
 }
 
-.card-visual img {
-	max-width: 100%;
-	max-height: calc(100% - 24px);
-	width: auto;
-	height: auto;
-	object-fit: contain;
-}
+.card-grid.variant-2x2 .card-title { grid-row: 3; grid-column: 1 / -1; text-align: left; align-self: start; }
+.card-grid.variant-2x2 .card-body { grid-row: 3; grid-column: 1 / -1; text-align: left; align-self: start; }
 
-.feature-icon {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	padding: 10px;
-	background: rgba(255, 255, 255, 0.08);
-	border-radius: 50%;
-	margin: 0 auto 10px;
-}
-
-.feature-icon-img {
-	width: 32px;
-	height: 32px;
-	display: block;
-}
-
-.feature-card p {
-	margin: 16px 0 0;
-	line-height: 1.6;
-}
-
-/* Footer centered and italic */
-footer {
-	text-align: center;
-	padding-bottom: 24px;
-}
-
-footer p {
-	font-style: italic;
-	margin: 0;
-}
-
-@media (max-width: 600px) {
-	.site-header {
-		flex-direction: column;
-		gap: 8px;
-		align-items: flex-start;
+/* Compatibilidad desktop: imagen arriba y texto abajo */
+@media (min-width: 1061px) {
+	.manual-features-grid .feature-card.feature-card-compat > .card-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		grid-template-rows: auto auto;
+		gap: 18px;
+		width: 100%;
+		align-items: stretch;
 	}
 
-	.navbar ul {
-		gap: 12px;
-	}
-
-	/* Smaller screens: collapse navbar into toggle */
-	.menu-toggle {
-		display: block;
-		position: absolute;
-		right: var(--page-padding);
-		top: 12px;
-		transform: none;
-	}
-
-	.site-header {
-		justify-content: center; /* center title */
-		position: relative;
-	}
-
-	.navbar {
-		display: none; /* hide by default on small screens */
-		position: absolute;
-		top: 100%;
-		right: var(--page-padding);
-		background: rgba(0,0,0,0.85);
+	.manual-features-grid .feature-card.feature-card-compat .card-visual {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		padding: 12px;
-		border-radius: 8px;
-		box-shadow: 0 6px 18px rgba(0,0,0,0.35);
-		z-index: 60;
 	}
 
-	.navbar.open {
-		display: block;
-	}
-
-	.navbar ul { flex-direction: column; gap: 8px; }
-
-	.navbar a { display: block; padding: 8px 12px; }
-
-	.hero-overlay {
-		bottom: 12px;
-		padding: 6px 10px;
+	.manual-features-grid .feature-card.feature-card-compat .card-content {
+		justify-content: flex-start;
 	}
 }
+
+/* ═══════════════════════════════════════════════════
+   7. FEATURES GRID — MODO RESPONSIVE (≤ 1060px)
+      El grid se convierte en una lista vertical
+   ═══════════════════════════════════════════════════ */
 
 /* Responsive section for widths smaller than the full manual grid */
 @media (max-width: 1060px) {
@@ -720,6 +550,15 @@ footer p {
 		transform: none;
 		cursor: default;
 		pointer-events: auto;
+	}
+
+	.manual-features-grid .feature-card:hover,
+	.manual-features-grid .feature-card:active,
+	.manual-features-grid .feature-card:focus,
+	.manual-features-grid .feature-card.expanded {
+		background: rgba(255, 255, 255, 0.05) !important;
+		transform: none !important;
+		border: none !important;
 	}
 
 	.manual-features-grid .feature-card:hover {
@@ -815,3 +654,178 @@ footer p {
 	.manual-features-grid .feature-card.feature-card-performance { order: 5; }
 }
 
+/* On narrow screens, collapse span-2x2 and span-3 to single column */
+@media (max-width: 900px) {
+	.feature-card.span-2x2 { grid-column: span 1; grid-row: span 1; }
+	.card-grid.variant-2x2 { grid-template-rows: auto auto auto; }
+	.feature-card.span-3 { grid-column: span 1; }
+	.feature-card.span-3 .card-grid { grid-template-columns: 1fr; }
+	.feature-card.span-3 .card-visual { order: -1; } /* visual on top on small screens */
+}
+
+/* ═══════════════════════════════════════════════════
+   8. GET INVOLVED SECTION
+   ═══════════════════════════════════════════════════ */
+
+#get_involved {
+	background: rgba(129, 61, 156, 0.92);
+	color: #ffffff;
+	width: calc(100% + (var(--page-padding) * 2));
+	max-width: 100vw;
+	margin-left: calc(var(--page-padding) * -1);
+	padding: 32px var(--page-padding) 32px;
+}
+
+#get_involved h2,
+#get_involved h3,
+#get_involved ul,
+#get_involved li {
+	color: inherit;
+}
+
+.steps-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 240px));
+	gap: 16px;
+	margin: 24px 0 0;
+	padding: 0;
+	list-style: none;
+	max-width: 100%;
+}
+
+.steps-grid li {
+	background: rgba(255, 255, 255, 0.06);
+	border-radius: 12px;
+	padding: 18px 12px;
+	min-height: 96px;
+	display: grid;
+	grid-template-rows: auto 1fr;
+	align-items: start;
+	justify-items: center;
+	gap: 8px;
+	transition: background 0.18s ease, transform 0.18s ease;
+}
+
+/* Center wrapped rows: when items wrap to a new row, keep them centered */
+.steps-grid {
+	justify-content: center; /* center the grid within its container */
+}
+
+.steps-grid li:hover {
+	background: rgba(255, 255, 255, 0.12);
+	transform: translateY(-3px);
+}
+
+.steps-grid .step-number {
+	width: 40px;
+	height: 40px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(255,255,255,0.08);
+	border-radius: 50%;
+	font-weight: 700;
+}
+
+.steps-grid li p { margin: 0; text-align: center; }
+
+/* ═══════════════════════════════════════════════════
+   9. FOOTER
+   ═══════════════════════════════════════════════════ */
+
+footer {
+	background: rgba(129, 61, 156, 0.92);
+	color: #ffffff;
+	width: calc(100% + (var(--page-padding) * 2));
+	margin-left: calc(var(--page-padding) * -1);
+	padding: 24px var(--page-padding);
+	text-align: center;
+}
+
+/* Footer centered and italic */
+footer {
+	text-align: center;
+	padding-bottom: 24px;
+}
+
+footer p {
+	font-style: italic;
+	margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   10. RESPONSIVE — MOBILE NAV (≤ 600px)
+   ═══════════════════════════════════════════════════ */
+
+@media (max-width: 600px) {
+	.site-header {
+		flex-direction: column;
+		gap: 8px;
+		align-items: flex-start;
+	}
+
+	.navbar ul {
+		gap: 12px;
+	}
+
+	/* Smaller screens: collapse navbar into toggle */
+	.menu-toggle {
+		display: block;
+		position: absolute;
+		right: var(--page-padding);
+		top: 12px;
+		transform: none;
+	}
+
+	.site-header {
+		justify-content: center; /* center title */
+		position: relative;
+	}
+
+	.navbar {
+		display: none; /* hide by default on small screens */
+		position: absolute;
+		top: 100%;
+		right: var(--page-padding);
+		background: rgba(0,0,0,0.85);
+		padding: 12px;
+		border-radius: 8px;
+		box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+		z-index: 60;
+	}
+
+	.navbar.open {
+		display: block;
+	}
+
+	.navbar ul { flex-direction: column; gap: 8px; }
+
+	.navbar a { display: block; padding: 8px 12px; }
+
+	.hero-overlay {
+		bottom: 12px;
+		padding: 6px 10px;
+	}
+}
+
+/* ═══════════════════════════════════════════════════
+   11. RESPONSIVE — STEPS GRID (≤ 720px)
+   ═══════════════════════════════════════════════════ */
+
+/* For smaller viewports where grid collapses to multiple rows, ensure children align center */
+@media (max-width: 720px) {
+	.steps-grid {
+		grid-template-columns: repeat(auto-fit, minmax(160px, 220px));
+		justify-items: center;
+	}
+}
+
+/* ═══════════════════════════════════════════════════
+   12. RESPONSIVE — DESKTOP NAV ENFORCEMENT (≥ 601px)
+   ═══════════════════════════════════════════════════ */
+
+/* Desktop: ensure toggle is hidden and navbar visible */
+@media (min-width: 601px) {
+	.menu-toggle { display: none !important; }
+	.navbar { display: flex !important; position: static !important; }
+}
