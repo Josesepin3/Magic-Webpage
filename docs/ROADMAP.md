@@ -248,24 +248,30 @@ conforme se cambian opciones.
 │                            │               │ │
 │  Procesador                │ Imagen del    │ │
 │  ◉ N1 Kinetic (base)       │ laptop según  │ │
-│  ○ N1 Pro (+40% veloz)     │ selección     │ │
-│  ○ N1 Max (2x rendim.)     │               │ │
-│                            │ N1 Pro        │ │
-│  Memoria RAM               │ 32GB RAM      │ │
-│  ○ 8GB                      │ 512GB SSD     │ │
-│  ◉ 16GB  (+$200)           │               │ │
-│  ○ 32GB  (+$400)           │ Total:        │ │
-│  ○ 64GB  (+$800)           │ $2,499        │ │
-│                            │               │ │
-│  Almacenamiento            │ [Añadir al    │ │
-│  ◉ 256GB SSD               │  carrito]     │ │
-│  ○ 512GB SSD  (+$200)      │               │ │
-│  ○ 1TB SSD    (+$400)     └───────────────┘ │
+│  ○ N1 Pro        (+$300)   │ selección     │ │
+│  ○ N1 Max        (+$700)   │               │ │
+│  ─── Intel / AMD ───        │ N1 Kinetic    │ │
+│  ○ Intel Core Ultra 9     │ 32GB RAM      │ │
+│    (+$1,200)                │ 512GB SSD     │ │
+│  ○ AMD Ryzen 9             │               │ │
+│    (+$1,000)                │ Total:        │ │
+│                            │ $1,999        │ │
+│  Memoria RAM               │               │ │
+│  ○ 8GB                      │ [Añadir al    │ │
+│  ◉ 16GB  (+$200)           │  carrito]     │ │
+│  ○ 32GB  (+$400)           │               │ │
+│  ○ 64GB  (+$800)           └───────────────┘ │
+│                                              │
+│  Almacenamiento                               │
+│  ◉ 256GB SSD                                 │
+│  ○ 512GB SSD  (+$200)                        │
+│  ○ 1TB SSD    (+$400)                        │
 │  ○ 2TB SSD    (+$800)                        │
 │                                              │
-│  Pantalla                                     │
-│  ◉ 13" Liquid Retina                         │
-│  ○ 15" Liquid Retina XDR                     │
+│  Pantalla 13.3"                              │
+│  Panel LiquidUX — 2880×1800                  │
+│  (única opción, misma pantalla               │
+│   en todos los modelos)                      │
 │                                              │
 └─────────────────────────────────────────────┘
 ```
@@ -390,10 +396,19 @@ o copy de marketing.
 ### Opciones configurables por producto (futuro)
 
 **Sirius Laptop:**
-- Procesador: N1 Kinetic (base), N1 Pro, N1 Max
+- **Procesador N1** (silicio propio, optimizado para MagicOS):
+  - N1 Kinetic (base)
+  - N1 Pro (+$300)
+  - N1 Max (+$700)
+- **Procesador alternativo** (decoy — más caro para que N1 sea más atractivo):
+  - Intel Core Ultra 9 (última generación) +$1,200
+  - AMD Ryzen 9 (última generación) +$1,000
+  > Estrategia: Al ofrecer Intel/AMD como alternativa más cara, el N1
+  > parece la opción inteligente (precio justo por rendimiento propio).
+  > También da libertad a quien insista en CPU de marca conocida.
 - RAM: 8GB, 16GB, 32GB, 64GB
 - Almacenamiento: 256GB, 512GB, 1TB, 2TB SSD
-- Pantalla: 13" Liquid Retina, 15" Liquid Retina XDR
+- **Pantalla única:** 13.3" — panel LiquidUX 2880×1800 (misma en todos los modelos)
 - Color: Obsidian Black, Starlight Silver, Midnight Blue
 
 **BlackBox Cloud:**
