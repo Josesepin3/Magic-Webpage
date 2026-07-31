@@ -1364,6 +1364,7 @@ footer p {
 
 	.hero-overlay {
 		position: relative;
+		left: 0;
 		z-index: 1;
 		transform: none;
 		max-width: 100%;
