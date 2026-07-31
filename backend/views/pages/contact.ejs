@@ -4,13 +4,39 @@
         <section class="contact-page">
             <h2 data-reveal>Contacto</h2>
             <p class="contact-intro" data-reveal data-reveal-delay="60">Estaremos encantados de escucharte.</p>
-            <form name="contact" method="POST" data-netlify="true" class="contact-form" data-reveal data-reveal-delay="120">
-                <input type="hidden" name="form-name" value="contact">
-                <input type="text" name="name" placeholder="Tu nombre" required>
-                <input type="email" name="email" placeholder="Tu correo electrónico" required>
-                <input type="text" name="subject" placeholder="Asunto">
-                <textarea name="message" placeholder="Tu mensaje" required rows="6"></textarea>
-                <button type="submit">Enviar mensaje</button>
+            <form action="https://formsubmit.co/josesepint3@gmail.com" method="POST" data-ajax="true" class="contact-form" data-reveal data-reveal-delay="120">
+                <input type="hidden" name="_subject" value="Nuevo mensaje desde MagicOS">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="text" name="_honey" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+                <div class="form-field">
+                    <label for="contact-name">Nombre</label>
+                    <input type="text" id="contact-name" name="name" placeholder="Tu nombre" required autocomplete="name">
+                    <span class="field-error" data-error-for="name" aria-live="polite"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="contact-email">Correo electrónico</label>
+                    <input type="email" id="contact-email" name="email" placeholder="tu@correo.com" required autocomplete="email">
+                    <span class="field-error" data-error-for="email" aria-live="polite"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="contact-subject">Asunto</label>
+                    <input type="text" id="contact-subject" name="subject" placeholder="Asunto (opcional)">
+                    <span class="field-error" data-error-for="subject" aria-live="polite"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="contact-message">Mensaje</label>
+                    <textarea id="contact-message" name="message" placeholder="Cuéntanos en qué podemos ayudarte" required rows="6"></textarea>
+                    <span class="field-error" data-error-for="message" aria-live="polite"></span>
+                </div>
+
+                <div class="contact-form-actions">
+                    <button type="submit">Enviar mensaje</button>
+                    <p class="form-status" role="status" aria-live="polite" hidden></p>
+                </div>
             </form>
         </section>
     </main>

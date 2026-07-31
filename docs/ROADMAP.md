@@ -11,9 +11,10 @@
 > Sirius rediseñada según maqueta (hero, badges N1/BlackBox, sección "Diseño
 > Modular", tarjetas con hover/tint), responsive móvil ajustado y **deploy en
 > GitHub Pages funcionando** (requisito del proyecto; Netlify quedó bloqueado por
-> créditos de build). Fase 2 completa (incluye reveal on scroll). Siguiente:
-> Fase 3 (contacto) — falta `ContactForm.js`, estados y CSS Apple, y migrar la
-> persistencia del formulario fuera de Netlify Forms (no existe en GitHub Pages).
+> créditos de build). Fase 2 y **Fase 3 completas**: el formulario de contacto
+> ahora envía vía **FormSubmit** (compatible con GitHub Pages) con validación en
+> tiempo real, estados loading/éxito/error y CSS estilo Apple. Siguiente:
+> Fase 4 (admin panel).
 
 ---
 
@@ -24,7 +25,7 @@
 | **Frontend** | Vanilla JS + EJS (SSR con Express local / prerender estático en build) |
 | **Backend** | Node.js + Express |
 | **Base de Datos** | SQLite (`better-sqlite3`) — solo dev local |
-| **Autenticación** | JWT + bcrypt (pendiente; plan: Supabase + Netlify Functions) |
+| **Autenticación** | JWT + bcrypt (pendiente; plan: Supabase) |
 | **IA** | Mistral API (modelo open-source gratuito) |
 | **CSS** | Vanilla (sin frameworks) |
 | **JS Frontend** | Modular, componentes funcionales puros |
@@ -42,7 +43,8 @@ MagicOS-Webpage/
 │   └── js/                      # JS modular del lado cliente
 │       ├── components/
 │       │   ├── ProductConfigurator.js  # Configurador tipo Apple
-│       │   └── RevealOnScroll.js       # Reveal al scrollear (IntersectionObserver)
+│       │   ├── RevealOnScroll.js       # Reveal al scrollear (IntersectionObserver)
+│       │   └── ContactForm.js          # Validación + envío FormSubmit (loading/éxito/error)
 │       └── services/
 │           └── api.js           # Fetch wrapper centralizado
 ├── backend/
@@ -60,14 +62,14 @@ MagicOS-Webpage/
 │   │       ├── productos.ejs          # Grid de productos
 │   │       ├── product-*.ejs          # Página por producto (magicos, sirius-laptop, chip-n1-kinetic, blackbox-cloud)
 │   │       ├── configure.ejs          # Configurador con opciones
-│   │       ├── contact.ejs            # Formulario de contacto (Netlify Forms)
+│   │       ├── contact.ejs            # Formulario de contacto (FormSubmit)
 │   │       └── 404.ejs
 │   ├── data/
 │   │   ├── magicos.db           # SQLite file (ignorado en git)
 │   │   └── products.json        # Datos de productos para el build estático (commiteado)
 │   └── seed.js                  # Poblar BD local + generar products.json
 ├── scripts/
-│   └── build-static.js          # Prerender EJS → dist/ (build de Netlify)
+│   └── build-static.js          # Prerender EJS → dist/ (build de GitHub Pages)
 ├── netlify.toml                 # Config de build/deploy en Netlify
 ├── docs/
 │   ├── mockups/                 # Maquetas de diseño (Sirius.svg)
@@ -90,19 +92,21 @@ MagicOS-Webpage/
 | GET | `/productos` | `productos.ejs` | Grid de todos los productos | ✅ |
 | GET | `/productos/:slug` | `product-<slug>.ejs` | Página individual por producto | ✅ |
 | GET | `/productos/:slug/configure` | `configure.ejs` | Configurador de producto | ✅ |
-| GET | `/contacto` | `contact.ejs` | Formulario de contacto (**Netlify Forms**) | ✅ |
+| GET | `/contacto` | `contact.ejs` | Formulario de contacto (**FormSubmit**) | ✅ |
 | GET | `/admin/login` | `login.ejs` | Login para admin | ⏳ Pendiente |
 | GET | `/admin/dashboard` | `dashboard.ejs` | Panel de administración | ⏳ Pendiente |
 
 ### API REST (JSON)
 
-> **Nota:** en el deploy de Netlify la web es estática; los endpoints REST de
-> Express solo aplican al dev local. El formulario de contacto ya se persiste vía
-> **Netlify Forms**. Auth/admin se replanteará con **Supabase + Netlify Functions**.
+> **Nota:** en el deploy de GitHub Pages la web es estática; los endpoints REST de
+> Express solo aplican al dev local. El formulario de contacto se persiste vía
+> **FormSubmit**. Auth/admin se replanteará con **Supabase**. 
+> (La tabla `messages` en SQLite quedó como referencia del modelo; el envío real
+> llega por correo a través de FormSubmit.)
 
 | Método | Ruta | Protegida | Descripción | Estado |
 |--------|------|-----------|-------------|--------|
-| POST | `/api/contact` | No | Enviar mensaje de contacto | ✅ reemplazado por Netlify Forms |
+| POST | `/api/contact` | No | Enviar mensaje de contacto | ✅ reemplazado por FormSubmit |
 | POST | `/api/auth/login` | No | Autenticar admin, devuelve JWT | ⏳ (plan: Supabase) |
 | GET | `/api/admin/messages` | Sí | Listar mensajes recibidos | ⏳ |
 | POST | `/api/admin/products` | Sí | Crear producto | ⏳ |
@@ -342,16 +346,19 @@ o copy de marketing.
 
 **Objetivo:** Formulario funcional con validación y persistencia.
 
-> **Cambio de enfoque:** la persistencia se resuelve con **Netlify Forms** en el
-> deploy estático (en vez de `POST /api/contact` + SQLite). El envío funciona en
-> producción; quedan pendientes la validación frontend y los estados.
+> **Cambio de enfoque:** la persistencia se resuelve con **FormSubmit**
+> (compatible con GitHub Pages, sin registro) en vez de `POST /api/contact` +
+> SQLite. El formulario usa `data-ajax="true"` para que el envío sea por AJAX y
+> el componente maneje los estados sin recargar la página.
 
 - [x] Ruta `GET /contacto` — página con formulario (estructura básica)
-- [x] Persistencia de envíos — Netlify Forms (solo Netlify; pendiente migrar a un
-      servicio compatible con GitHub Pages, p. ej. Formspree/Getform)
-- [ ] Componente JS `ContactForm.js` — validación frontend en tiempo real
-- [ ] Estados: loading (spinner en botón), éxito (mensaje verde), error (alerta)
-- [ ] CSS para el formulario: estilo Apple (inputs sin bordes, focus sutiles)
+- [x] Persistencia de envíos — FormSubmit (`https://formsubmit.co/josesepint3@gmail.com`,
+      con honeypot `_honey`, `_subject` y captcha deshabilitado)
+- [x] Componente JS `ContactForm.js` — validación frontend en tiempo real
+      (nombre, correo, asunto, mensaje con mensajes por campo)
+- [x] Estados: loading (spinner en botón), éxito (mensaje verde), error (alerta)
+- [x] CSS para el formulario: estilo Apple (inputs sin bordes con fondo sutil,
+      focus ring azul, botón pill)
 
 ### Fase 4 — Admin Panel
 
@@ -385,8 +392,8 @@ o copy de marketing.
 - [ ] Estados de carga en todas las páginas (skeleton screens o spinners)
 - [ ] Estados de error con mensajes claros y acción de reintentar
 - [ ] Estados vacío ("No hay productos", "No hay mensajes")
-- [~] Animaciones CSS: hover en cards ✅, scroll reveal pendiente
-- [ ] Validación en tiempo real en formularios
+- [~] Animaciones CSS: hover en cards ✅, scroll reveal ✅ (Fase 2)
+- [x] Validación en tiempo real en formularios (Fase 3 — ContactForm.js)
 - [~] Responsive real probado en mobile/tablet/desktop (Sirius en curso)
 - [x] `.gitignore` (node_modules, .env, *.db)
 - [x] Comentarios técnicos en código clave
@@ -456,9 +463,11 @@ npm run build         # Prerender estático EJS → dist/ (sin SQLite ni módulo
   El sitio estático seguiría desplegándose si se repone crédito (los datos ya están
   en `main`), pero la web oficial es GitHub Pages.
 - `netlify.toml`: build `npm run build`, publish `dist` (ya no es el canal principal).
-- Formularios: Netlify Forms (`name="contact"` + `data-netlify="true"`) **solo
-  funciona en Netlify**. En GitHub Pages el POST no tiene backend → pendiente
-  migrar la persistencia (Formspree/Getform u otro servicio).
+- Formularios: FormSubmit (`https://formsubmit.co/josesepint3@gmail.com`) con
+  `data-ajax="true"` + `ContactForm.js`. El envío llega por correo al email de la
+  cuenta; la primera vez que se envía hay que confirmar la activación que llega
+  a la bandeja. (Netlify Forms era solo Netlify; en GitHub Pages el POST no
+  tiene backend, por eso se migró.)
 
 ### Variables de entorno (`.env`)
 ```
@@ -466,7 +475,7 @@ PORT=3000
 JWT_SECRET=...
 MISTRAL_API_KEY=...
 MISTRAL_API_URL=https://api.mistral.ai/v1/chat/completions
-# Futuro (auth en Netlify): SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+# Futuro (auth): SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
 ```
 
 ### Patrón de componentes (Vanilla JS)
