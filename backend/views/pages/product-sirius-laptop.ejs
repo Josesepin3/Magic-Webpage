@@ -1,36 +1,68 @@
 <%- include('../partials/header') %>
 
     <main class="product-page">
-      <section class="product-hero">
-        <div class="product-hero-content">
-          <h1 class="product-name"><%= product.name %></h1>
-          <% if (product.tagline) { %>
-            <p class="product-tagline"><%= product.tagline %></p>
-          <% } %>
-          <% if (product.status === 'coming_soon') { %>
-            <span class="product-badge">Próximamente</span>
-          <% } %>
-          <p class="product-description"><%= product.description %></p>
-          <% if (product.base_price) { %>
-            <p class="product-price">Desde $<%= product.base_price.toLocaleString() %></p>
-          <% } %>
-          <div class="product-actions">
-            <a href="/productos/<%= product.slug %>/configure" class="btn btn-primary">Configurar</a>
-            <a href="/productos" class="btn btn-secondary">Ver todos los productos</a>
-          </div>
-        </div>
-      </section>
 
-      <% if (features.length > 0) { %>
-        <section class="product-features">
-          <% features.forEach(feature => { %>
-            <article class="feature-section">
-              <h2><%= feature.title %></h2>
-              <p><%= feature.description %></p>
-            </article>
-          <% }) %>
+        <section id="que_es">
+            <div class="hero sirius-hero">
+                <a href="/productos" class="hero-back-btn">← Volver a productos</a>
+                <img src="/img/sirius-hero.png" alt="Sirius Laptop">
+                <div class="sirius-hero-panel">
+                    <% if (product.status === 'coming_soon') { %>
+                        <span class="sirius-pill">PROXIMAMENTE</span>
+                    <% } %>
+                    <% if (product.base_price) { %>
+                        <p class="sirius-price">Desde $<%= product.base_price.toLocaleString() %></p>
+                    <% } %>
+                </div>
+            </div>
         </section>
-      <% } %>
+
+        <section class="sirius-cta">
+            <div class="sirius-promos">
+                <div class="sirius-promo-group sirius-promo-group--n1">
+                    <%- include('../partials/n1-badge') %>
+                    <p class="sirius-promo-text">Con el chip N1™<br>Kinetic</p>
+                </div>
+                <div class="sirius-promo-group sirius-promo-group--blackbox">
+                    <%- include('../partials/blackbox-badge') %>
+                    <p class="sirius-promo-text">Incluye 3 meses de<br>BlackBox Cloud gratis*</p>
+                </div>
+            </div>
+            <div class="sirius-actions">
+                <a href="/productos/<%= product.slug %>/configure" class="sirius-btn sirius-btn--primary">Configurar</a>
+                <a href="/productos" class="sirius-btn sirius-btn--secondary">Ver todos los productos</a>
+            </div>
+        </section>
+
+        <section class="sirius-modular">
+            <% const modularFeature = features.find(f => f.title === 'Diseño Modular'); %>
+            <h2><%= modularFeature ? modularFeature.title : 'Diseño Modular' %></h2>
+            <p class="sirius-modular-sub"><%= modularFeature ? modularFeature.description : 'Cada componente se reemplaza individualmente. Adiós a la obsolescencia programada.' %></p>
+            <img src="/img/modular-device.svg" alt="Módulos intercambiables de la Sirius Laptop">
+        </section>
+
+        <% if (features.length > 0) { %>
+            <section class="sirius-features">
+                <% features.forEach(feature => { %>
+                    <% if (feature.title === 'Diseño Modular') return; %>
+                    <article class="sirius-feature-card <%= feature.title === 'Privacidad por Defecto' ? 'sirius-feature-card--privacy' : 'sirius-feature-card--n1' %>">
+                        <span class="feature-icon" aria-hidden="true">
+                            <% if (feature.title === 'Privacidad por Defecto') { %>
+                                <svg class="feature-icon-img" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="m 2 0 c -0.550781 0 -1 0.449219 -1 1 v 8 c 0 2.5 1.816406 4.246094 3.445312 5.332031 c 1.628907 1.085938 3.238282 1.617188 3.238282 1.617188 c 0.207031 0.070312 0.425781 0.070312 0.632812 0 c 0 0 1.609375 -0.53125 3.238282 -1.617188 c 1.628906 -0.085937 3.445312 -2.832031 3.445312 -5.332031 v -8 c 0 -0.550781 -0.449219 -1 -1 -1 z m 1 2 h 10 v 7 c 0 1.5 -1.183594 2.753906 -2.554688 3.667969 c -1.214843 0.808593 -2.179687 1.128906 -2.445312 1.226562 c -0.265625 -0.097656 -1.230469 -0.417969 -2.445312 -1.226562 c -1.371094 -0.914063 -2.554688 -2.167969 -2.554688 -3.667969 z m 1 1 v 6 c 0 1 0.867188 2.007812 2.109375 2.835938 c 0.933594 0.621093 1.472656 0.785156 1.890625 0.949218 v -9.785156 z m 0 0" fill="currentColor"/>
+                                </svg>
+                            <% } else { %>
+                                <svg class="feature-icon-img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M15,9H9V15H15V9M13,13H11V11H13V13M22,11V9H20V7A2,2 0 0,0 18,5H16V3H14V5H10V3H8V5H6A2,2 0 0,0 4,7V9H2V11H4V13H2V15H4V17A2,2 0 0,0 6,19H8V21H10V19H14V21H16V19H18A2,2 0 0,0 20,17V15H22V13H20V11H22M18,17H6V7H18V17Z" fill="currentColor"/>
+                                </svg>
+                            <% } %>
+                        </span>
+                        <h3><%= feature.title %></h3>
+                        <p><%= feature.description %></p>
+                    </article>
+                <% }) %>
+            </section>
+        <% } %>
     </main>
 
 <%- include('../partials/footer') %>
