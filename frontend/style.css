@@ -1185,7 +1185,7 @@ input, textarea, button {
 	align-items: start;
 	justify-items: center;
 	gap: 8px;
-	transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+	transition: background 0.18s ease, transform 0.18s ease;
 }
 
 /* Center wrapped rows: when items wrap to a new row, keep them centered */
@@ -1197,7 +1197,6 @@ input, textarea, button {
 	.steps-grid li:hover {
 		background: rgba(255, 255, 255, 0.12);
 		transform: translateY(-3px);
-		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 	}
 }
 
