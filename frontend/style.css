@@ -242,21 +242,6 @@ a {
 	z-index: 1;
 }
 
-.navbar a::after {
-	content: '';
-	position: absolute;
-	inset: 0;
-	background: rgba(255, 255, 255, 0.08);
-	border-radius: 6px;
-	transform: scale(0);
-	transition: transform 0.2s ease;
-	z-index: -1;
-}
-
-.navbar a:hover::after {
-	transform: scale(1);
-}
-
 /* Menu toggle button (hidden on desktop) */
 .menu-toggle {
 	display: none;
@@ -325,10 +310,6 @@ a {
 	background: rgba(0, 0, 0, 0.4);
 	border-radius: 20px;
 	transition: background 0.2s ease;
-}
-
-.hero-back-btn:hover {
-	background: rgba(0, 0, 0, 0.65);
 }
 
 /* ═══════════════════════════════════════════════════
@@ -450,10 +431,6 @@ a {
 	color: #ffffff;
 }
 
-.sirius-btn:hover {
-	filter: brightness(1.15);
-}
-
 /* ═══════════════════════════════════════════════════
    4c. SIRIUS MODULAR & FEATURES
    ═══════════════════════════════════════════════════ */
@@ -537,29 +514,6 @@ a {
 	font-size: 0.95rem;
 	line-height: 1.55;
 	color: rgba(255, 255, 255, 0.85);
-}
-
-@media (hover: hover) {
-	.sirius-feature-card:hover {
-		transform: translateY(-4px);
-		box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
-	}
-
-	.sirius-feature-card--privacy:hover {
-		background-color: #3584e4;
-		border-color: #3584e4;
-	}
-
-	.sirius-feature-card--n1:hover {
-		background-color: #b660ff;
-		border-color: #b660ff;
-	}
-
-	.sirius-feature-card:hover h3,
-	.sirius-feature-card:hover p,
-	.sirius-feature-card:hover .feature-icon {
-		color: #000000;
-	}
 }
 
 /* ═══════════════════════════════════════════════════
@@ -854,11 +808,6 @@ a {
 	padding: 24px 18px;
 }
 
-.manual-features-grid .feature-card:hover {
-	background-color: rgba(255, 255, 255, 0.12); /* hover más visible manteniendo sutileza */
-	transform: translateY(-3px);
-}
-
 .manual-features-grid .feature-card.expanded {
 	border: 1px solid rgba(255, 255, 255, 0.12);
 }
@@ -978,37 +927,6 @@ a {
 		transform: none;
 		cursor: default;
 		pointer-events: auto;
-	}
-
-	.manual-features-grid .feature-card:hover,
-	.manual-features-grid .feature-card:active,
-	.manual-features-grid .feature-card:focus,
-	.manual-features-grid .feature-card.expanded {
-		background: rgba(255, 255, 255, 0.05) !important;
-		transform: none !important;
-		border: none !important;
-	}
-
-	.manual-features-grid .feature-card:hover {
-		background: rgba(255, 255, 255, 0.08) !important;
-		transform: none !important;
-		border: none !important;
-	}
-
-	.manual-features-grid .feature-card.feature-card-ui:hover {
-		background: rgba(53, 132, 228, 0.12) !important;
-	}
-	.manual-features-grid .feature-card.feature-card-security:hover {
-		background: rgba(255, 120, 0, 0.14) !important;
-	}
-	.manual-features-grid .feature-card.feature-card-performance:hover {
-		background: rgba(229, 165, 10, 0.14) !important;
-	}
-	.manual-features-grid .feature-card.feature-card-compat:hover {
-		background: rgba(237, 51, 59, 0.14) !important;
-	}
-	.manual-features-grid .feature-card.feature-card-open:hover {
-		background: rgba(51, 209, 122, 0.14) !important;
 	}
 
 	.manual-features-grid .feature-card:active,
@@ -1139,11 +1057,6 @@ a {
 	justify-content: center; /* center the grid within its container */
 }
 
-.steps-grid li:hover {
-	background: rgba(255, 255, 255, 0.12);
-	transform: translateY(-3px);
-}
-
 .steps-grid .step-number {
 	width: 40px;
 	height: 40px;
@@ -1224,32 +1137,6 @@ footer p {
   padding: 28px 24px;
   text-decoration: none;
   transition: background 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
-}
-
-.producto-card:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.15);
-  transform: translateY(-4px);
-}
-
-.producto-card--os:hover {
-  background: rgba(53, 132, 228, 0.15);
-  border-color: rgba(53, 132, 228, 0.3);
-}
-
-.producto-card--hardware:hover {
-  background: rgba(229, 165, 10, 0.15);
-  border-color: rgba(229, 165, 10, 0.3);
-}
-
-.producto-card--silicon:hover {
-  background: rgba(51, 209, 122, 0.15);
-  border-color: rgba(51, 209, 122, 0.3);
-}
-
-.producto-card--cloud:hover {
-  background: rgba(129, 61, 156, 0.15);
-  border-color: rgba(129, 61, 156, 0.3);
 }
 
 .producto-card-header {
@@ -1382,8 +1269,12 @@ footer p {
 	.navbar a { display: block; padding: 8px 12px; }
 
 	.hero-overlay {
-		bottom: 12px;
-		padding: 6px 10px;
+		position: relative;
+		z-index: 1;
+		transform: none;
+		max-width: 100%;
+		margin-top: 16px;
+		padding: 0;
 	}
 }
 
