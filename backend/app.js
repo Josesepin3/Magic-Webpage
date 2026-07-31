@@ -3,7 +3,7 @@ const path = require('path');
 require('dotenv').config();
 
 const homeRouter = require('./routes/home');
-const catalogRouter = require('./routes/catalog');
+const productsRouter = require('./routes/products');
 const contactRouter = require('./routes/contact');
 
 const app = express();
@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use('/', homeRouter);
-app.use('/catalogo', catalogRouter);
+app.use('/productos', productsRouter);
 app.use('/contacto', contactRouter);
 
 app.use((req, res) => {
@@ -25,5 +25,5 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`MagicOS corriendo en http://localhost:${PORT}`);
+  console.log(`Magic corriendo en http://localhost:${PORT}`);
 });

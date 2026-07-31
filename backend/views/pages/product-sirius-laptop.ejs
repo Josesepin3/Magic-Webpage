@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+
+    <main class="product-page">
+      <section class="product-hero">
+        <div class="product-hero-content">
+          <h1 class="product-name"><%= product.name %></h1>
+          <% if (product.tagline) { %>
+            <p class="product-tagline"><%= product.tagline %></p>
+          <% } %>
+          <% if (product.status === 'coming_soon') { %>
+            <span class="product-badge">Próximamente</span>
+          <% } %>
+          <p class="product-description"><%= product.description %></p>
+          <% if (product.base_price) { %>
+            <p class="product-price">Desde $<%= product.base_price.toLocaleString() %></p>
+          <% } %>
+          <div class="product-actions">
+            <a href="/productos/<%= product.slug %>/configure" class="btn btn-primary">Configurar</a>
+            <a href="/productos" class="btn btn-secondary">Ver todos los productos</a>
+          </div>
+        </div>
+      </section>
+
+      <% if (features.length > 0) { %>
+        <section class="product-features">
+          <% features.forEach(feature => { %>
+            <article class="feature-section">
+              <h2><%= feature.title %></h2>
+              <p><%= feature.description %></p>
+            </article>
+          <% }) %>
+        </section>
+      <% } %>
+    </main>
+
+<%- include('../partials/footer') %>

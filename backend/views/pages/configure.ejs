@@ -1,0 +1,56 @@
+<%- include('../partials/header') %>
+
+    <main class="configure-page" data-product-id="<%= product.id %>" data-base-price="<%= product.base_price %>">
+      <div class="configure-layout">
+        <div class="configure-options">
+          <h1 class="configure-title">Configurar <%= product.name %></h1>
+
+          <% for (const [groupName, groupOptions] of Object.entries(groupedOptions)) { %>
+            <fieldset class="option-group" data-group="<%= groupName %>">
+              <legend class="option-group-title"><%= groupName %></legend>
+              <div class="option-group-options">
+                <% groupOptions.forEach(opt => { %>
+                  <label class="option-card <%= opt.is_default ? 'selected' : '' %>">
+                    <input type="radio"
+                           name="<%= groupName %>"
+                           value="<%= opt.id %>"
+                           data-price="<%= opt.price_modifier %>"
+                           <%= opt.is_default ? 'checked' : '' %>>
+                    <span class="option-label"><%= opt.label %></span>
+                    <% if (opt.description) { %>
+                      <span class="option-desc"><%= opt.description %></span>
+                    <% } %>
+                    <% if (opt.price_modifier > 0) { %>
+                      <span class="option-price">+$<%= opt.price_modifier.toLocaleString() %></span>
+                    <% } else if (opt.is_default) { %>
+                      <span class="option-price included">Incluido</span>
+                    <% } %>
+                  </label>
+                <% }) %>
+              </div>
+            </fieldset>
+          <% } %>
+        </div>
+
+        <aside class="configure-summary">
+          <div class="summary-sticky">
+            <h2>Resumen</h2>
+            <p class="summary-product"><%= product.name %></p>
+            <ul class="summary-selections" id="summary-selections">
+              <% for (const [groupName, groupOptions] of Object.entries(groupedOptions)) { %>
+                <% const defaultOpt = groupOptions.find(o => o.is_default) || groupOptions[0] %>
+                <li><strong><%= groupName %>:</strong> <%= defaultOpt.label %></li>
+              <% } %>
+            </ul>
+            <p class="summary-total">
+              Total: <span id="total-price">$<%= product.base_price.toLocaleString() %></span>
+            </p>
+          </div>
+        </aside>
+      </div>
+
+      <script id="options-data" type="application/json"><%= JSON.stringify(options) %></script>
+      <script src="/js/components/ProductConfigurator.js"></script>
+    </main>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,31 @@
+<%- include('../partials/header') %>
+
+    <main class="productos-page">
+      <section class="productos-hero">
+        <h1>Productos</h1>
+        <p class="productos-subtitle">Conoce el ecosistema MagicOS.</p>
+      </section>
+
+      <section class="productos-grid">
+        <% if (products.length === 0) { %>
+          <p class="empty-state">Próximamente...</p>
+        <% } else { %>
+          <% products.forEach(product => { %>
+            <a href="/productos/<%= product.slug %>" class="producto-card producto-card--<%= product.category %>">
+              <div class="producto-card-header">
+                <h2 class="producto-card-title"><%= product.name %></h2>
+                <% if (product.status === 'coming_soon') { %>
+                  <span class="producto-badge">Próximamente</span>
+                <% } %>
+              </div>
+              <% if (product.tagline) { %>
+                <p class="producto-tagline"><%= product.tagline %></p>
+              <% } %>
+              <p class="producto-desc"><%= product.description %></p>
+            </a>
+          <% }) %>
+        <% } %>
+      </section>
+    </main>
+
+<%- include('../partials/footer') %>
