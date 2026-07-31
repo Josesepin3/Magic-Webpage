@@ -10,9 +10,10 @@
 > rebranding a **Magic** (rutas `/productos`), navbar liquid-glass, página de
 > Sirius rediseñada según maqueta (hero, badges N1/BlackBox, sección "Diseño
 > Modular", tarjetas con hover/tint), responsive móvil ajustado y **deploy en
-> Netlify funcionando** (estático con `dist/`, sin dependencia de módulos nativos
-> en el build). Fase 2 completa (incluye reveal on scroll). Siguiente:
-> Fase 3 (contacto) — falta `ContactForm.js`, estados y CSS Apple.
+> GitHub Pages funcionando** (requisito del proyecto; Netlify quedó bloqueado por
+> créditos de build). Fase 2 completa (incluye reveal on scroll). Siguiente:
+> Fase 3 (contacto) — falta `ContactForm.js`, estados y CSS Apple, y migrar la
+> persistencia del formulario fuera de Netlify Forms (no existe en GitHub Pages).
 
 ---
 
@@ -27,7 +28,7 @@
 | **IA** | Mistral API (modelo open-source gratuito) |
 | **CSS** | Vanilla (sin frameworks) |
 | **JS Frontend** | Modular, componentes funcionales puros |
-| **Deploy** | Netlify (estático, `dist/` + Netlify Forms) |
+| **Deploy** | GitHub Pages (`josesepin3.github.io/MagicOS-Webpage`, workflow Actions) |
 
 ---
 
@@ -346,7 +347,8 @@ o copy de marketing.
 > producción; quedan pendientes la validación frontend y los estados.
 
 - [x] Ruta `GET /contacto` — página con formulario (estructura básica)
-- [x] Persistencia de envíos — Netlify Forms (`name="contact"` + `data-netlify`)
+- [x] Persistencia de envíos — Netlify Forms (solo Netlify; pendiente migrar a un
+      servicio compatible con GitHub Pages, p. ej. Formspree/Getform)
 - [ ] Componente JS `ContactForm.js` — validación frontend en tiempo real
 - [ ] Estados: loading (spinner en botón), éxito (mensaje verde), error (alerta)
 - [ ] CSS para el formulario: estilo Apple (inputs sin bordes, focus sutiles)
@@ -438,13 +440,25 @@ npm run dev           # Servidor Express local (nodemon, http://localhost:3000)
 npm run build         # Prerender estático EJS → dist/ (sin SQLite ni módulos nativos)
 ```
 
-### Deploy (Netlify)
-- Auto-deploy desde la rama `main` en cada push (también disponible la `dev`).
-- `netlify.toml`: `command = "npm run build"`, `publish = "dist"`, `NODE_VERSION = 20`.
-- **Importante:** el build NO usa `npm run seed` (mejor-sqlite3/bcrypt causan segfault
-  en el entorno de Netlify). Los datos vienen de `backend/data/products.json` (commiteado).
-- Formularios: Netlify Forms (`name="contact"` + `data-netlify="true"`).
-- Sitio: `magic-os.netlify.app`
+### Deploy (GitHub Pages — requerimiento del proyecto)
+
+> **Importante:** Netlify bloqueó los deploys (créditos de build del plan gratuito,
+> periodo 16 jul → 16 ago 2026), así que el deploy oficial ahora es **GitHub Pages**.
+
+- **GitHub Pages:** `https://josesepin3.github.io/MagicOS-Webpage/`
+  - Workflow `.github/workflows/deploy.yml`: en cada push a `main` corre
+    `npm ci` + `npm run build` (en runners de GitHub, sin límite de créditos) y
+    publica `dist/` vía `actions/deploy-pages`.
+  - El build usa `BASE_PATH=/MagicOS-Webpage` para prefijar las rutas absolutas
+    (`href/src/srcset`) en el HTML prerenderizado (`scripts/build-static.js`).
+  - En dev local y Netlify el `BASE_PATH` queda vacío (rutas de raíz).
+- **Netlify** (`magic-os.netlify.app`): quedó deshabilitado por límite de créditos.
+  El sitio estático seguiría desplegándose si se repone crédito (los datos ya están
+  en `main`), pero la web oficial es GitHub Pages.
+- `netlify.toml`: build `npm run build`, publish `dist` (ya no es el canal principal).
+- Formularios: Netlify Forms (`name="contact"` + `data-netlify="true"`) **solo
+  funciona en Netlify**. En GitHub Pages el POST no tiene backend → pendiente
+  migrar la persistencia (Formspree/Getform u otro servicio).
 
 ### Variables de entorno (`.env`)
 ```
