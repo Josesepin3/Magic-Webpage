@@ -4,9 +4,13 @@
    1. RESET & BASE STYLES
    ═══════════════════════════════════════════════════ */
 
-html, body {
-	height: 100%;
+html,
+body {
 	margin: 0;
+}
+
+html {
+	height: 100%;
 }
 
 *,
@@ -25,6 +29,20 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 	padding: var(--header-height) var(--page-padding) var(--page-padding);
 	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+/* Sticky footer: main crece para empujar el footer al borde inferior
+   cuando el contenido no llena la pantalla (no es fixed, hace scroll normal). */
+main {
+	flex: 1 0 auto;
+	width: 100%;
+}
+
+footer {
+	flex-shrink: 0;
 }
 
 /* Ensure common elements inherit the text color */
