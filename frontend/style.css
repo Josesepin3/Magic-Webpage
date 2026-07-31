@@ -224,6 +224,12 @@ a {
 	font-size: 1.25rem;
 }
 
+.site-logo {
+	display: block;
+	height: 36px;
+	width: auto;
+}
+
 .navbar ul {
 	display: flex;
 	gap: 4px;
