@@ -50,6 +50,11 @@
         </aside>
       </div>
 
+      <div class="mobile-total-bar">
+        <span class="mobile-total-label">Total</span>
+        <span class="mobile-total-price" id="total-price-mobile">$<%= product.base_price.toLocaleString() %></span>
+      </div>
+
       <script id="options-data" type="application/json"><%= JSON.stringify(options) %></script>
       <script src="/js/components/ProductConfigurator.js"></script>
     </main>

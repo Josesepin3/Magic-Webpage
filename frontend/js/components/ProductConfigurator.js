@@ -6,24 +6,8 @@
 
   var radios = page.querySelectorAll('input[type="radio"]');
   var totalEl = document.getElementById('total-price');
+  var mobileTotalEl = document.getElementById('total-price-mobile');
   var summaryEl = document.getElementById('summary-selections');
-  var summaryCard = page.querySelector('.configure-summary');
-
-  function getStickyTop() {
-    var headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height'), 10) || 96;
-    return headerHeight + 64;
-  }
-
-  function updateCollapsed() {
-    if (!summaryCard) return;
-    if (window.matchMedia('(max-width: 720px)').matches) {
-      var scrollY = window.pageYOffset || document.documentElement.scrollTop;
-      var threshold = summaryCard.offsetTop - getStickyTop();
-      page.classList.toggle('summary-collapsed', scrollY >= threshold);
-    } else {
-      page.classList.remove('summary-collapsed');
-    }
-  }
 
   function getSelectedOptions() {
     var selected = {};
@@ -61,7 +45,9 @@
       extra += selected[key].price;
     }
     var total = basePrice + extra;
-    if (totalEl) totalEl.textContent = '$' + total.toLocaleString();
+    var formatted = '$' + total.toLocaleString();
+    if (totalEl) totalEl.textContent = formatted;
+    if (mobileTotalEl) mobileTotalEl.textContent = formatted;
   }
 
   function updateCards() {
@@ -83,9 +69,5 @@
     radio.addEventListener('change', handleChange);
   });
 
-  window.addEventListener('scroll', updateCollapsed, { passive: true });
-  window.addEventListener('resize', updateCollapsed);
-
   handleChange();
-  updateCollapsed();
 })();

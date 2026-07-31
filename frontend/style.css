@@ -1778,6 +1778,10 @@ html.reveal-js [data-reveal].revealed {
 	top: calc(var(--header-height) + 24px);
 }
 
+.mobile-total-bar {
+	display: none;
+}
+
 .summary-sticky {
 	background: rgba(255, 255, 255, 0.04);
 	border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1938,45 +1942,39 @@ html.reveal-js [data-reveal].revealed {
 		gap: 24px;
 	}
 
-	.configure-title {
-		position: sticky;
-		top: calc(var(--header-height) + 8px);
-		z-index: 6;
-		margin: 0;
-		padding: 0 18px;
-		height: 48px;
-		display: flex;
-		align-items: center;
-		background: rgba(8, 8, 10, 0.92);
-		backdrop-filter: blur(14px);
-		-webkit-backdrop-filter: blur(14px);
-		border-radius: 14px;
-		font-size: 1.15rem;
-	}
-
 	.configure-summary {
-		position: sticky;
-		top: calc(var(--header-height) + 64px);
-		order: -1;
-		z-index: 5;
-		background: rgba(8, 8, 10, 0.92);
-		backdrop-filter: blur(14px);
-		-webkit-backdrop-filter: blur(14px);
-		border-radius: 16px;
+		position: static;
 	}
 
-	.configure-page.summary-collapsed .summary-product,
-	.configure-page.summary-collapsed .summary-selections,
-	.configure-page.summary-collapsed .summary-sticky h2 {
+	.summary-total {
 		display: none;
 	}
 
-	.configure-page.summary-collapsed .summary-sticky {
-		padding: 12px 18px;
+	.mobile-total-bar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 12px;
+		padding: 14px 18px;
+		background: rgba(8, 8, 10, 0.92);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 14px;
+		position: sticky;
+		bottom: 12px;
+		z-index: 5;
 	}
 
-	.configure-page.summary-collapsed .summary-total {
-		padding-top: 0;
-		border-top: none;
+	.mobile-total-label {
+		font-size: 1rem;
+		font-weight: 600;
+		color: rgba(255, 255, 255, 0.65);
+	}
+
+	.mobile-total-price {
+		font-size: 1.2rem;
+		font-weight: 700;
+		color: #3584e4;
 	}
 }
