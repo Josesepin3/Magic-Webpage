@@ -1351,7 +1351,10 @@ footer p {
 	}
 
 	.navbar {
-		display: none; /* hide by default on small screens */
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
 		position: fixed;
 		inset: 0;
 		background: rgba(0, 0, 0, 0.72);
@@ -1360,13 +1363,16 @@ footer p {
 		padding: var(--header-height) var(--page-padding) 24px;
 		overflow-y: auto;
 		z-index: 60;
+		visibility: hidden;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.3s ease, visibility 0.3s ease;
 	}
 
 	.navbar.open {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
+		visibility: visible;
+		opacity: 1;
+		pointer-events: auto;
 	}
 
 	.navbar ul {
