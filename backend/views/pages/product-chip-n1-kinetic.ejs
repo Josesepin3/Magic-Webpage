@@ -3,15 +3,15 @@
     <main class="product-page">
       <section class="product-hero">
         <div class="product-hero-content">
-          <h1 class="product-name"><%= product.name %></h1>
+          <h1 class="product-name" data-reveal><%= product.name %></h1>
           <% if (product.tagline) { %>
-            <p class="product-tagline"><%= product.tagline %></p>
+            <p class="product-tagline" data-reveal data-reveal-delay="60"><%= product.tagline %></p>
           <% } %>
           <% if (product.status === 'coming_soon') { %>
-            <span class="product-badge">Próximamente</span>
+            <span class="product-badge" data-reveal data-reveal-delay="120">Próximamente</span>
           <% } %>
-          <p class="product-description"><%= product.description %></p>
-          <div class="product-actions">
+          <p class="product-description" data-reveal data-reveal-delay="180"><%= product.description %></p>
+          <div class="product-actions" data-reveal data-reveal-delay="240">
             <a href="/productos" class="btn btn-secondary">Ver todos los productos</a>
           </div>
         </div>
@@ -19,8 +19,8 @@
 
       <% if (features.length > 0) { %>
         <section class="product-features">
-          <% features.forEach(feature => { %>
-            <article class="feature-section">
+          <% features.forEach((feature, index) => { %>
+            <article class="feature-section" data-reveal data-reveal-delay="<%= index * 80 %>">
               <h2><%= feature.title %></h2>
               <p><%= feature.description %></p>
             </article>

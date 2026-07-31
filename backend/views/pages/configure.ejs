@@ -3,10 +3,10 @@
     <main class="configure-page" data-product-id="<%= product.id %>" data-base-price="<%= product.base_price %>">
       <div class="configure-layout">
         <div class="configure-options">
-          <h1 class="configure-title">Configurar <%= product.name %></h1>
+          <h1 class="configure-title" data-reveal>Configurar <%= product.name %></h1>
 
-          <% for (const [groupName, groupOptions] of Object.entries(groupedOptions)) { %>
-            <fieldset class="option-group" data-group="<%= groupName %>">
+          <% Object.entries(groupedOptions).forEach(([groupName, groupOptions], index) => { %>
+            <fieldset class="option-group" data-group="<%= groupName %>" data-reveal data-reveal-delay="<%= index * 60 %>">
               <legend class="option-group-title"><%= groupName %></legend>
               <div class="option-group-options">
                 <% groupOptions.forEach(opt => { %>
@@ -29,10 +29,10 @@
                 <% }) %>
               </div>
             </fieldset>
-          <% } %>
+          <% }) %>
         </div>
 
-        <aside class="configure-summary">
+        <aside class="configure-summary" data-reveal data-reveal-delay="180">
           <div class="summary-sticky">
             <h2>Resumen</h2>
             <p class="summary-product"><%= product.name %></p>
