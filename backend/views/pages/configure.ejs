@@ -2,8 +2,9 @@
 
     <main class="configure-page" data-product-id="<%= product.id %>" data-base-price="<%= product.base_price %>">
       <div class="configure-layout">
+        <h1 class="configure-title" data-reveal>Configurar <%= product.name %></h1>
+
         <div class="configure-options">
-          <h1 class="configure-title" data-reveal>Configurar <%= product.name %></h1>
 
           <% Object.entries(groupedOptions).forEach(([groupName, groupOptions], index) => { %>
             <fieldset class="option-group" data-group="<%= groupName %>" data-reveal data-reveal-delay="<%= index * 60 %>">

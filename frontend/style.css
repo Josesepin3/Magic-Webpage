@@ -1691,6 +1691,7 @@ html.reveal-js [data-reveal].revealed {
 }
 
 .configure-title {
+	grid-column: 1 / -1;
 	margin: 0 0 28px;
 	font-size: clamp(1.6rem, 3.2vw, 2.2rem);
 	font-weight: 700;
@@ -1937,14 +1938,45 @@ html.reveal-js [data-reveal].revealed {
 		gap: 24px;
 	}
 
+	.configure-title {
+		position: sticky;
+		top: calc(var(--header-height) + 8px);
+		z-index: 6;
+		margin: 0;
+		padding: 0 18px;
+		height: 48px;
+		display: flex;
+		align-items: center;
+		background: rgba(8, 8, 10, 0.92);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		border-radius: 14px;
+		font-size: 1.15rem;
+	}
+
 	.configure-summary {
 		position: sticky;
-		top: calc(var(--header-height) + 12px);
+		top: calc(var(--header-height) + 64px);
 		order: -1;
 		z-index: 5;
 		background: rgba(8, 8, 10, 0.92);
 		backdrop-filter: blur(14px);
 		-webkit-backdrop-filter: blur(14px);
 		border-radius: 16px;
+	}
+
+	.configure-page.summary-collapsed .summary-product,
+	.configure-page.summary-collapsed .summary-selections,
+	.configure-page.summary-collapsed .summary-sticky h2 {
+		display: none;
+	}
+
+	.configure-page.summary-collapsed .summary-sticky {
+		padding: 12px 18px;
+	}
+
+	.configure-page.summary-collapsed .summary-total {
+		padding-top: 0;
+		border-top: none;
 	}
 }
