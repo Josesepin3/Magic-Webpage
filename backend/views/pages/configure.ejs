@@ -46,13 +46,19 @@
             <p class="summary-total">
               Total: <span id="total-price">$<%= product.base_price.toLocaleString() %></span>
             </p>
+            <button type="button" class="buy-button" disabled>Comprar</button>
+            <p class="out-of-stock">No hay stock</p>
           </div>
         </aside>
       </div>
 
       <div class="mobile-total-bar">
-        <span class="mobile-total-label">Total</span>
-        <span class="mobile-total-price" id="total-price-mobile">$<%= product.base_price.toLocaleString() %></span>
+        <div class="mobile-total-row">
+          <span class="mobile-total-label">Total</span>
+          <span class="mobile-total-price" id="total-price-mobile">$<%= product.base_price.toLocaleString() %></span>
+        </div>
+        <button type="button" class="buy-button" disabled>Comprar</button>
+        <p class="out-of-stock">No hay stock</p>
       </div>
 
       <script id="options-data" type="application/json"><%= JSON.stringify(options) %></script>

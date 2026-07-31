@@ -1832,6 +1832,30 @@ html.reveal-js [data-reveal].revealed {
 	color: #3584e4;
 }
 
+.buy-button {
+	width: 100%;
+	margin-top: 16px;
+	padding: 12px 24px;
+	border: none;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.1);
+	color: rgba(255, 255, 255, 0.4);
+	font: inherit;
+	font-weight: 600;
+	cursor: not-allowed;
+}
+
+.buy-button:disabled {
+	opacity: 0.7;
+}
+
+.out-of-stock {
+	margin: 8px 0 0;
+	font-size: 0.85rem;
+	text-align: center;
+	color: #ff9f0a;
+}
+
 /* ═══════════════════════════════════════════════════
     18. CONTACT PAGE
    ═══════════════════════════════════════════════════ */
@@ -1946,14 +1970,15 @@ html.reveal-js [data-reveal].revealed {
 		position: static;
 	}
 
-	.summary-total {
+	.summary-total,
+	.summary-sticky .buy-button,
+	.summary-sticky .out-of-stock {
 		display: none;
 	}
 
 	.mobile-total-bar {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
+		flex-direction: column;
 		gap: 12px;
 		margin-top: 12px;
 		padding: 14px 18px;
@@ -1965,6 +1990,18 @@ html.reveal-js [data-reveal].revealed {
 		position: sticky;
 		bottom: 12px;
 		z-index: 5;
+	}
+
+	.mobile-total-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.mobile-total-bar .buy-button,
+	.mobile-total-bar .out-of-stock {
+		margin-top: 0;
 	}
 
 	.mobile-total-label {
