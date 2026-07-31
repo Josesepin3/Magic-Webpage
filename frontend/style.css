@@ -1319,6 +1319,14 @@ footer p {
     padding: 9px 18px;
   }
 
+  .sirius-badge {
+    height: 80px;
+  }
+
+  .hero-back-text {
+    display: none;
+  }
+
   .sirius-features {
     grid-template-columns: 1fr;
   }
@@ -1332,7 +1340,7 @@ footer p {
 	.site-header {
 		flex-direction: column;
 		gap: 8px;
-		align-items: flex-start;
+		align-items: center;
 	}
 
 	.navbar ul {
@@ -1350,7 +1358,7 @@ footer p {
 
 	.site-header {
 		justify-content: center; /* center title */
-		position: relative;
+		position: fixed;
 	}
 
 	.navbar {
