@@ -1,15 +1,17 @@
-const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const ejs = require('ejs');
 
 const ROOT = path.join(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const PORT = process.env.PORT || 3210;
-const BASE = `http://127.0.0.1:${PORT}`;
+const VIEWS = path.join(ROOT, 'backend', 'views');
+const DATA_FILE = path.join(ROOT, 'backend', 'data', 'products.json');
 
-async function fetchText(urlPath) {
-  const res = await fetch(`${BASE}${urlPath}`);
-  return { status: res.status, body: await res.text() };
+const products = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+
+function renderPage(template, data) {
+  const file = path.join(VIEWS, `${template}.ejs`);
+  return ejs.renderFile(file, data, { filename: file });
 }
 
 function writePage(relPath, html) {
@@ -31,69 +33,44 @@ function copyDir(src, dest) {
   }
 }
 
-async function waitForServer() {
-  for (let i = 0; i < 150; i++) {
-    try {
-      const r = await fetchText('/');
-      if (r.status) return;
-    } catch (_) {
-      await new Promise((r) => setTimeout(r, 200));
-    }
+function groupedOptionsFor(product) {
+  const groupedOptions = {};
+  for (const opt of product.options) {
+    if (!groupedOptions[opt.group_name]) groupedOptions[opt.group_name] = [];
+    groupedOptions[opt.group_name].push(opt);
   }
-  throw new Error('El servidor Express no arrancó a tiempo.');
+  return groupedOptions;
 }
 
 async function main() {
-  const server = spawn('node', ['backend/app.js'], {
-    cwd: ROOT,
-    env: { ...process.env, PORT: String(PORT) },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  const pages = [
+    { template: 'pages/home', data: { title: 'Magic', products }, file: 'index.html' },
+    { template: 'pages/productos', data: { title: 'Productos - Magic', products }, file: 'productos/index.html' },
+    { template: 'pages/contact', data: { title: 'Contacto - Magic' }, file: 'contacto/index.html' },
+    { template: 'pages/404', data: { title: 'Página no encontrada' }, file: '404.html' },
+  ];
 
-  try {
-    await waitForServer();
-
-    const { getDb } = require(path.join(ROOT, 'backend/config/db'));
-    const db = getDb();
-    const products = db.prepare('SELECT slug FROM products ORDER BY category').all();
-
-    const routes = ['/', '/productos', '/contacto'];
-    for (const p of products) {
-      routes.push(`/productos/${p.slug}`);
-      routes.push(`/productos/${p.slug}/configure`);
-    }
-
-    const targets = [
-      { url: '/', file: 'index.html' },
-      { url: '/productos', file: 'productos/index.html' },
-      { url: '/contacto', file: 'contacto/index.html' },
-    ];
-    for (const p of products) {
-      targets.push({ url: `/productos/${p.slug}`, file: `productos/${p.slug}/index.html` });
-      targets.push({ url: `/productos/${p.slug}/configure`, file: `productos/${p.slug}/configure/index.html` });
-    }
-
-    for (const t of targets) {
-      const { status, body } = await fetchText(t.url);
-      if (status !== 200) {
-        throw new Error(`Ruta ${t.url} devolvió HTTP ${status}`);
-      }
-      writePage(t.file, body);
-      console.log(`  prerender ${t.url} -> dist/${t.file}`);
-    }
-
-    const { status, body } = await fetchText('/ruta-que-no-existe-404');
-    if (status !== 404) {
-      throw new Error(`La ruta 404 devolvió HTTP ${status}`);
-    }
-    writePage('404.html', body);
-    console.log('  prerender /404 -> dist/404.html');
-
-    copyDir(path.join(ROOT, 'frontend'), DIST);
-    console.log('  assets frontend copiados a dist/');
-  } finally {
-    server.kill('SIGTERM');
+  for (const p of products) {
+    pages.push({
+      template: `pages/product-${p.slug}`,
+      data: { title: `${p.name} - Magic`, product: p, features: p.features },
+      file: `productos/${p.slug}/index.html`,
+    });
+    pages.push({
+      template: 'pages/configure',
+      data: { title: `Configurar ${p.name} - Magic`, product: p, groupedOptions: groupedOptionsFor(p), options: p.options },
+      file: `productos/${p.slug}/configure/index.html`,
+    });
   }
+
+  for (const page of pages) {
+    const html = await renderPage(page.template, page.data);
+    writePage(page.file, html);
+    console.log(`  prerender ${page.template} -> dist/${page.file}`);
+  }
+
+  copyDir(path.join(ROOT, 'frontend'), DIST);
+  console.log('  assets frontend copiados a dist/');
 
   console.log('Build estático completado.');
 }
