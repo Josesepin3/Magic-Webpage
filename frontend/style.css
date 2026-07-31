@@ -1537,6 +1537,12 @@ html.reveal-js [data-reveal].revealed {
 	text-align: center;
 }
 
+.product-hero-visual {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 20px;
+}
+
 .product-name {
 	margin: 0 0 8px;
 	font-size: clamp(2rem, 4.5vw, 3.2rem);

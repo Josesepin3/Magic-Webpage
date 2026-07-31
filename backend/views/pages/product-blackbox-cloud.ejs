@@ -3,6 +3,9 @@
     <main class="product-page">
       <section class="product-hero">
         <div class="product-hero-content">
+          <div class="product-hero-visual" data-reveal>
+            <%- include('../partials/blackbox-badge') %>
+          </div>
           <h1 class="product-name" data-reveal><%= product.name %></h1>
           <% if (product.tagline) { %>
             <p class="product-tagline" data-reveal data-reveal-delay="60"><%= product.tagline %></p>
