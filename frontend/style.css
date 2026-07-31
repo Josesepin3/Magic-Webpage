@@ -1955,6 +1955,7 @@ html.reveal-js [data-reveal].revealed {
 		justify-content: space-between;
 		align-items: center;
 		gap: 12px;
+		margin-top: 12px;
 		padding: 14px 18px;
 		background: rgba(8, 8, 10, 0.92);
 		backdrop-filter: blur(14px);
