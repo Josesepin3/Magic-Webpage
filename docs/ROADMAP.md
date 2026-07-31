@@ -6,6 +6,12 @@
 > Este documento es la guía viva del proyecto. Los detalles cambiarán sobre la
 > marcha, pero la estructura y visión general se mantienen aquí.
 
+> **Estado (31 jul 2026):** Backend fundado, catálogo y configurador funcionando,
+> rebranding a **Magic** (rutas `/productos`), navbar liquid-glass, página de
+> Sirius rediseñada según maqueta (hero, badges N1/BlackBox, sección "Diseño
+> Modular", tarjetas con hover/tint) y responsive móvil ajustado. Siguiente:
+> pulir el resto de páginas, Fase 3 (contacto) y Fase 4 (admin).
+
 ---
 
 ## Stack Tecnológico
@@ -22,58 +28,40 @@
 
 ---
 
-## Estructura del Proyecto (Objetivo Final)
+## Estructura del Proyecto (Actual)
 
 ```
 MagicOS-Webpage/
 ├── frontend/
-│   ├── index.html              # Home (estático inicial)
-│   ├── style.css                # Estilos globales
-│   ├── img/                     # Imágenes y SVGs
+│   ├── style.css                # Estilos globales (incluye liquid-glass navbar)
+│   ├── img/                     # Imágenes y SVGs (hero Sirius, módulos, badges)
 │   └── js/                      # JS modular del lado cliente
 │       ├── components/
-│       │   ├── Card.js          # Card de producto reutilizable
-│       │   ├── Header.js        # Navbar dinámico
-│       │   ├── ChatWidget.js    # Widget de IA flotante
-│       │   ├── ContactForm.js   # Formulario con validación
 │       │   └── ProductConfigurator.js  # Configurador tipo Apple
-│       ├── services/
-│       │   ├── api.js           # Fetch wrapper centralizado
-│       │   └── ai.js            # Cliente para Mistral API
-│       └── utils/
-│           ├── validators.js    # Validaciones frontend
-│           └── states.js        # Helpers loading/error/empty
+│       └── services/
+│           └── api.js           # Fetch wrapper centralizado
 ├── backend/
 │   ├── app.js                   # Entry point de Express
 │   ├── config/
 │   │   └── db.js                # Inicialización SQLite + schemas
 │   ├── routes/
 │   │   ├── home.js              # GET /
-│   │   ├── catalog.js           # GET /catalogo, /catalogo/:slug, /catalogo/:slug/configure
-│   │   ├── contact.js           # GET /contacto, POST /api/contact
-│   │   ├── auth.js              # POST /api/auth/login
-│   │   ├── admin.js             # CRUD /api/admin/*
-│   │   └── ai.js                # POST /api/ai/chat
-│   ├── controllers/
-│   ├── models/
-│   ├── middleware/
-│   │   └── auth.js              # JWT verification
+│   │   ├── products.js          # GET /productos, /productos/:slug, /productos/:slug/configure
+│   │   └── contact.js           # GET /contacto
 │   ├── views/
-│   │   ├── partials/            # header.ejs, footer.ejs, nav.ejs
-│   │   ├── pages/
-│   │   │   ├── home.ejs
-│   │   │   ├── catalog.ejs          # Grid de productos
-│   │   │   ├── product.ejs          # Página individual estilo Apple
-│   │   │   ├── configure.ejs        # Configurador con opciones
-│   │   │   ├── contact.ejs          # Formulario de contacto
-│   │   │   └── admin/
-│   │   │       ├── login.ejs
-│   │   │       └── dashboard.ejs
-│   │   └── layouts/
+│   │   ├── partials/            # header.ejs, footer.ejs, n1-badge.ejs, blackbox-badge.ejs
+│   │   └── pages/
+│   │       ├── home.ejs
+│   │       ├── productos.ejs          # Grid de productos
+│   │       ├── product-*.ejs          # Página por producto (magicos, sirius-laptop, chip-n1-kinetic, blackbox-cloud)
+│   │       ├── configure.ejs          # Configurador con opciones
+│   │       ├── contact.ejs            # Formulario de contacto
+│   │       └── 404.ejs
 │   ├── data/
 │   │   └── magicos.db           # SQLite file
 │   └── seed.js                  # Poblar BD con datos iniciales
 ├── docs/
+│   ├── mockups/                 # Maquetas de diseño (Sirius.svg)
 │   └── ROADMAP.md               # Este archivo
 ├── package.json
 └── .gitignore
@@ -83,30 +71,32 @@ MagicOS-Webpage/
 
 ## Tabla de Rutas (API y Páginas)
 
+> Rebranding: las rutas `/catalogo*` pasaron a `/productos*` (marca **Magic**).
+
 ### Páginas (Server-rendered con EJS)
 
-| Método | Ruta | Vista | Descripción |
-|--------|------|-------|-------------|
-| GET | `/` | `home.ejs` | Landing page (hero + features + CTA) |
-| GET | `/catalogo` | `catalog.ejs` | Grid de todos los productos |
-| GET | `/catalogo/:slug` | `product.ejs` | Página individual estilo Apple |
-| GET | `/catalogo/:slug/configure` | `configure.ejs` | Configurador de producto |
-| GET | `/contacto` | `contact.ejs` | Formulario de contacto |
-| GET | `/admin/login` | `login.ejs` | Login para admin |
-| GET | `/admin/dashboard` | `dashboard.ejs` | Panel de administración |
+| Método | Ruta | Vista | Descripción | Estado |
+|--------|------|-------|-------------|--------|
+| GET | `/` | `home.ejs` | Landing page (hero + features + CTA) | ✅ |
+| GET | `/productos` | `productos.ejs` | Grid de todos los productos | ✅ |
+| GET | `/productos/:slug` | `product-<slug>.ejs` | Página individual por producto | ✅ |
+| GET | `/productos/:slug/configure` | `configure.ejs` | Configurador de producto | ✅ |
+| GET | `/contacto` | `contact.ejs` | Formulario de contacto | ✅ |
+| GET | `/admin/login` | `login.ejs` | Login para admin | ⏳ Pendiente |
+| GET | `/admin/dashboard` | `dashboard.ejs` | Panel de administración | ⏳ Pendiente |
 
 ### API REST (JSON)
 
-| Método | Ruta | Protegida | Descripción |
-|--------|------|-----------|-------------|
-| POST | `/api/contact` | No | Enviar mensaje de contacto |
-| POST | `/api/auth/login` | No | Autenticar admin, devuelve JWT |
-| GET | `/api/admin/messages` | Sí | Listar mensajes recibidos |
-| POST | `/api/admin/products` | Sí | Crear producto |
-| PUT | `/api/admin/products/:id` | Sí | Editar producto |
-| DELETE | `/api/admin/products/:id` | Sí | Eliminar producto |
-| POST | `/api/ai/chat` | No | Chat con IA vía Mistral |
-| GET | `/api/products/:slug` | No | Datos de producto + opciones |
+| Método | Ruta | Protegida | Descripción | Estado |
+|--------|------|-----------|-------------|--------|
+| POST | `/api/contact` | No | Enviar mensaje de contacto | ⏳ (tabla `messages` ya creada) |
+| POST | `/api/auth/login` | No | Autenticar admin, devuelve JWT | ⏳ |
+| GET | `/api/admin/messages` | Sí | Listar mensajes recibidos | ⏳ |
+| POST | `/api/admin/products` | Sí | Crear producto | ⏳ |
+| PUT | `/api/admin/products/:id` | Sí | Editar producto | ⏳ |
+| DELETE | `/api/admin/products/:id` | Sí | Eliminar producto | ⏳ |
+| POST | `/api/ai/chat` | No | Chat con IA vía Mistral | ⏳ |
+| GET | `/api/products/:slug` | No | Datos de producto + opciones | ⏳ (datos servidos por SSR) |
 
 ---
 
@@ -176,7 +166,7 @@ CREATE TABLE users (
 
 ## Diseño Visual de Páginas Clave
 
-### `/catalogo` — Grid de productos
+### `/productos` — Grid de productos
 
 Cuadrícula minimalista con cards que muestran imagen, nombre, descripción corta
 y estado (disponible/próximamente). Cada card enlaza a la página individual.
@@ -198,7 +188,7 @@ y estado (disponible/próximamente). Cada card enlaza a la página individual.
 └─────────────────────────────────────────────┘
 ```
 
-### `/catalogo/:slug` — Página de producto (estilo Apple)
+### `/productos/:slug` — Página de producto (estilo Apple)
 
 Diseño vertical con secciones narrativas. Cada sección ocupa la pantalla o
 cerca, con imagen a tamaño completo y texto superpuesto o al costado.
@@ -234,7 +224,7 @@ cerca, con imagen a tamaño completo y texto superpuesto o al costado.
 └─────────────────────────────────────────────┘
 ```
 
-### `/catalogo/:slug/configure` — Configurador
+### `/productos/:slug/configure` — Configurador
 
 Dos columnas: opciones a la izquierda, resumen + imagen actualizada a la derecha.
 Cada grupo de opciones (Procesador, RAM, Almacenamiento) es un conjunto de cards
@@ -314,30 +304,30 @@ o copy de marketing.
 
 **Objetivo:** Tener Express funcionando con SQLite y EJS.
 
-- [ ] `npm init` + instalar express, better-sqlite3, ejs, bcrypt, jsonwebtoken, dotenv
-- [ ] Crear `backend/app.js` con Express configurado
-- [ ] `backend/config/db.js`: inicializar SQLite, crear tablas
-- [ ] `backend/seed.js`: poblar BD con productos MagicOS + admin por defecto
-- [ ] Migrar landing actual (HTML estático) a `views/pages/home.ejs`
-- [ ] Crear `views/partials/header.ejs` y `footer.ejs`
-- [ ] Rutas básicas: home, catálogo, contacto (vistas vacías con layout)
+- [x] `npm init` + instalar express, better-sqlite3, ejs, bcrypt, jsonwebtoken, dotenv
+- [x] Crear `backend/app.js` con Express configurado
+- [x] `backend/config/db.js`: inicializar SQLite, crear tablas
+- [x] `backend/seed.js`: poblar BD con productos MagicOS + admin por defecto
+- [x] Migrar landing actual (HTML estático) a `views/pages/home.ejs`
+- [x] Crear `views/partials/header.ejs` y `footer.ejs`
+- [x] Rutas básicas: home, catálogo (`/productos`), contacto
 
 ### Fase 2 — Catálogo de Productos
 
 **Objetivo:** Páginas de producto con estilo Apple.
 
-- [ ] Ruta `GET /catalogo` — grid de productos desde BD
-- [ ] Ruta `GET /catalogo/:slug` — página individual con secciones narrativas
-- [ ] Ruta `GET /catalogo/:slug/configure` — configurador con opciones desde BD
-- [ ] Componente JS `ProductConfigurator.js` — cálculo dinámico de precio
-- [ ] CSS para diseño Apple: hero full-screen, sticky nav, secciones con scroll
+- [x] Ruta `GET /productos` — grid de productos desde BD (antes `/catalogo`)
+- [x] Ruta `GET /productos/:slug` — página individual por producto
+- [x] Ruta `GET /productos/:slug/configure` — configurador con opciones desde BD
+- [x] Componente JS `ProductConfigurator.js` — cálculo dinámico de precio
+- [x] CSS para diseño Apple: hero full-screen, navbar sticky liquid-glass, secciones narrativas (Sirius)
 - [ ] Animaciones: reveal al scrollear con IntersectionObserver
 
 ### Fase 3 — Formulario de Contacto
 
 **Objetivo:** Formulario funcional con validación y persistencia.
 
-- [ ] Ruta `GET /contacto` — página con formulario
+- [x] Ruta `GET /contacto` — página con formulario (estructura básica)
 - [ ] Componente JS `ContactForm.js` — validación frontend en tiempo real
 - [ ] Ruta `POST /api/contact` — validación backend + guardar en SQLite
 - [ ] Estados: loading (spinner en botón), éxito (mensaje verde), error (alerta)
@@ -375,12 +365,12 @@ o copy de marketing.
 - [ ] Estados de carga en todas las páginas (skeleton screens o spinners)
 - [ ] Estados de error con mensajes claros y acción de reintentar
 - [ ] Estados vacío ("No hay productos", "No hay mensajes")
-- [ ] Animaciones CSS: hover en cards, transiciones de página, scroll reveal
+- [~] Animaciones CSS: hover en cards ✅, scroll reveal pendiente
 - [ ] Validación en tiempo real en formularios
-- [ ] Responsive real probado en mobile/tablet/desktop
-- [ ] `.gitignore` (node_modules, .env, *.db)
-- [ ] Comentarios técnicos en código clave
-- [ ] Documentación de cómo ejecutar el proyecto
+- [~] Responsive real probado en mobile/tablet/desktop (Sirius en curso)
+- [x] `.gitignore` (node_modules, .env, *.db)
+- [x] Comentarios técnicos en código clave
+- [x] Documentación de cómo ejecutar el proyecto
 
 ---
 
@@ -393,7 +383,10 @@ o copy de marketing.
 | **Chip N1 Kinetic** | Silicon | ⏳ En desarrollo | `chip-n1-kinetic` |
 | **BlackBox Cloud** | Cloud | ⏳ En desarrollo | `blackbox-cloud` |
 
-### Opciones configurables por producto (futuro)
+### Opciones configurables por producto
+
+> Sirius: las opciones de Procesador, RAM y Almacenamiento ya están sembradas en
+> la BD (`seed.js`) y el configurador las muestra en `/productos/sirius-laptop/configure`.
 
 **Sirius Laptop:**
 - **Procesador N1** (silicio propio, optimizado para MagicOS):
