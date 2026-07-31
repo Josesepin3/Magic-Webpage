@@ -1510,15 +1510,6 @@ html.reveal-js [data-reveal].revealed {
     15. ENTRANCE ANIMATIONS
    ═══════════════════════════════════════════════════ */
 
-@keyframes headerDrop {
-	from { opacity: 0; transform: translateY(-14px); }
-	to   { opacity: 1; transform: none; }
-}
-
-.site-header {
-	animation: headerDrop 0.5s ease-out both;
-}
-
 @keyframes heroZoom {
 	from { transform: scale(1.06); }
 	to   { transform: scale(1); }
@@ -1530,7 +1521,6 @@ html.reveal-js [data-reveal].revealed {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.site-header,
 	.hero img {
 		animation: none;
 	}

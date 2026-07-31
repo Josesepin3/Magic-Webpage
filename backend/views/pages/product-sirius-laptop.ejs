@@ -5,7 +5,11 @@
         <section id="que_es">
             <div class="hero sirius-hero">
                 <a href="/productos" class="hero-back-btn">← <span class="hero-back-text">Volver a productos</span></a>
-                <img src="/img/sirius-hero.png" alt="Sirius Laptop">
+                <img src="/img/sirius-hero-1920.webp"
+                     srcset="/img/sirius-hero-1200.webp 1200w, /img/sirius-hero-1920.webp 1920w, /img/sirius-hero-2400.webp 2400w"
+                     sizes="100vw"
+                     width="1920" height="1146"
+                     alt="Sirius Laptop" fetchpriority="high">
                 <div class="sirius-hero-panel">
                     <% if (product.status === 'coming_soon') { %>
                         <span class="sirius-pill">PROXIMAMENTE</span>
