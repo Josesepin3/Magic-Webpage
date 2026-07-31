@@ -17,7 +17,7 @@
             </div>
         </section>
 
-        <section class="sirius-cta">
+        <section class="sirius-cta" data-reveal>
             <div class="sirius-promos">
                 <div class="sirius-promo-group sirius-promo-group--n1">
                     <%- include('../partials/n1-badge') %>
@@ -34,7 +34,7 @@
             </div>
         </section>
 
-        <section class="sirius-modular">
+        <section class="sirius-modular" data-reveal>
             <% const modularFeature = features.find(f => f.title === 'Diseño Modular'); %>
             <h2><%= modularFeature ? modularFeature.title : 'Diseño Modular' %></h2>
             <p class="sirius-modular-sub"><%= modularFeature ? modularFeature.description : 'Cada componente se reemplaza individualmente. Adiós a la obsolescencia programada.' %></p>
@@ -42,10 +42,10 @@
         </section>
 
         <% if (features.length > 0) { %>
-            <section class="sirius-features">
-                <% features.forEach(feature => { %>
+            <section class="sirius-features" data-reveal>
+                <% features.forEach((feature, index) => { %>
                     <% if (feature.title === 'Diseño Modular') return; %>
-                    <article class="sirius-feature-card <%= feature.title === 'Privacidad por Defecto' ? 'sirius-feature-card--privacy' : 'sirius-feature-card--n1' %>">
+                    <article class="sirius-feature-card <%= feature.title === 'Privacidad por Defecto' ? 'sirius-feature-card--privacy' : 'sirius-feature-card--n1' %>" data-reveal data-reveal-delay="<%= index * 80 %>">
                         <span class="feature-icon" aria-hidden="true">
                             <% if (feature.title === 'Privacidad por Defecto') { %>
                                 <svg class="feature-icon-img" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

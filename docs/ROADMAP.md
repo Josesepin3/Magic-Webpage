@@ -9,8 +9,10 @@
 > **Estado (31 jul 2026):** Backend fundado, catálogo y configurador funcionando,
 > rebranding a **Magic** (rutas `/productos`), navbar liquid-glass, página de
 > Sirius rediseñada según maqueta (hero, badges N1/BlackBox, sección "Diseño
-> Modular", tarjetas con hover/tint) y responsive móvil ajustado. Siguiente:
-> pulir el resto de páginas, Fase 3 (contacto) y Fase 4 (admin).
+> Modular", tarjetas con hover/tint), responsive móvil ajustado y **deploy en
+> Netlify funcionando** (estático con `dist/`, sin dependencia de módulos nativos
+> en el build). Fase 2 completa (incluye reveal on scroll). Siguiente:
+> Fase 3 (contacto) — falta `ContactForm.js`, estados y CSS Apple.
 
 ---
 
@@ -18,13 +20,14 @@
 
 | Capa | Tecnología |
 |------|-----------|
-| **Frontend** | Vanilla JS + EJS (SSR con Express) |
+| **Frontend** | Vanilla JS + EJS (SSR con Express local / prerender estático en build) |
 | **Backend** | Node.js + Express |
-| **Base de Datos** | SQLite (`better-sqlite3`) |
-| **Autenticación** | JWT + bcrypt |
+| **Base de Datos** | SQLite (`better-sqlite3`) — solo dev local |
+| **Autenticación** | JWT + bcrypt (pendiente; plan: Supabase + Netlify Functions) |
 | **IA** | Mistral API (modelo open-source gratuito) |
 | **CSS** | Vanilla (sin frameworks) |
 | **JS Frontend** | Modular, componentes funcionales puros |
+| **Deploy** | Netlify (estático, `dist/` + Netlify Forms) |
 
 ---
 
@@ -33,15 +36,16 @@
 ```
 MagicOS-Webpage/
 ├── frontend/
-│   ├── style.css                # Estilos globales (incluye liquid-glass navbar)
-│   ├── img/                     # Imágenes y SVGs (hero Sirius, módulos, badges)
+│   ├── style.css                # Estilos globales (incluye liquid-glass navbar + reveal on scroll)
+│   ├── img/                     # Imágenes y SVGs (hero Sirius, módulos, badges, logo blanco)
 │   └── js/                      # JS modular del lado cliente
 │       ├── components/
-│       │   └── ProductConfigurator.js  # Configurador tipo Apple
+│       │   ├── ProductConfigurator.js  # Configurador tipo Apple
+│       │   └── RevealOnScroll.js       # Reveal al scrollear (IntersectionObserver)
 │       └── services/
 │           └── api.js           # Fetch wrapper centralizado
 ├── backend/
-│   ├── app.js                   # Entry point de Express
+│   ├── app.js                   # Entry point de Express (dev local)
 │   ├── config/
 │   │   └── db.js                # Inicialización SQLite + schemas
 │   ├── routes/
@@ -51,15 +55,19 @@ MagicOS-Webpage/
 │   ├── views/
 │   │   ├── partials/            # header.ejs, footer.ejs, n1-badge.ejs, blackbox-badge.ejs
 │   │   └── pages/
-│   │       ├── home.ejs
+│   │       ├── home.ejs                  # Vacía — pendiente rediseño del ecosistema (landing en /productos/magicos)
 │   │       ├── productos.ejs          # Grid de productos
 │   │       ├── product-*.ejs          # Página por producto (magicos, sirius-laptop, chip-n1-kinetic, blackbox-cloud)
 │   │       ├── configure.ejs          # Configurador con opciones
-│   │       ├── contact.ejs            # Formulario de contacto
+│   │       ├── contact.ejs            # Formulario de contacto (Netlify Forms)
 │   │       └── 404.ejs
 │   ├── data/
-│   │   └── magicos.db           # SQLite file
-│   └── seed.js                  # Poblar BD con datos iniciales
+│   │   ├── magicos.db           # SQLite file (ignorado en git)
+│   │   └── products.json        # Datos de productos para el build estático (commiteado)
+│   └── seed.js                  # Poblar BD local + generar products.json
+├── scripts/
+│   └── build-static.js          # Prerender EJS → dist/ (build de Netlify)
+├── netlify.toml                 # Config de build/deploy en Netlify
 ├── docs/
 │   ├── mockups/                 # Maquetas de diseño (Sirius.svg)
 │   └── ROADMAP.md               # Este archivo
@@ -81,22 +89,26 @@ MagicOS-Webpage/
 | GET | `/productos` | `productos.ejs` | Grid de todos los productos | ✅ |
 | GET | `/productos/:slug` | `product-<slug>.ejs` | Página individual por producto | ✅ |
 | GET | `/productos/:slug/configure` | `configure.ejs` | Configurador de producto | ✅ |
-| GET | `/contacto` | `contact.ejs` | Formulario de contacto | ✅ |
+| GET | `/contacto` | `contact.ejs` | Formulario de contacto (**Netlify Forms**) | ✅ |
 | GET | `/admin/login` | `login.ejs` | Login para admin | ⏳ Pendiente |
 | GET | `/admin/dashboard` | `dashboard.ejs` | Panel de administración | ⏳ Pendiente |
 
 ### API REST (JSON)
 
+> **Nota:** en el deploy de Netlify la web es estática; los endpoints REST de
+> Express solo aplican al dev local. El formulario de contacto ya se persiste vía
+> **Netlify Forms**. Auth/admin se replanteará con **Supabase + Netlify Functions**.
+
 | Método | Ruta | Protegida | Descripción | Estado |
 |--------|------|-----------|-------------|--------|
-| POST | `/api/contact` | No | Enviar mensaje de contacto | ⏳ (tabla `messages` ya creada) |
-| POST | `/api/auth/login` | No | Autenticar admin, devuelve JWT | ⏳ |
+| POST | `/api/contact` | No | Enviar mensaje de contacto | ✅ reemplazado por Netlify Forms |
+| POST | `/api/auth/login` | No | Autenticar admin, devuelve JWT | ⏳ (plan: Supabase) |
 | GET | `/api/admin/messages` | Sí | Listar mensajes recibidos | ⏳ |
 | POST | `/api/admin/products` | Sí | Crear producto | ⏳ |
 | PUT | `/api/admin/products/:id` | Sí | Editar producto | ⏳ |
 | DELETE | `/api/admin/products/:id` | Sí | Eliminar producto | ⏳ |
 | POST | `/api/ai/chat` | No | Chat con IA vía Mistral | ⏳ |
-| GET | `/api/products/:slug` | No | Datos de producto + opciones | ⏳ (datos servidos por SSR) |
+| GET | `/api/products/:slug` | No | Datos de producto + opciones | ⏳ (datos servidos por SSR/prerender) |
 
 ---
 
@@ -151,6 +163,8 @@ CREATE TABLE messages (
 ```
 
 ### users (Admin)
+
+> Solo aplica al dev local. En el deploy se prevé sustituir por Supabase Auth.
 
 ```sql
 CREATE TABLE users (
@@ -321,15 +335,19 @@ o copy de marketing.
 - [x] Ruta `GET /productos/:slug/configure` — configurador con opciones desde BD
 - [x] Componente JS `ProductConfigurator.js` — cálculo dinámico de precio
 - [x] CSS para diseño Apple: hero full-screen, navbar sticky liquid-glass, secciones narrativas (Sirius)
-- [ ] Animaciones: reveal al scrollear con IntersectionObserver
+- [x] Animaciones: reveal al scrollear con IntersectionObserver (`RevealOnScroll.js`)
 
 ### Fase 3 — Formulario de Contacto
 
 **Objetivo:** Formulario funcional con validación y persistencia.
 
+> **Cambio de enfoque:** la persistencia se resuelve con **Netlify Forms** en el
+> deploy estático (en vez de `POST /api/contact` + SQLite). El envío funciona en
+> producción; quedan pendientes la validación frontend y los estados.
+
 - [x] Ruta `GET /contacto` — página con formulario (estructura básica)
+- [x] Persistencia de envíos — Netlify Forms (`name="contact"` + `data-netlify`)
 - [ ] Componente JS `ContactForm.js` — validación frontend en tiempo real
-- [ ] Ruta `POST /api/contact` — validación backend + guardar en SQLite
 - [ ] Estados: loading (spinner en botón), éxito (mensaje verde), error (alerta)
 - [ ] CSS para el formulario: estilo Apple (inputs sin bordes, focus sutiles)
 
@@ -415,9 +433,18 @@ o copy de marketing.
 ### Ejecución del proyecto
 ```bash
 npm install
-node backend/seed.js     # Poblar BD (primera vez)
-node backend/app.js      # Iniciar servidor
+npm run seed          # Poblar BD local (dev) + regenerar backend/data/products.json
+npm run dev           # Servidor Express local (nodemon, http://localhost:3000)
+npm run build         # Prerender estático EJS → dist/ (sin SQLite ni módulos nativos)
 ```
+
+### Deploy (Netlify)
+- Auto-deploy desde la rama `main` en cada push (también disponible la `dev`).
+- `netlify.toml`: `command = "npm run build"`, `publish = "dist"`, `NODE_VERSION = 20`.
+- **Importante:** el build NO usa `npm run seed` (mejor-sqlite3/bcrypt causan segfault
+  en el entorno de Netlify). Los datos vienen de `backend/data/products.json` (commiteado).
+- Formularios: Netlify Forms (`name="contact"` + `data-netlify="true"`).
+- Sitio: `magic-os.netlify.app`
 
 ### Variables de entorno (`.env`)
 ```
@@ -425,6 +452,7 @@ PORT=3000
 JWT_SECRET=...
 MISTRAL_API_KEY=...
 MISTRAL_API_URL=https://api.mistral.ai/v1/chat/completions
+# Futuro (auth en Netlify): SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
 ```
 
 ### Patrón de componentes (Vanilla JS)

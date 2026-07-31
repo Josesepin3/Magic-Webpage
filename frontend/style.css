@@ -1420,3 +1420,28 @@ footer p {
 	.menu-toggle { display: none !important; }
 	.navbar { display: flex !important; position: static !important; }
 }
+
+/* ═══════════════════════════════════════════════════
+    14. REVEAL ON SCROLL (IntersectionObserver)
+   ═══════════════════════════════════════════════════ */
+
+/* Solo se aplica la ocultación si JS cargó (html.reveal-js).
+   Sin JS, o con prefers-reduced-motion, el contenido queda visible. */
+html.reveal-js [data-reveal] {
+	opacity: 0;
+	transform: translateY(24px);
+	transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+html.reveal-js [data-reveal].revealed {
+	opacity: 1;
+	transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html.reveal-js [data-reveal] {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+}

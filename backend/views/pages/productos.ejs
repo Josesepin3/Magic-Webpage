@@ -10,8 +10,8 @@
         <% if (products.length === 0) { %>
           <p class="empty-state">Próximamente...</p>
         <% } else { %>
-          <% products.forEach(product => { %>
-            <a href="/productos/<%= product.slug %>" class="producto-card producto-card--<%= product.category %>">
+          <% products.forEach((product, index) => { %>
+            <a href="/productos/<%= product.slug %>" class="producto-card producto-card--<%= product.category %>" data-reveal data-reveal-delay="<%= index * 80 %>">
               <div class="producto-card-header">
                 <h2 class="producto-card-title"><%= product.name %></h2>
                 <% if (product.status === 'coming_soon') { %>
