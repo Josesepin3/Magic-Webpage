@@ -1017,7 +1017,7 @@ a {
 		display: grid;
 		grid-template-columns: 2fr 1fr;
 		gap: 18px;
-		align-items: start;
+		align-items: stretch;
 		width: 100%;
 	}
 
