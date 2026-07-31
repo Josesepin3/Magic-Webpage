@@ -4,7 +4,8 @@
         <section>
             <h2>Contacto</h2>
             <p>Estaremos encantados de escucharte.</p>
-            <form action="/api/contact" method="POST" style="max-width: 500px; margin: 40px auto; display: flex; flex-direction: column; gap: 16px;">
+            <form name="contact" method="POST" data-netlify="true" style="max-width: 500px; margin: 40px auto; display: flex; flex-direction: column; gap: 16px;">
+                <input type="hidden" name="form-name" value="contact">
                 <input type="text" name="name" placeholder="Tu nombre" required
                     style="padding: 12px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(255,255,255,0.05); color: inherit; font: inherit;">
                 <input type="email" name="email" placeholder="Tu correo electrónico" required

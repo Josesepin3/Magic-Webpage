@@ -10,6 +10,7 @@
     "start": "node backend/app.js",
     "dev": "nodemon backend/app.js",
     "seed": "node backend/seed.js",
+    "build": "node scripts/build-static.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
