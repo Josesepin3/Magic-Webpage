@@ -24,7 +24,7 @@
 
   targets.forEach(function (el) {
     var delay = parseInt(el.getAttribute('data-reveal-delay'), 10);
-    if (delay) el.style.transitionDelay = delay + 'ms';
+    if (delay) el.style.animationDelay = delay + 'ms';
     observer.observe(el);
   });
 })();
