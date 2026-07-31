@@ -27,7 +27,7 @@ body {
 	color: #ffffff;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	padding: var(--header-height) var(--page-padding) var(--page-padding);
+	padding: var(--header-height) var(--page-padding) 0;
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
