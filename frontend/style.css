@@ -1934,10 +1934,17 @@ html.reveal-js [data-reveal].revealed {
 @media (max-width: 720px) {
 	.configure-layout {
 		grid-template-columns: 1fr;
-		gap: 32px;
+		gap: 24px;
 	}
 
 	.configure-summary {
-		position: static;
+		position: sticky;
+		top: calc(var(--header-height) + 12px);
+		order: -1;
+		z-index: 5;
+		background: rgba(8, 8, 10, 0.92);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		border-radius: 16px;
 	}
 }
