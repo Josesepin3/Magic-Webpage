@@ -6,6 +6,7 @@ const ROOT = path.join(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
 const VIEWS = path.join(ROOT, 'backend', 'views');
 const DATA_FILE = path.join(ROOT, 'backend', 'data', 'products.json');
+const BASE_PATH = (process.env.BASE_PATH || '').replace(/\/+$/, '');
 
 const products = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
 
@@ -14,10 +15,25 @@ function renderPage(template, data) {
   return ejs.renderFile(file, data, { filename: file });
 }
 
+function prefixSrcset(value, basePath) {
+  return value
+    .split(/\s+/)
+    .map((token) => (token.charAt(0) === '/' ? basePath + token : token))
+    .join(' ');
+}
+
+function prefixBasePaths(html, basePath) {
+  if (!basePath) return html;
+  return html
+    .replace(/(href=")\//g, `$1${basePath}/`)
+    .replace(/(src=")\//g, `$1${basePath}/`)
+    .replace(/srcset="([^"]*)"/g, (_m, value) => `srcset="${prefixSrcset(value, basePath)}"`);
+}
+
 function writePage(relPath, html) {
   const out = path.join(DIST, relPath);
   fs.mkdirSync(path.dirname(out), { recursive: true });
-  fs.writeFileSync(out, html);
+  fs.writeFileSync(out, prefixBasePaths(html, BASE_PATH));
 }
 
 function copyDir(src, dest) {
