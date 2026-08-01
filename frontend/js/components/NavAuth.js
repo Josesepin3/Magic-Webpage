@@ -63,7 +63,7 @@
         '<a href="' + MagicOS.url('/cuenta/login') + '?mode=register">' + ICONS.userplus + '<span>Crear cuenta</span></a>'
       ];
     }
-    return '<div class="user-menu" role="menu" hidden>' + links.join('') + '</div>';
+    return '<div class="user-menu" role="menu">' + links.join('') + '</div>';
   }
 
   function renderSlot(slot) {
@@ -77,9 +77,9 @@
 
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const willOpen = menu.hidden;
+      const willOpen = !menu.classList.contains('open');
       closeAllMenus();
-      menu.hidden = !willOpen;
+      if (willOpen) menu.classList.add('open');
       btn.setAttribute('aria-expanded', String(willOpen));
     });
 
@@ -104,7 +104,7 @@
   }
 
   function closeAllMenus() {
-    document.querySelectorAll('.user-menu').forEach((m) => { m.hidden = true; });
+    document.querySelectorAll('.user-menu').forEach((m) => m.classList.remove('open'));
     document.querySelectorAll('.user-menu-btn').forEach((b) => b.setAttribute('aria-expanded', 'false'));
   }
 

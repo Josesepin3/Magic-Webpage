@@ -2688,10 +2688,18 @@ html.reveal-js [data-reveal].revealed {
 	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 	backdrop-filter: blur(20px) saturate(140%);
 	-webkit-backdrop-filter: blur(20px) saturate(140%);
+	visibility: hidden;
+	opacity: 0;
+	pointer-events: none;
+	transform: translateY(-8px);
+	transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
 }
 
-.user-menu[hidden] {
-	display: none;
+.user-menu.open {
+	visibility: visible;
+	opacity: 1;
+	pointer-events: auto;
+	transform: translateY(0);
 }
 
 .user-menu a,
@@ -3144,6 +3152,7 @@ html.reveal-js [data-reveal].revealed {
 		background: rgba(0, 0, 0, 0.72);
 		backdrop-filter: blur(24px);
 		-webkit-backdrop-filter: blur(24px);
+		transform: none;
 		z-index: 60;
 	}
 
@@ -3164,10 +3173,6 @@ html.reveal-js [data-reveal].revealed {
 	.nav-user--mobile .user-menu .user-menu-divider {
 		width: 100%;
 		max-width: 260px;
-	}
-
-	.nav-user--mobile .user-menu[hidden] {
-		display: none;
 	}
 }
 
