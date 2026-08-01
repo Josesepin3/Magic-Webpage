@@ -1,6 +1,6 @@
 <div align="center">
   
-  <img src="https://github.com/user-attachments/assets/91c89b84-8d38-48d6-960b-7cc40d619cad" alt="Magic White" width="400" />
+  <img src="https://raw.githubusercontent.com/Josesepin3/Magic-Webpage/main/frontend/img/magic-logo-white.svg" alt="Magic" width="400" />
 
 </div>
 
