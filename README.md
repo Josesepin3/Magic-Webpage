@@ -1,14 +1,14 @@
 <div align="center">
   
-  <img src="https://github.com/user-attachments/assets/91c89b84-8d38-48d6-960b-7cc40d619cad" alt="MagicOS White" width="400" />
+  <img src="https://github.com/user-attachments/assets/91c89b84-8d38-48d6-960b-7cc40d619cad" alt="Magic White" width="400" />
 
 </div>
 
 ---
 
-¡Bienvenido al repositorio oficial de la plataforma web de **MagicOS**! 
+¡Bienvenido al repositorio oficial de la plataforma web de **Magic**!
 
-Este proyecto comprende el desarrollo de la aplicación web oficial de nuestro sistema operativo de vanguardia, enfocado en la privacidad radical y el procesamiento local. La plataforma está diseñada bajo una arquitectura Full-Stack utilizando JavaScript como lenguaje principal.
+Este proyecto comprende el desarrollo de la aplicación web oficial de nuestro ecosistema de vanguardia, enfocado en la privacidad radical y el procesamiento local. La plataforma está diseñada bajo una arquitectura Full-Stack utilizando JavaScript como lenguaje principal.
 
 ---
 
@@ -16,7 +16,7 @@ Este proyecto comprende el desarrollo de la aplicación web oficial de nuestro s
 
 ### 👤 Nombre del Negocio
 
-**MagicOS**
+**Magic**
 
 ### 🛑 El Problema que Resuelve
 
@@ -45,7 +45,7 @@ Nuestra solución no es solo una aplicación; es un ecosistema cerrado de hardwa
 
 ---
 
-## 🌐 Sobre este Repositorio (`MagicOS-Webpage`)
+## 🌐 Sobre este Repositorio (`Magic-Webpage`)
 
 Este proyecto está estructurado como una aplicación **Full-Stack** integrada, dividiendo responsabilidades de forma clara y escalable.
 
@@ -70,4 +70,3 @@ Este proyecto está estructurado como una aplicación **Full-Stack** integrada, 
   _With ♥️ by PGTM_
 
 </div>
-

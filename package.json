@@ -16,14 +16,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Josesepin3/MagicOS-Webpage.git"
+    "url": "git+https://github.com/Josesepin3/Magic-Webpage.git"
   },
   "keywords": [],
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/Josesepin3/MagicOS-Webpage/issues"
+    "url": "https://github.com/Josesepin3/Magic-Webpage/issues"
   },
-  "homepage": "https://github.com/Josesepin3/MagicOS-Webpage#readme",
+  "homepage": "https://github.com/Josesepin3/Magic-Webpage#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^13.0.2",

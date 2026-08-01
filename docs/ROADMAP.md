@@ -1,4 +1,4 @@
-# MagicOS-Webpage — Roadmap del Proyecto
+# Magic-Webpage — Roadmap del Proyecto
 
 > **Contexto:** Página web oficial de MagicOS, desarrollada como proyecto de curso.
 > Progresión: HTML → CSS → Backend con JS.
@@ -32,14 +32,14 @@
 | **IA** | Mistral API (modelo open-source gratuito) |
 | **CSS** | Vanilla (sin frameworks) |
 | **JS Frontend** | Modular, componentes funcionales puros |
-| **Deploy** | GitHub Pages (`josesepin3.github.io/MagicOS-Webpage`, workflow Actions) |
+| **Deploy** | GitHub Pages (`josesepin3.github.io/Magic-Webpage`, workflow Actions) |
 
 ---
 
 ## Estructura del Proyecto (Actual)
 
 ```
-MagicOS-Webpage/
+Magic-Webpage/
 ├── frontend/
 │   ├── style.css                # Estilos globales (incluye liquid-glass navbar + reveal on scroll)
 │   ├── img/                     # Imágenes y SVGs (hero Sirius, módulos, badges, logo blanco)
@@ -444,7 +444,7 @@ en el deploy estático de GitHub Pages, sin backend Express.
 - [ ] Aplicar `supabase/schema.sql` en el SQL Editor de Supabase
 - [ ] `npm run seed:supabase` (requiere el schema aplicado)
 - [ ] Dashboard de Supabase → Auth → URL Configuration: redirects
-      `http://localhost:3000/**` y `https://josesepin3.github.io/MagicOS-Webpage/**`
+      `http://localhost:3000/**` y `https://josesepin3.github.io/Magic-Webpage/**`
 - [ ] Google OAuth en Supabase (opcional) y poner `GOOGLE: true` en `config.js`
 - [ ] Probar local (`npm run dev` + `npx serve dist`) y desplegar a `main`
 
@@ -526,11 +526,11 @@ npm run build         # Prerender estático EJS → dist/ (sin SQLite ni módulo
 > **Importante:** Netlify bloqueó los deploys (créditos de build del plan gratuito,
 > periodo 16 jul → 16 ago 2026), así que el deploy oficial ahora es **GitHub Pages**.
 
-- **GitHub Pages:** `https://josesepin3.github.io/MagicOS-Webpage/`
+- **GitHub Pages:** `https://josesepin3.github.io/Magic-Webpage/`
   - Workflow `.github/workflows/deploy.yml`: en cada push a `main` corre
     `npm ci` + `npm run build` (en runners de GitHub, sin límite de créditos) y
     publica `dist/` vía `actions/deploy-pages`.
-  - El build usa `BASE_PATH=/MagicOS-Webpage` para prefijar las rutas absolutas
+  - El build usa `BASE_PATH=/Magic-Webpage` para prefijar las rutas absolutas
     (`href/src/srcset`) en el HTML prerenderizado (`scripts/build-static.js`).
   - En dev local y Netlify el `BASE_PATH` queda vacío (rutas de raíz).
 - **Netlify** (`magic-os.netlify.app`): quedó deshabilitado por límite de créditos.
