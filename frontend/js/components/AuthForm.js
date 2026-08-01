@@ -104,7 +104,7 @@
   function showVerificationNotice(email) {
     form.classList.add('is-success');
     form.innerHTML =
-      '<div class="account-verify" data-reveal>' +
+      '<div class="account-verify">' +
         '<h2>Revisa tu correo</h2>' +
         '<p>Te enviamos un enlace de confirmación a <strong>' + escapeHtml(email) + '</strong>.</p>' +
         '<p class="account-verify-sub">Abre el correo para activar tu cuenta y poder iniciar sesión.</p>' +
