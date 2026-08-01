@@ -30,6 +30,12 @@ function prefixBasePaths(html, basePath) {
     .replace(/srcset="([^"]*)"/g, (_m, value) => `srcset="${prefixSrcset(value, basePath)}"`);
 }
 
+// Reescritura de url('/...') absolutas dentro del CSS (las remotas https:// quedan intactas).
+function prefixCssUrls(css, basePath) {
+  if (!basePath) return css;
+  return css.replace(/url\((['"]?)\//g, (_m, quote) => `url(${quote}${basePath}/`);
+}
+
 function writePage(relPath, html) {
   const out = path.join(DIST, relPath);
   fs.mkdirSync(path.dirname(out), { recursive: true });
@@ -43,6 +49,8 @@ function copyDir(src, dest) {
     const to = path.join(dest, entry.name);
     if (entry.isDirectory()) {
       copyDir(from, to);
+    } else if (entry.name.endsWith('.css')) {
+      fs.writeFileSync(to, prefixCssUrls(fs.readFileSync(from, 'utf8'), BASE_PATH));
     } else {
       fs.copyFileSync(from, to);
     }
