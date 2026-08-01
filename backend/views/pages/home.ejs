@@ -1,6 +1,144 @@
 <%- include('../partials/header') %>
 
     <main>
+
+      <!-- HERO -->
+      <section class="home-hero" id="inicio">
+        <div class="home-hero-galaxy" aria-hidden="true"></div>
+        <div class="home-hero-glow" aria-hidden="true"></div>
+        <div class="home-hero-glow home-hero-glow--tint" aria-hidden="true"></div>
+        <div class="home-hero-inner">
+          <img class="home-hero-logo" src="/img/magic-logo-white.svg" alt="Magic" width="3864" height="910" fetchpriority="high">
+          <h1 class="hm-headline">El ecosistema que pone tu privacidad primero.</h1>
+          <p class="hm-sub">Software, hardware y nube diseñados para que tus datos sean solo tuyos. Sin telemetría, sin rastreo, sin concesiones.</p>
+          <div class="hm-cta">
+            <a href="#ecosistema" class="hm-btn hm-btn--primary hm-scroll">Explorar el ecosistema</a>
+            <a href="/productos" class="hm-btn hm-btn--ghost">Ver productos</a>
+          </div>
+        </div>
+        <span class="hm-scroll-hint" aria-hidden="true">Desliza</span>
+      </section>
+
+      <!-- MANIFIESTO -->
+      <section class="hm-manifiesto" aria-label="Manifiesto">
+        <p class="hm-manifiesto-text">Software. Hardware. Nube. Privado por defecto.</p>
+      </section>
+
+      <!-- ECOSISTEMA -->
+      <section class="hm-section" id="ecosistema">
+        <div class="hm-section-head">
+          <span class="hm-eyebrow">El ecosistema</span>
+          <h2>Cuatro piezas. Una sola filosofía.</h2>
+          <p>Un sistema operativo, una laptop modular, un chip propio y una nube cifrada. Todo conectado, todo bajo tu control.</p>
+        </div>
+        <div class="productos-grid">
+          <div class="hm-reveal" data-delay="0">
+            <a href="/productos/magicos" class="producto-card producto-card--os">
+              <div class="producto-card-header">
+                <h2 class="producto-card-title">MagicOS</h2>
+                <span class="producto-badge producto-badge--available">Disponible</span>
+              </div>
+              <p class="producto-tagline">El sistema operativo que pone tu privacidad primero.</p>
+              <p class="producto-desc">Interfaz minimalista, seguridad radical y cero dependencia de la nube. Procesamiento estrictamente local.</p>
+            </a>
+          </div>
+          <div class="hm-reveal" data-delay="80">
+            <a href="/productos/sirius-laptop" class="producto-card producto-card--hardware">
+              <div class="producto-card-header">
+                <h2 class="producto-card-title">Sirius Laptop</h2>
+                <span class="producto-badge">Próximamente</span>
+              </div>
+              <p class="producto-tagline">Hardware modular. Potencia que te pertenece.</p>
+              <p class="producto-desc">Componentes reparables y actualizables como bloques de Lego, con el Chip N1 Kinetic integrado.</p>
+            </a>
+          </div>
+          <div class="hm-reveal" data-delay="160">
+            <a href="/productos/chip-n1-kinetic" class="producto-card producto-card--silicon">
+              <div class="producto-card-header">
+                <h2 class="producto-card-title">Chip N1 Kinetic</h2>
+                <span class="producto-badge">Próximamente</span>
+              </div>
+              <p class="producto-tagline">Silicio propio. Rendimiento sin compromisos.</p>
+              <p class="producto-desc">Arquitectura de silicio propietaria, optimizada para ejecutar tareas complejas de forma local.</p>
+            </a>
+          </div>
+          <div class="hm-reveal" data-delay="240">
+            <a href="/productos/blackbox-cloud" class="producto-card producto-card--cloud">
+              <div class="producto-card-header">
+                <h2 class="producto-card-title">BlackBox Cloud</h2>
+                <span class="producto-badge">Próximamente</span>
+              </div>
+              <p class="producto-tagline">El puente seguro entre tus dispositivos.</p>
+              <p class="producto-desc">Almacenamiento con cifrado de extremo a extremo, blindado con llaves que solo tú posees.</p>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- DESTACADO MAGICOS -->
+      <section class="hm-section">
+        <div class="hm-featured">
+          <div class="hm-featured-copy">
+            <span class="hm-eyebrow">Flagship</span>
+            <h2 class="hm-reveal">MagicOS, el corazón del ecosistema.</h2>
+            <p class="hm-reveal" data-delay="60">Un sistema operativo premium con núcleo diseñado para el procesamiento estrictamente local. Rápido, minimalista y ajeno a la telemetría.</p>
+            <ul class="hm-feature-list">
+              <li class="hm-reveal" data-delay="120">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span><strong>Privacidad radical</strong> — procesamiento 100% local. Sin telemetría, sin rastreo.</span>
+              </li>
+              <li class="hm-reveal" data-delay="180">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                <span><strong>Interfaz minimalista</strong> — diseñado para la productividad sin distracciones.</span>
+              </li>
+              <li class="hm-reveal" data-delay="240">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                <span><strong>Cero dependencia</strong> — tu sistema, tus datos, tus reglas.</span>
+              </li>
+            </ul>
+            <div class="hm-cta hm-reveal" data-delay="300">
+              <a href="/productos/magicos" class="hm-btn hm-btn--primary">Conocer MagicOS</a>
+            </div>
+          </div>
+          <div class="hm-featured-media" data-parallax="24">
+            <div class="hm-featured-glow" aria-hidden="true"></div>
+            <img src="/img/apps.svg" alt="Aplicaciones de MagicOS" width="480" height="480">
+          </div>
+        </div>
+      </section>
+
+      <!-- VALORES -->
+      <section class="hm-section">
+        <div class="hm-section-head">
+          <span class="hm-eyebrow">Nuestra filosofía</span>
+          <h2>Tus datos, tu propiedad.</h2>
+          <p>Tres principios que no negociamos.</p>
+        </div>
+        <div class="hm-values-grid">
+          <article class="hm-value-card hm-reveal">
+            <div class="hm-value-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <h3>Procesamiento local</h3>
+            <p>Todo se ejecuta en tu dispositivo. Nada se procesa en servidores que no controlas.</p>
+          </article>
+          <article class="hm-value-card hm-reveal" data-delay="100">
+            <div class="hm-value-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+            </div>
+            <h3>Cero telemetría</h3>
+            <p>Nadie vigila lo que haces. Sin métricas ocultas, sin perfiles de usuario, sin venta de datos.</p>
+          </article>
+          <article class="hm-value-card hm-reveal" data-delay="200">
+            <div class="hm-value-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <h3>Sin backdoors</h3>
+            <p>Tu máquina, tus reglas. Cero puertas traseras, cero acceso remoto no autorizado.</p>
+          </article>
+        </div>
+      </section>
+
     </main>
 
 <%- include('../partials/footer') %>

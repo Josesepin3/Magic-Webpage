@@ -63,7 +63,7 @@
         '<a href="' + MagicOS.url('/cuenta/login') + '?mode=register">' + ICONS.userplus + '<span>Crear cuenta</span></a>'
       ];
     }
-    return '<div class="user-menu" role="menu">' + links.join('') + '</div>';
+    return '<div class="user-menu" role="menu" data-lenis-prevent>' + links.join('') + '</div>';
   }
 
   function renderSlot(slot) {

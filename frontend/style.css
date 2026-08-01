@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 /* ═══════════════════════════════════════════════════
    1. RESET & BASE STYLES
@@ -102,7 +102,7 @@ input, textarea, button {
 	inset: 0;
 	z-index: -1;
 	pointer-events: none;
-	background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+	background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent);
 }
 
 .glass-layer {
@@ -254,6 +254,14 @@ input, textarea, button {
 .site-title {
 	margin: 0;
 	font-size: 1.25rem;
+	transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+/* Homepage: el logo del navbar se oculta mientras el logo del hero está en pantalla */
+.site-title.site-title--home-hidden {
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
 }
 
 .site-logo {
@@ -3183,5 +3191,437 @@ html.reveal-js [data-reveal].revealed {
 
 	.cart-item-price {
 		text-align: left;
+	}
+}
+
+/* ═══════════════════════════════════════════════════
+    23. HOMEPAGE (ECOSISTEMA CINEMATICO)
+    ═══════════════════════════════════════════════════ */
+
+.hm-section,
+.hm-manifiesto,
+.home-hero {
+	scroll-margin-top: calc(var(--header-height) + 8px);
+}
+
+.hm-section {
+	max-width: 1120px;
+	margin: 0 auto;
+	padding: 40px 0 80px;
+}
+
+.hm-section-head {
+	text-align: center;
+	margin-bottom: 48px;
+}
+
+.hm-section-head h2 {
+	font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	margin: 8px 0 0;
+}
+
+.hm-section-head p {
+	opacity: 0.6;
+	margin: 12px auto 0;
+	max-width: 52ch;
+	line-height: 1.6;
+}
+
+.hm-eyebrow {
+	display: inline-block;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: rgba(53, 132, 228, 0.9);
+}
+
+/* ── HERO ─────────────────────────────────────────── */
+
+.home-hero {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	min-height: 100svh;
+	width: calc(100% + (var(--page-padding) * 2));
+	margin-left: calc(var(--page-padding) * -1);
+	margin-top: calc(var(--header-height) * -1);
+	padding: calc(var(--header-height) + 32px) 0 96px;
+	overflow: hidden;
+}
+
+.home-hero-glow {
+	position: absolute;
+	left: 50%;
+	top: 42%;
+	width: 720px;
+	height: 720px;
+	margin-left: -360px;
+	margin-top: -360px;
+	border-radius: 50%;
+	pointer-events: none;
+	filter: blur(90px);
+	will-change: transform;
+	background: radial-gradient(circle, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%);
+}
+
+/* Galaxia bajo el hero (parallax mouse + scroll). La imagen se añade cuando esté disponible. */
+.home-hero-galaxy {
+	position: absolute;
+	inset: -35% -10% -35%;
+	background-image: url('/img/galaxy.webp');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	opacity: 0.55;
+	filter: saturate(1.15) brightness(0.9);
+	mask-image: linear-gradient(to bottom, black 45%, transparent 100%);
+	-webkit-mask-image: linear-gradient(to bottom, black 45%, transparent 100%);
+	pointer-events: none;
+	will-change: transform;
+	transform: translateZ(0);
+}
+
+/* Degradado de cierre: funde el hero (y el glow) con la sección siguiente */
+.home-hero::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 200px;
+	z-index: 1;
+	pointer-events: none;
+	background: linear-gradient(to bottom, transparent, #000 88%);
+}
+
+.home-hero-glow--tint {
+	background: radial-gradient(circle, rgba(53, 132, 228, 0.22) 0%, rgba(129, 61, 156, 0.16) 45%, transparent 70%);
+	animation: hm-glow-pulse 9s ease-in-out infinite;
+}
+
+@keyframes hm-glow-pulse {
+	0%, 100% { opacity: 0.55; }
+	50% { opacity: 1; }
+}
+
+.home-hero-inner {
+	position: relative;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+	max-width: 1120px;
+	padding: 0 var(--page-padding);
+	will-change: transform;
+}
+
+.home-hero-logo {
+	width: clamp(240px, 42vw, 520px);
+	height: auto;
+	margin-bottom: 32px;
+}
+
+.hm-headline {
+	font-size: clamp(2rem, 5vw, 3.6rem);
+	font-weight: 800;
+	letter-spacing: -0.03em;
+	line-height: 1.08;
+	max-width: 18ch;
+	margin: 0 0 18px;
+}
+
+.hm-word {
+	display: inline-block;
+	overflow: hidden;
+	vertical-align: top;
+}
+
+.hm-word-inner {
+	display: inline-block;
+	will-change: transform;
+}
+
+.hm-sub {
+	font-size: clamp(1rem, 1.6vw, 1.25rem);
+	opacity: 0.6;
+	max-width: 52ch;
+	line-height: 1.6;
+	margin: 0 0 36px;
+}
+
+.hm-cta {
+	display: flex;
+	gap: 16px;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.hm-btn {
+	display: inline-block;
+	padding: 12px 28px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-size: 0.95rem;
+	font-weight: 600;
+	transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.hm-btn--primary {
+	background: #ffffff;
+	color: #000000;
+}
+
+.hm-btn--ghost {
+	background: rgba(255, 255, 255, 0.06);
+	color: #ffffff;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+@media (hover: hover) {
+	.hm-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+	}
+
+	.hm-btn--primary:hover {
+		background: #f0f0f0;
+		filter: brightness(1.02);
+	}
+
+	.hm-btn--ghost:hover {
+		background: rgba(255, 255, 255, 0.1);
+		border-color: rgba(255, 255, 255, 0.35);
+	}
+}
+
+.hm-scroll-hint {
+	position: absolute;
+	bottom: 26px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	color: rgba(255, 255, 255, 0.5);
+	font-size: 0.72rem;
+	font-weight: 500;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+}
+
+.hm-scroll-hint::after {
+	content: '';
+	width: 1px;
+	height: 44px;
+	background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), transparent);
+	animation: hm-hint 1.8s ease-in-out infinite;
+}
+
+@keyframes hm-hint {
+	0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
+	35% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+	100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+/* ── MANIFIESTO ───────────────────────────────────── */
+
+.hm-manifiesto {
+	max-width: 1120px;
+	margin: 0 auto;
+	padding: clamp(80px, 14vw, 160px) 0;
+	text-align: center;
+}
+
+.hm-manifiesto-text {
+	font-size: clamp(1.7rem, 4vw, 3rem);
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	line-height: 1.2;
+	max-width: 22ch;
+	margin: 0 auto;
+}
+
+.hm-manifiesto .hm-word {
+	overflow: hidden;
+}
+
+/* ── ECOSISTEMA (grid) ────────────────────────────── */
+
+.hm-section .producto-badge--available {
+	background: rgba(51, 209, 122, 0.16);
+	color: #5fe09a;
+}
+
+/* ── DESTACADO MAGICOS ────────────────────────────── */
+
+.hm-featured {
+	display: grid;
+	grid-template-columns: 1.1fr 0.9fr;
+	gap: 56px;
+	align-items: center;
+}
+
+.hm-featured-copy h2 {
+	font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	line-height: 1.15;
+	margin: 8px 0 16px;
+}
+
+.hm-featured-copy > p {
+	opacity: 0.65;
+	line-height: 1.7;
+	margin-bottom: 24px;
+}
+
+.hm-feature-list {
+	list-style: none;
+	padding: 0;
+	margin: 0 0 28px;
+	display: grid;
+	gap: 16px;
+}
+
+.hm-feature-list li {
+	display: flex;
+	gap: 14px;
+	align-items: flex-start;
+	opacity: 0.85;
+	line-height: 1.6;
+	font-size: 0.95rem;
+}
+
+.hm-feature-list li strong {
+	font-weight: 600;
+}
+
+.hm-feature-list svg {
+	flex: 0 0 auto;
+	width: 22px;
+	height: 22px;
+	margin-top: 3px;
+	color: rgba(53, 132, 228, 0.9);
+}
+
+.hm-featured-media {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.hm-featured-glow {
+	position: absolute;
+	width: 420px;
+	height: 420px;
+	border-radius: 50%;
+	filter: blur(70px);
+	pointer-events: none;
+	background: radial-gradient(circle, rgba(129, 61, 156, 0.35) 0%, rgba(53, 132, 228, 0.18) 45%, transparent 70%);
+}
+
+.hm-featured-media img {
+	position: relative;
+	width: 100%;
+	max-width: 420px;
+	height: auto;
+}
+
+/* ── VALORES ──────────────────────────────────────── */
+
+.hm-values-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 24px;
+}
+
+.hm-value-card {
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 16px;
+	padding: 32px 28px;
+	will-change: transform;
+}
+
+.hm-value-icon {
+	width: 46px;
+	height: 46px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 12px;
+	background: rgba(53, 132, 228, 0.15);
+	color: #ffffff;
+	margin-bottom: 18px;
+}
+
+.hm-value-icon svg {
+	width: 22px;
+	height: 22px;
+}
+
+.hm-value-card h3 {
+	font-size: 1.15rem;
+	font-weight: 700;
+	margin: 0 0 10px;
+	letter-spacing: -0.01em;
+}
+
+.hm-value-card p {
+	font-size: 0.92rem;
+	opacity: 0.6;
+	line-height: 1.65;
+	margin: 0;
+}
+
+/* ── RESPONSIVE HOMEPAGE ──────────────────────────── */
+
+@media (max-width: 860px) {
+	.hm-featured {
+		grid-template-columns: 1fr;
+		gap: 40px;
+	}
+
+	.hm-featured-media {
+		order: -1;
+	}
+
+	.hm-values-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.home-hero-glow {
+		width: min(92vw, 520px);
+		height: min(92vw, 520px);
+		margin-left: calc(min(92vw, 520px) / -2);
+		margin-top: calc(min(92vw, 520px) / -2);
+	}
+}
+
+@media (max-width: 600px) {
+	.hm-section {
+		padding: 24px 0 56px;
+	}
+
+	.hm-cta {
+		flex-direction: column;
+		align-items: center;
+		width: 100%;
+	}
+
+	.hm-cta .hm-btn {
+		width: 100%;
+		max-width: 320px;
+		text-align: center;
 	}
 }
