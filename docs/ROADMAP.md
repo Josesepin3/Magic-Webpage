@@ -11,10 +11,10 @@
 > Sirius rediseñada según maqueta (hero, badges N1/BlackBox, sección "Diseño
 > Modular", tarjetas con hover/tint), responsive móvil ajustado y **deploy en
 > GitHub Pages funcionando** (requisito del proyecto; Netlify quedó bloqueado por
-> créditos de build). Fase 2 y **Fase 3 completas**: el formulario de contacto
-> ahora envía vía **FormSubmit** (compatible con GitHub Pages) con validación en
-> tiempo real, estados loading/éxito/error y CSS estilo Apple. Siguiente:
-> Fase 4 (admin panel).
+> créditos de build). Fases 2, 3 y **4 completas**: formulario de contacto vía
+> **FormSubmit** (compatible con GitHub Pages) y panel de administración
+> (Express/JWT/SQLite, solo dev local): login, dashboard con mensajes y CRUD de
+> productos. Siguiente: Fase 5 (IA con Mistral).
 
 ---
 
@@ -25,7 +25,7 @@
 | **Frontend** | Vanilla JS + EJS (SSR con Express local / prerender estático en build) |
 | **Backend** | Node.js + Express |
 | **Base de Datos** | SQLite (`better-sqlite3`) — solo dev local |
-| **Autenticación** | JWT + bcrypt (pendiente; plan: Supabase) |
+| **Autenticación** | JWT + bcrypt (dev local); plan: Supabase en el deploy |
 | **IA** | Mistral API (modelo open-source gratuito) |
 | **CSS** | Vanilla (sin frameworks) |
 | **JS Frontend** | Modular, componentes funcionales puros |
@@ -44,17 +44,24 @@ MagicOS-Webpage/
 │       ├── components/
 │       │   ├── ProductConfigurator.js  # Configurador tipo Apple
 │       │   ├── RevealOnScroll.js       # Reveal al scrollear (IntersectionObserver)
-│       │   └── ContactForm.js          # Validación + envío FormSubmit (loading/éxito/error)
+│       │   ├── ContactForm.js          # Validación + envío FormSubmit (loading/éxito/error)
+│       │   ├── LoginForm.js            # Login de admin (JWT → localStorage)
+│       │   └── AdminApp.js             # Dashboard: mensajes + CRUD productos
 │       └── services/
 │           └── api.js           # Fetch wrapper centralizado
 ├── backend/
 │   ├── app.js                   # Entry point de Express (dev local)
 │   ├── config/
 │   │   └── db.js                # Inicialización SQLite + schemas
+│   ├── middleware/
+│   │   └── auth.js              # requireAuth (JWT Bearer) + signToken
 │   ├── routes/
 │   │   ├── home.js              # GET /
 │   │   ├── products.js          # GET /productos, /productos/:slug, /productos/:slug/configure
-│   │   └── contact.js           # GET /contacto
+│   │   ├── contact.js           # GET /contacto
+│   │   ├── auth.js              # POST /api/auth/login
+│   │   ├── admin.js             # GET /admin/login, /admin/dashboard
+│   │   └── adminApi.js          # /api/admin/* protegidas (mensajes + CRUD productos)
 │   ├── views/
 │   │   ├── partials/            # header.ejs, footer.ejs, n1-badge.ejs, blackbox-badge.ejs
 │   │   └── pages/
@@ -63,6 +70,8 @@ MagicOS-Webpage/
 │   │       ├── product-*.ejs          # Página por producto (magicos, sirius-laptop, chip-n1-kinetic, blackbox-cloud)
 │   │       ├── configure.ejs          # Configurador con opciones
 │   │       ├── contact.ejs            # Formulario de contacto (FormSubmit)
+│   │       ├── login.ejs              # Login de admin (dev local)
+│   │       ├── dashboard.ejs          # Panel de admin (dev local)
 │   │       └── 404.ejs
 │   ├── data/
 │   │   ├── magicos.db           # SQLite file (ignorado en git)
@@ -93,8 +102,8 @@ MagicOS-Webpage/
 | GET | `/productos/:slug` | `product-<slug>.ejs` | Página individual por producto | ✅ |
 | GET | `/productos/:slug/configure` | `configure.ejs` | Configurador de producto | ✅ |
 | GET | `/contacto` | `contact.ejs` | Formulario de contacto (**FormSubmit**) | ✅ |
-| GET | `/admin/login` | `login.ejs` | Login para admin | ⏳ Pendiente |
-| GET | `/admin/dashboard` | `dashboard.ejs` | Panel de administración | ⏳ Pendiente |
+| GET | `/admin/login` | `login.ejs` | Login para admin (dev local) | ✅ dev local |
+| GET | `/admin/dashboard` | `dashboard.ejs` | Panel de administración (dev local) | ✅ dev local |
 
 ### API REST (JSON)
 
@@ -107,11 +116,17 @@ MagicOS-Webpage/
 | Método | Ruta | Protegida | Descripción | Estado |
 |--------|------|-----------|-------------|--------|
 | POST | `/api/contact` | No | Enviar mensaje de contacto | ✅ reemplazado por FormSubmit |
-| POST | `/api/auth/login` | No | Autenticar admin, devuelve JWT | ⏳ (plan: Supabase) |
-| GET | `/api/admin/messages` | Sí | Listar mensajes recibidos | ⏳ |
-| POST | `/api/admin/products` | Sí | Crear producto | ⏳ |
-| PUT | `/api/admin/products/:id` | Sí | Editar producto | ⏳ |
-| DELETE | `/api/admin/products/:id` | Sí | Eliminar producto | ⏳ |
+| POST | `/api/auth/login` | No | Autenticar admin, devuelve JWT | ✅ dev local |
+| GET | `/api/admin/messages` | Sí | Listar mensajes recibidos | ✅ dev local |
+| PATCH | `/api/admin/messages/:id` | Sí | Marcar leído/no leído | ✅ dev local |
+| DELETE | `/api/admin/messages/:id` | Sí | Eliminar mensaje | ✅ dev local |
+| GET | `/api/admin/products` | Sí | Listar productos | ✅ dev local |
+| POST | `/api/admin/products` | Sí | Crear producto | ✅ dev local |
+| GET | `/api/admin/products/:id` | Sí | Obtener producto | ✅ dev local |
+| PUT | `/api/admin/products/:id` | Sí | Editar producto | ✅ dev local |
+| DELETE | `/api/admin/products/:id` | Sí | Eliminar producto | ✅ dev local |
+| GET | `/api/admin/products/:id/options` | Sí | Listar opciones de producto | ✅ dev local |
+| PUT | `/api/admin/products/:id/options` | Sí | Reemplazar opciones | ✅ dev local |
 | POST | `/api/ai/chat` | No | Chat con IA vía Mistral | ⏳ |
 | GET | `/api/products/:slug` | No | Datos de producto + opciones | ⏳ (datos servidos por SSR/prerender) |
 
@@ -364,16 +379,24 @@ o copy de marketing.
 
 **Objetivo:** Login + dashboard protegido.
 
-- [ ] Ruta `GET /admin/login` — página de login
-- [ ] Componente JS `LoginForm.js` — validación + llamada a API
-- [ ] Ruta `POST /api/auth/login` — verificar credenciales, devolver JWT
-- [ ] Middleware `backend/middleware/auth.js` — verificar JWT en rutas protegidas
-- [ ] Ruta `GET /admin/dashboard` — panel protegido con:
-  - Lista de mensajes de contacto (leer/no leídos)
-  - CRUD de productos (nombre, precio, imágenes, opciones)
-  - Logout
-- [ ] Ruta `POST /api/admin/products`
-- [ ] Rutas `PUT/DELETE /api/admin/products/:id`
+> **Nota:** solo aplica al dev local (Express + SQLite). En GitHub Pages no hay
+> backend, así que el admin no se publica en el sitio estático. El plan para
+> llevarlo al deploy es migrar la persistencia a Supabase (Auth + tablas + SDK).
+
+- [x] Ruta `GET /admin/login` — página de login
+- [x] Componente JS `LoginForm.js` — validación + llamada a `POST /api/auth/login`,
+      guarda el JWT en localStorage y redirige al dashboard
+- [x] Ruta `POST /api/auth/login` — verifica credenciales (bcrypt), devuelve JWT
+      (2h, firma `JWT_SECRET` del `.env`; fallback dev)
+- [x] Middleware `backend/middleware/auth.js` — verifica `Authorization: Bearer` en rutas protegidas
+- [x] Ruta `GET /admin/dashboard` — panel protegido (el cliente redirige a login si no hay token) con:
+  - Lista de mensajes de contacto (marcar leído/no leído, eliminar, contador)
+  - CRUD de productos (nombre, slug, tagline, descripción, precio, categoría,
+    estado, imagen, features JSON) + opciones configurables (builder por filas)
+  - Logout (limpia localStorage)
+- [x] Rutas API (`/api/admin`, protegidas con JWT): `GET/POST /products`,
+      `GET/PUT/DELETE /products/:id`, `GET/PUT /products/:id/options`,
+      `GET/PATCH/DELETE /messages/:id`
 
 ### Fase 5 — IA
 

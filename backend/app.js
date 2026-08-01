@@ -5,6 +5,9 @@ require('dotenv').config();
 const homeRouter = require('./routes/home');
 const productsRouter = require('./routes/products');
 const contactRouter = require('./routes/contact');
+const authRouter = require('./routes/auth');
+const adminRouter = require('./routes/admin');
+const adminApiRouter = require('./routes/adminApi');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +22,9 @@ app.use(express.json());
 app.use('/', homeRouter);
 app.use('/productos', productsRouter);
 app.use('/contacto', contactRouter);
+app.use('/api/auth', authRouter);
+app.use('/admin', adminRouter);
+app.use('/api/admin', adminApiRouter);
 
 app.use((req, res) => {
   res.status(404).render('pages/404', { title: 'Página no encontrada' });

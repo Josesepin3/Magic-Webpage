@@ -1,0 +1,126 @@
+<%- include('../partials/header') %>
+
+    <main>
+        <section class="admin-dashboard" data-reveal>
+            <div class="admin-head">
+                <div>
+                    <h2>Panel de administración</h2>
+                    <p class="admin-sub">Gestión de mensajes y productos.</p>
+                </div>
+                <div class="admin-head-actions">
+                    <span class="admin-user" id="admin-user"></span>
+                    <button type="button" class="btn-ghost btn-small" id="admin-logout">Cerrar sesión</button>
+                </div>
+            </div>
+
+            <section class="admin-section" data-section="messages">
+                <div class="admin-section-head">
+                    <h3>Mensajes de contacto <span class="count-badge" id="messages-count" hidden></span></h3>
+                </div>
+                <div id="messages-list" class="messages-list">
+                    <p class="empty-note">Cargando mensajes…</p>
+                </div>
+            </section>
+
+            <section class="admin-section" data-section="products">
+                <div class="admin-section-head">
+                    <h3>Productos</h3>
+                    <button type="button" class="btn-primary btn-small" id="product-new">Nuevo producto</button>
+                </div>
+                <div id="products-list" class="products-admin-list">
+                    <p class="empty-note">Cargando productos…</p>
+                </div>
+            </section>
+        </section>
+
+        <dialog id="product-dialog" class="product-dialog">
+            <form id="product-form" novalidate>
+                <div class="dialog-head">
+                    <h3 id="product-dialog-title">Producto</h3>
+                    <button type="button" class="dialog-close" data-close aria-label="Cerrar">✕</button>
+                </div>
+
+                <div class="dialog-body">
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="product-name">Nombre</label>
+                            <input type="text" id="product-name" name="name" placeholder="MagicOS" required>
+                            <span class="field-error" data-error-for="name" aria-live="polite"></span>
+                        </div>
+                        <div class="form-field">
+                            <label for="product-slug">Slug (opcional)</label>
+                            <input type="text" id="product-slug" name="slug" placeholder="se genera solo">
+                            <span class="field-error" data-error-for="slug" aria-live="polite"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="product-tagline">Tagline</label>
+                        <input type="text" id="product-tagline" name="tagline" placeholder="Frase corta tipo Apple">
+                        <span class="field-error" data-error-for="tagline" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="product-description">Descripción</label>
+                        <textarea id="product-description" name="description" rows="3" placeholder="Descripción del producto"></textarea>
+                        <span class="field-error" data-error-for="description" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-grid form-grid--3">
+                        <div class="form-field">
+                            <label for="product-price">Precio base (USD)</label>
+                            <input type="number" id="product-price" name="base_price" min="0" step="1" placeholder="0">
+                            <span class="field-error" data-error-for="base_price" aria-live="polite"></span>
+                        </div>
+                        <div class="form-field">
+                            <label for="product-category">Categoría</label>
+                            <select id="product-category" name="category">
+                                <option value="os">Sistema Operativo</option>
+                                <option value="hardware">Hardware</option>
+                                <option value="cloud">Cloud</option>
+                                <option value="silicon">Silicon</option>
+                            </select>
+                            <span class="field-error" data-error-for="category" aria-live="polite"></span>
+                        </div>
+                        <div class="form-field">
+                            <label for="product-status">Estado</label>
+                            <select id="product-status" name="status">
+                                <option value="available">Disponible</option>
+                                <option value="coming_soon">Próximamente</option>
+                            </select>
+                            <span class="field-error" data-error-for="status" aria-live="polite"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="product-image">Imagen (URL)</label>
+                        <input type="text" id="product-image" name="image_url" placeholder="/img/MagicOS.png">
+                        <span class="field-error" data-error-for="image_url" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="product-features">Features (JSON)</label>
+                        <textarea id="product-features" name="features_json" rows="4" placeholder='[{"title":"Diseño","description":"...","img":""}]'></textarea>
+                        <span class="field-error" data-error-for="features_json" aria-live="polite"></span>
+                    </div>
+
+                    <div class="options-block">
+                        <div class="options-block-head">
+                            <h4>Opciones configurables</h4>
+                            <button type="button" class="btn-ghost btn-small" id="option-add">+ Añadir opción</button>
+                        </div>
+                        <p class="options-hint">Deja vacío si el producto no tiene configurador.</p>
+                        <div id="options-list"></div>
+                    </div>
+                </div>
+
+                <div class="dialog-actions">
+                    <p class="form-status" role="status" aria-live="polite" hidden></p>
+                    <button type="button" class="btn-ghost" data-close>Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar</button>
+                </div>
+            </form>
+        </dialog>
+    </main>
+
+<%- include('../partials/footer') %>

@@ -24,6 +24,28 @@ const insertUser = db.prepare(`
   INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)
 `);
 
+const insertMessage = db.prepare(`
+  INSERT INTO messages (name, email, subject, message, read) VALUES (?, ?, ?, ?, ?)
+`);
+
+const sampleMessages = [
+  {
+    name: 'Ana Torres', email: 'ana@example.com', subject: 'Disponibilidad de Sirius',
+    message: 'Hola, ¿cuándo estará disponible la laptop Sirius? Me interesa el modelo con N1 Max.',
+    read: 0
+  },
+  {
+    name: 'Luis Pérez', email: 'luis@example.com', subject: 'Licencias de MagicOS',
+    message: '¿MagicOS tiene licencias gratuitas para estudiantes? Estoy preparando mi tesis y me encantaría usarlo.',
+    read: 1
+  },
+  {
+    name: 'María García', email: 'maria@example.com', subject: 'Cifrado de BlackBox',
+    message: 'Quiero saber más sobre el cifrado zero-knowledge de BlackBox Cloud y si funciona en Linux.',
+    read: 0
+  }
+];
+
 const productsData = [
   {
     id: 1,
@@ -97,6 +119,10 @@ const seed = db.transaction(() => {
 
   const hash = bcrypt.hashSync('admin123', 10);
   insertUser.run('admin', 'admin@magicos.io', hash);
+
+  for (const m of sampleMessages) {
+    insertMessage.run(m.name, m.email, m.subject, m.message, m.read);
+  }
 });
 
 seed();
@@ -109,4 +135,5 @@ console.log('Base de datos poblada correctamente.');
 console.log('  - 4 productos');
 console.log(`  - ${productsData.reduce((n, p) => n + p.options.length, 0)} opciones configurables`);
 console.log('  - 1 admin (admin / admin123)');
+console.log(`  - ${sampleMessages.length} mensajes de ejemplo`);
 console.log(`  - JSON generado en backend/data/products.json`);
