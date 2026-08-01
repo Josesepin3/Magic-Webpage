@@ -113,7 +113,7 @@
 
     var payload = new URLSearchParams(new FormData(form));
 
-    fetch(form.action, {
+    var formSubmit = fetch(form.action, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -122,13 +122,33 @@
       body: payload.toString()
     }).then(function (res) {
       return res.json().then(function (data) {
-        if (res.ok && data && data.success === 'true') showSuccess();
-        else showError();
+        return res.ok && data && data.success === 'true';
       }, function () {
-        if (res.ok) showSuccess();
-        else showError();
+        return res.ok;
       });
-    }).catch(showError);
+    }).catch(function () {
+      return false;
+    });
+
+    var supabaseInsert = Promise.resolve(false);
+    var supabase = window.MagicOS && window.MagicOS.supabase;
+    if (supabase) {
+      supabaseInsert = supabase.from('messages').insert({
+        name: getField('name').value.trim(),
+        email: getField('email').value.trim(),
+        subject: getField('subject').value.trim(),
+        message: getField('message').value.trim()
+      }).then(function (res) {
+        return !res.error;
+      }).catch(function () {
+        return false;
+      });
+    }
+
+    Promise.all([formSubmit, supabaseInsert]).then(function (results) {
+      if (results[0] || results[1]) showSuccess();
+      else showError();
+    });
   }
 
   form.addEventListener('submit', function (e) {

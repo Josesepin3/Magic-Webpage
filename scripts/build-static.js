@@ -12,7 +12,7 @@ const products = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
 
 function renderPage(template, data) {
   const file = path.join(VIEWS, `${template}.ejs`);
-  return ejs.renderFile(file, data, { filename: file });
+  return ejs.renderFile(file, { ...data, basePath: BASE_PATH }, { filename: file });
 }
 
 function prefixSrcset(value, basePath) {
@@ -64,6 +64,12 @@ async function main() {
     { template: 'pages/productos', data: { title: 'Productos - Magic', products }, file: 'productos/index.html' },
     { template: 'pages/contact', data: { title: 'Contacto - Magic' }, file: 'contacto/index.html' },
     { template: 'pages/404', data: { title: 'Página no encontrada' }, file: '404.html' },
+    { template: 'pages/cuenta-login', data: { title: 'Iniciar sesión - Magic' }, file: 'cuenta/login/index.html' },
+    { template: 'pages/cuenta-perfil', data: { title: 'Mi perfil - Magic' }, file: 'cuenta/perfil/index.html' },
+    { template: 'pages/carrito', data: { title: 'Carrito - Magic' }, file: 'carrito/index.html' },
+    { template: 'pages/cuenta-servicios', data: { title: 'Mis servicios - Magic' }, file: 'cuenta/servicios/index.html' },
+    { template: 'pages/login', data: { title: 'Admin - Magic' }, file: 'admin/login/index.html' },
+    { template: 'pages/dashboard', data: { title: 'Panel de administración - Magic' }, file: 'admin/dashboard/index.html' },
   ];
 
   for (const p of products) {

@@ -1,6 +1,6 @@
 <%- include('../partials/header') %>
 
-    <main class="configure-page" data-product-id="<%= product.id %>" data-base-price="<%= product.base_price %>">
+    <main class="configure-page" data-product-id="<%= product.id %>" data-base-price="<%= product.base_price %>" data-product-name="<%= product.name %>" data-product-slug="<%= product.slug %>">
       <div class="configure-layout">
         <h1 class="configure-title" data-reveal>Configurar <%= product.name %></h1>
 
@@ -46,8 +46,8 @@
             <p class="summary-total">
               Total: <span id="total-price">$<%= product.base_price.toLocaleString() %></span>
             </p>
-            <button type="button" class="buy-button" disabled>Comprar</button>
-            <p class="out-of-stock">No hay stock</p>
+            <button type="button" class="buy-button" <%= product.status === 'available' ? '' : 'disabled' %> data-add-to-cart><%= product.status === 'available' ? 'Añadir al carrito' : 'No disponible' %></button>
+            <% if (product.status !== 'available') { %><p class="out-of-stock">No hay stock</p><% } %>
           </div>
         </aside>
       </div>
@@ -57,12 +57,11 @@
           <span class="mobile-total-label">Total</span>
           <span class="mobile-total-price" id="total-price-mobile">$<%= product.base_price.toLocaleString() %></span>
         </div>
-        <button type="button" class="buy-button" disabled>Comprar</button>
-        <p class="out-of-stock">No hay stock</p>
+        <button type="button" class="buy-button" <%= product.status === 'available' ? '' : 'disabled' %> data-add-to-cart><%= product.status === 'available' ? 'Añadir al carrito' : 'No disponible' %></button>
+        <% if (product.status !== 'available') { %><p class="out-of-stock">No hay stock</p><% } %>
       </div>
 
       <script id="options-data" type="application/json"><%= JSON.stringify(options) %></script>
-      <script src="/js/components/ProductConfigurator.js"></script>
     </main>
 
 <%- include('../partials/footer') %>

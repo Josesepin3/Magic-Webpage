@@ -2,12 +2,16 @@
   var form = document.getElementById('login-form');
   if (!form) return;
 
+  var supabase = window.MagicOS && window.MagicOS.supabase;
+  if (!supabase) return;
+
   var statusEl = form.querySelector('.form-status');
   var submitBtn = form.querySelector('button[type="submit"]');
 
   var validators = {
-    username: function (value) {
-      if (!value.trim()) return 'Por favor, escribe tu usuario.';
+    email: function (value) {
+      if (!value.trim()) return 'Por favor, escribe tu correo.';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) return 'Introduce un correo válido.';
       return '';
     },
     password: function (value) {
@@ -47,8 +51,7 @@
     if (!input) return;
     input.addEventListener('blur', function () {
       if (input.value.trim()) {
-        var error = validators[name](input.value);
-        setFieldError(name, error);
+        setFieldError(name, validators[name](input.value));
       }
     });
     input.addEventListener('input', function () {
@@ -85,26 +88,23 @@
     setLoading(true);
     if (statusEl) statusEl.hidden = true;
 
-    fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: getField('username').value.trim(),
-        password: getField('password').value
-      })
+    supabase.auth.signInWithPassword({
+      email: getField('email').value.trim(),
+      password: getField('password').value
     }).then(function (res) {
-      return res.json().then(function (data) {
-        if (res.ok && data.token) {
-          localStorage.setItem('magic-admin-token', data.token);
-          localStorage.setItem('magic-admin-user', data.user.username);
-          window.location.href = '/admin/dashboard';
-        } else {
-          setLoading(false);
-          setStatus('error', (data && data.error) || 'No pudimos iniciar sesión.');
-        }
-      }, function () {
+      if (res.error) {
         setLoading(false);
-        setStatus('error', 'No pudimos iniciar sesión.');
+        setStatus('error', 'Correo o contraseña incorrectos.');
+        return;
+      }
+      supabase.from('profiles').select('role').eq('id', res.data.user.id).maybeSingle().then(function (roleRes) {
+        if (roleRes.data && roleRes.data.role === 'admin') {
+          window.location.href = MagicOS.url('/admin/dashboard');
+        } else {
+          supabase.auth.signOut();
+          setLoading(false);
+          setStatus('error', 'No tienes permisos de administrador.');
+        }
       });
     }).catch(function () {
       setLoading(false);

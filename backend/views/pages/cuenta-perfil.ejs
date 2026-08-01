@@ -1,0 +1,38 @@
+<%- include('../partials/header') %>
+
+    <main>
+        <section class="account-page">
+            <form id="profile-form" class="account-card account-card--wide" data-reveal novalidate>
+                <h2>Mi perfil</h2>
+                <p class="account-intro">Tu cuenta Magic.</p>
+
+                <div class="profile-avatar">
+                    <div class="profile-avatar-img" id="profile-avatar" aria-hidden="true"></div>
+                    <label class="profile-avatar-upload">
+                        Cambiar foto
+                        <input type="file" id="profile-avatar-input" accept="image/*">
+                    </label>
+                    <p class="profile-avatar-hint" id="profile-avatar-hint" aria-live="polite"></p>
+                </div>
+
+                <div class="form-field">
+                    <label for="profile-name">Nombre</label>
+                    <input type="text" id="profile-name" name="full_name" placeholder="Tu nombre" autocomplete="name">
+                    <span class="field-error" data-error-for="full_name" aria-live="polite"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="profile-email">Correo electrónico</label>
+                    <input type="email" id="profile-email" name="email" readonly disabled>
+                </div>
+
+                <div class="account-actions">
+                    <button type="submit" id="profile-save">Guardar cambios</button>
+                    <button type="button" class="btn-danger" id="profile-logout">Cerrar sesión</button>
+                    <p class="form-status" role="status" aria-live="polite" hidden></p>
+                </div>
+            </form>
+        </section>
+    </main>
+
+<%- include('../partials/footer') %>

@@ -11,6 +11,7 @@
     "dev": "nodemon backend/app.js",
     "seed": "node backend/seed.js",
     "build": "node scripts/build-static.js",
+    "seed:supabase": "node scripts/seed-supabase.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -32,6 +33,7 @@
     "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
+    "@supabase/supabase-js": "^2.111.0",
     "nodemon": "^3.1.14"
   }
 }

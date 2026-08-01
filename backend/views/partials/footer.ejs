@@ -2,8 +2,17 @@
         <p>&copy; 2026 Magic. All rights reserved. Free-to-use License</p>
     </footer>
 
+    <script src="/vendor/supabase.js"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/services/supabase.js"></script>
     <script src="/js/components/RevealOnScroll.js"></script>
+    <script src="/js/components/NavAuth.js"></script>
+    <script src="/js/components/ProductConfigurator.js"></script>
     <script src="/js/components/ContactForm.js"></script>
+    <script src="/js/components/AuthForm.js"></script>
+    <script src="/js/components/ProfilePage.js"></script>
+    <script src="/js/components/CartManager.js"></script>
+    <script src="/js/components/ServicesPage.js"></script>
     <script src="/js/components/LoginForm.js"></script>
     <script src="/js/components/AdminApp.js"></script>
 
@@ -33,10 +42,15 @@
                 const siteHeader = document.querySelector('.site-header');
                 const siteTitle = document.querySelector('.site-title');
                 const toggle = document.querySelector('.menu-toggle');
+                const mobileNavUser = document.querySelector('.nav-user--mobile');
                 if (!siteHeader || !siteTitle || !toggle) return;
                 if (!window.matchMedia('(max-width:600px)').matches) {
                     toggle.style.top = '';
                     toggle.style.transform = '';
+                    if (mobileNavUser) {
+                        mobileNavUser.style.top = '';
+                        mobileNavUser.style.transform = '';
+                    }
                     return;
                 }
                 const headerRect = siteHeader.getBoundingClientRect();
@@ -45,6 +59,10 @@
                 const topForToggle = Math.max(6, Math.round(titleCenter));
                 toggle.style.top = topForToggle + 'px';
                 toggle.style.transform = 'translateY(-50%)';
+                if (mobileNavUser) {
+                    mobileNavUser.style.top = topForToggle + 'px';
+                    mobileNavUser.style.transform = 'translateY(-50%)';
+                }
             }
 
             window.addEventListener('load', alignMenuToggleToTitle);

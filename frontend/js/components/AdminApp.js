@@ -2,14 +2,8 @@
   var page = document.querySelector('.admin-dashboard');
   if (!page) return;
 
-  var TOKEN_KEY = 'magic-admin-token';
-  var USER_KEY = 'magic-admin-user';
-  var token = localStorage.getItem(TOKEN_KEY);
-
-  if (!token) {
-    window.location.href = '/admin/login';
-    return;
-  }
+  var supabase = window.MagicOS && window.MagicOS.supabase;
+  if (!supabase) return;
 
   var userNameEl = document.getElementById('admin-user');
   var logoutBtn = document.getElementById('admin-logout');
@@ -37,27 +31,9 @@
       .replace(/'/g, '&#39;');
   }
 
-  function api(path, options) {
-    options = options || {};
-    options.headers = options.headers || {};
-    options.headers['Authorization'] = 'Bearer ' + token;
-    if (options.body && !options.headers['Content-Type']) {
-      options.headers['Content-Type'] = 'application/json';
-    }
-    return fetch(path, options).then(function (res) {
-      if (res.status === 401) {
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(USER_KEY);
-        window.location.href = '/admin/login';
-        throw new Error('No autorizado');
-      }
-      return res.json().then(function (data) {
-        if (!res.ok) throw new Error((data && data.error) || ('Error ' + res.status));
-        return data;
-      }, function () {
-        throw new Error('Error ' + res.status);
-      });
-    });
+  function parseFeatures(p) {
+    if (!p.features_json) return [];
+    try { return JSON.parse(p.features_json); } catch (e) { return []; }
   }
 
   function renderListError(list) {
@@ -70,14 +46,10 @@
     console.error(err);
   }
 
-  if (userNameEl) {
-    userNameEl.textContent = localStorage.getItem(USER_KEY) || '';
-  }
-
   logoutBtn.addEventListener('click', function () {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    window.location.href = '/admin/login';
+    supabase.auth.signOut().then(function () {
+      window.location.href = MagicOS.url('/admin/login');
+    });
   });
 
   function setCount(total, unread) {
@@ -104,7 +76,12 @@
 
   function loadMessages() {
     messagesList.innerHTML = '<p class="empty-note">Cargando mensajes…</p>';
-    api('/api/admin/messages').then(function (messages) {
+    supabase.from('messages').select('*').order('created_at', { ascending: false }).then(function (res) {
+      if (res.error) {
+        messagesList.innerHTML = '<p class="empty-note is-error">' + esc(res.error.message) + '</p>';
+        return;
+      }
+      var messages = res.data || [];
       if (!messages.length) {
         messagesList.innerHTML = '<p class="empty-note">No hay mensajes todavía.</p>';
         setCount(0, 0);
@@ -113,23 +90,27 @@
       var unread = messages.filter(function (m) { return !m.read; }).length;
       setCount(messages.length, unread);
       messagesList.innerHTML = messages.map(renderMessage).join('');
-    }).catch(renderListError(messagesList));
+    });
   }
 
   messagesList.addEventListener('click', function (e) {
     var toggle = e.target.closest('[data-toggle-read]');
     if (toggle) {
-      api('/api/admin/messages/' + toggle.getAttribute('data-toggle-read'), {
-        method: 'PATCH',
-        body: JSON.stringify({})
-      }).then(loadMessages).catch(showInlineError);
+      var id = toggle.getAttribute('data-toggle-read');
+      supabase.from('messages').select('read').eq('id', id).maybeSingle().then(function (res) {
+        var newRead = !(res.data && res.data.read);
+        return supabase.from('messages').update({ read: newRead }).eq('id', id);
+      }).then(function (res) {
+        if (!res.error) loadMessages();
+      });
       return;
     }
     var del = e.target.closest('[data-delete-message]');
     if (del) {
       if (!window.confirm('¿Eliminar este mensaje?')) return;
-      api('/api/admin/messages/' + del.getAttribute('data-delete-message'), { method: 'DELETE' })
-        .then(loadMessages).catch(showInlineError);
+      supabase.from('messages').delete().eq('id', del.getAttribute('data-delete-message')).then(function (res) {
+        if (!res.error) loadMessages();
+      });
     }
   });
 
@@ -151,13 +132,18 @@
 
   function loadProducts() {
     productsList.innerHTML = '<p class="empty-note">Cargando productos…</p>';
-    api('/api/admin/products').then(function (products) {
+    supabase.from('products').select('*').order('category', { ascending: true }).order('name', { ascending: true }).then(function (res) {
+      if (res.error) {
+        productsList.innerHTML = '<p class="empty-note is-error">' + esc(res.error.message) + '</p>';
+        return;
+      }
+      var products = res.data || [];
       if (!products.length) {
         productsList.innerHTML = '<p class="empty-note">No hay productos. Crea el primero.</p>';
         return;
       }
       productsList.innerHTML = products.map(renderProduct).join('');
-    }).catch(renderListError(productsList));
+    });
   }
 
   productsList.addEventListener('click', function (e) {
@@ -169,8 +155,9 @@
     var del = e.target.closest('[data-delete-product]');
     if (del) {
       if (!window.confirm('¿Eliminar este producto? También se borrarán sus opciones.')) return;
-      api('/api/admin/products/' + del.getAttribute('data-delete-product'), { method: 'DELETE' })
-        .then(loadProducts).catch(showInlineError);
+      supabase.from('products').delete().eq('id', del.getAttribute('data-delete-product')).then(function (res) {
+        if (!res.error) loadProducts();
+      });
     }
   });
 
@@ -206,7 +193,7 @@
     form.elements.category.value = p.category || 'os';
     form.elements.status.value = p.status || 'available';
     form.elements.image_url.value = p.image_url || '';
-    form.elements.features_json.value = p.features_json ? JSON.stringify(p.features) : '';
+    form.elements.features_json.value = p.features_json ? JSON.stringify(parseFeatures(p)) : '';
   }
 
   function openDialog(id) {
@@ -217,11 +204,12 @@
 
     if (editingId) {
       dialogTitle.textContent = 'Editar producto';
-      api('/api/admin/products/' + editingId).then(function (p) {
-        fillProductForm(p);
-        return api('/api/admin/products/' + editingId + '/options');
-      }).then(function (options) {
-        optionRows = options.map(function (o) {
+      supabase.from('products').select('*').eq('id', editingId).maybeSingle().then(function (res) {
+        if (res.error || !res.data) throw new Error(res.error ? res.error.message : 'Producto no encontrado');
+        fillProductForm(res.data);
+        return supabase.from('product_options').select('*').eq('product_id', editingId).order('group_order', { ascending: true }).order('sort_order', { ascending: true });
+      }).then(function (res2) {
+        optionRows = (res2.data || []).map(function (o) {
           return {
             group_name: o.group_name,
             label: o.label,
@@ -348,29 +336,37 @@
       features_json: form.elements.features_json.value.trim()
     };
 
+    var optionsPayload = optionRows.map(function (r) {
+      return {
+        group_name: r.group_name,
+        label: r.label,
+        description: r.description,
+        price_modifier: Number(r.price_modifier) || 0,
+        is_default: r.is_default
+      };
+    }).map(function (o, i) {
+      o.sort_order = i;
+      return o;
+    });
+
     setDialogLoading(true);
     clearDialogStatus();
 
     var save = editingId
-      ? api('/api/admin/products/' + editingId, { method: 'PUT', body: JSON.stringify(payload) })
-      : api('/api/admin/products', { method: 'POST', body: JSON.stringify(payload) });
+      ? supabase.from('products').update(payload).eq('id', editingId).select('id').single()
+      : supabase.from('products').insert(payload).select('id').single();
 
-    save.then(function (saved) {
-      var optionsPayload = JSON.stringify({
-        options: optionRows.map(function (r) {
-          return {
-            group_name: r.group_name,
-            label: r.label,
-            description: r.description,
-            price_modifier: Number(r.price_modifier) || 0,
-            is_default: r.is_default
-          };
-        })
+    save.then(function (res) {
+      if (res.error) throw new Error(res.error.message);
+      var productId = res.data.id;
+      return supabase.from('product_options').delete().eq('product_id', productId).then(function () {
+        if (!optionsPayload.length) return { error: null };
+        return supabase.from('product_options').insert(optionsPayload.map(function (o) {
+          return { product_id: productId, group_name: o.group_name, label: o.label, description: o.description, price_modifier: o.price_modifier, is_default: o.is_default, group_order: 1, sort_order: o.sort_order };
+        }));
       });
-      return api('/api/admin/products/' + saved.id + '/options', { method: 'PUT', body: optionsPayload }).then(function () {
-        return saved;
-      });
-    }).then(function () {
+    }).then(function (res2) {
+      if (res2.error) throw new Error(res2.error.message);
       setDialogLoading(false);
       dialog.close();
       loadProducts();
@@ -394,6 +390,28 @@
     openDialog(null);
   });
 
-  loadMessages();
-  loadProducts();
+  function init() {
+    supabase.auth.getUser().then(function (res) {
+      var user = (res.data && res.data.user) || null;
+      if (userNameEl && user) userNameEl.textContent = user.email || '';
+    });
+    loadMessages();
+    loadProducts();
+  }
+
+  supabase.auth.getSession().then(function (res) {
+    var sessionUser = (res.data && res.data.session && res.data.session.user) || null;
+    if (!sessionUser) {
+      window.location.href = MagicOS.url('/admin/login');
+      return;
+    }
+    supabase.from('profiles').select('role').eq('id', sessionUser.id).maybeSingle().then(function (r) {
+      if (!(r.data && r.data.role === 'admin')) {
+        supabase.auth.signOut();
+        window.location.href = MagicOS.url('/admin/login');
+        return;
+      }
+      init();
+    });
+  });
 })();

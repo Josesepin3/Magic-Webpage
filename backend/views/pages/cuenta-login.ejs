@@ -1,0 +1,41 @@
+<%- include('../partials/header') %>
+
+    <main>
+        <section class="account-page">
+            <form id="auth-form" class="account-card" data-reveal novalidate>
+                <h2 id="auth-title">Iniciar sesión</h2>
+                <p class="account-intro" id="auth-subtitle">Accede con tu cuenta Magic.</p>
+
+                <div class="form-field auth-field--register" hidden>
+                    <label for="auth-name">Nombre</label>
+                    <input type="text" id="auth-name" name="full_name" placeholder="Tu nombre" autocomplete="name">
+                    <span class="field-error" data-error-for="full_name" aria-live="polite"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="auth-email">Correo electrónico</label>
+                    <input type="email" id="auth-email" name="email" placeholder="tu@correo.com" autocomplete="email" required>
+                    <span class="field-error" data-error-for="email" aria-live="polite"></span>
+                </div>
+
+                <div class="form-field">
+                    <label for="auth-password">Contraseña</label>
+                    <input type="password" id="auth-password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+                    <span class="field-error" data-error-for="password" aria-live="polite"></span>
+                </div>
+
+                <div class="account-actions">
+                    <button type="submit" id="auth-submit">Entrar</button>
+                    <button type="button" class="btn-ghost" id="auth-google" hidden>Continuar con Google</button>
+                    <p class="form-status" role="status" aria-live="polite" hidden></p>
+                </div>
+
+                <p class="auth-switch">
+                    <span id="auth-switch-text">¿No tienes cuenta?</span>
+                    <button type="button" id="auth-toggle">Crear cuenta</button>
+                </p>
+            </form>
+        </section>
+    </main>
+
+<%- include('../partials/footer') %>

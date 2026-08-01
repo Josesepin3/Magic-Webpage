@@ -70,4 +70,64 @@
   });
 
   handleChange();
+
+  var buyButtons = page.querySelectorAll('[data-add-to-cart]');
+
+  function selectedOptionsArray() {
+    var selected = getSelectedOptions();
+    return Object.keys(selected).map(function (group) {
+      return {
+        group: group,
+        label: selected[group].label,
+        price: selected[group].price
+      };
+    });
+  }
+
+  function totalPrice() {
+    var extra = 0;
+    var selected = getSelectedOptions();
+    for (var key in selected) extra += selected[key].price;
+    return basePrice + extra;
+  }
+
+  buyButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (btn.disabled) return;
+      var magic = window.MagicOS;
+      var supabase = magic && magic.supabase;
+      if (!magic || !supabase) return;
+
+      supabase.auth.getSession().then(function (res) {
+        var user = (res.data && res.data.session && res.data.session.user) || null;
+        if (!user) {
+          window.location.href = magic.url('/cuenta/login') + '?next=' + encodeURIComponent(magic.currentPath());
+          return;
+        }
+
+        btn.disabled = true;
+        supabase.from('cart_items').insert({
+          user_id: user.id,
+          product_id: page.dataset.productId,
+          product_name: page.dataset.productName,
+          product_slug: page.dataset.productSlug,
+          options: selectedOptionsArray(),
+          unit_price: totalPrice(),
+          quantity: 1
+        }).then(function (insertRes) {
+          if (insertRes.error) {
+            btn.disabled = false;
+            return;
+          }
+          var original = btn.textContent;
+          btn.textContent = 'Añadido ✓';
+          setTimeout(function () {
+            btn.textContent = original;
+            btn.disabled = false;
+          }, 1600);
+          if (magic.refreshNav) magic.refreshNav();
+        });
+      });
+    });
+  });
 })();

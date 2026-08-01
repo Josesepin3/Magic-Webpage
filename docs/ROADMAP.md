@@ -6,15 +6,17 @@
 > Este documento es la guía viva del proyecto. Los detalles cambiarán sobre la
 > marcha, pero la estructura y visión general se mantienen aquí.
 
-> **Estado (31 jul 2026):** Backend fundado, catálogo y configurador funcionando,
+> **Estado (1 ago 2026):** Backend fundado, catálogo y configurador funcionando,
 > rebranding a **Magic** (rutas `/productos`), navbar liquid-glass, página de
-> Sirius rediseñada según maqueta (hero, badges N1/BlackBox, sección "Diseño
-> Modular", tarjetas con hover/tint), responsive móvil ajustado y **deploy en
+> Sirius rediseñada según maqueta, responsive móvil ajustado y **deploy en
 > GitHub Pages funcionando** (requisito del proyecto; Netlify quedó bloqueado por
-> créditos de build). Fases 2, 3 y **4 completas**: formulario de contacto vía
-> **FormSubmit** (compatible con GitHub Pages) y panel de administración
-> (Express/JWT/SQLite, solo dev local): login, dashboard con mensajes y CRUD de
-> productos. Siguiente: Fase 5 (IA con Mistral).
+> créditos de build). Fases 2, 3 y 4 completas. **Migración a Supabase**
+> implementada (Fase 4b): cuentas de cliente (email/contraseña + Google opcional),
+> avatar en el navbar, carrito solo con cuenta, checkout simulado, "Mis
+> servicios" y el admin (login/CRUD/mensajes) ahora corren 100% contra Supabase
+> en GitHub Pages. Pendiente: aplicar `supabase/schema.sql` en el SQL Editor,
+> ejecutar `npm run seed:supabase`, configurar redirects de Auth y Google OAuth,
+> y probar/deploy. Siguiente: Fase 5 (IA con Mistral).
 
 ---
 
@@ -23,9 +25,10 @@
 | Capa | Tecnología |
 |------|-----------|
 | **Frontend** | Vanilla JS + EJS (SSR con Express local / prerender estático en build) |
-| **Backend** | Node.js + Express |
+| **Backend** | Node.js + Express (dev local, páginas públicas) |
 | **Base de Datos** | SQLite (`better-sqlite3`) — solo dev local |
-| **Autenticación** | JWT + bcrypt (dev local); plan: Supabase en el deploy |
+| **Autenticación** | **Supabase Auth** (email/contraseña + Google opcional) |
+| **Persistencia** | **Supabase** (Postgres + RLS + Storage para avatares) |
 | **IA** | Mistral API (modelo open-source gratuito) |
 | **CSS** | Vanilla (sin frameworks) |
 | **JS Frontend** | Modular, componentes funcionales puros |
@@ -42,13 +45,21 @@ MagicOS-Webpage/
 │   ├── img/                     # Imágenes y SVGs (hero Sirius, módulos, badges, logo blanco)
 │   └── js/                      # JS modular del lado cliente
 │       ├── components/
-│       │   ├── ProductConfigurator.js  # Configurador tipo Apple
+│       │   ├── ProductConfigurator.js  # Configurador tipo Apple + "Añadir al carrito" (Supabase)
 │       │   ├── RevealOnScroll.js       # Reveal al scrollear (IntersectionObserver)
-│       │   ├── ContactForm.js          # Validación + envío FormSubmit (loading/éxito/error)
-│       │   ├── LoginForm.js            # Login de admin (JWT → localStorage)
-│       │   └── AdminApp.js             # Dashboard: mensajes + CRUD productos
+│       │   ├── ContactForm.js          # Validación + envío FormSubmit + insert en Supabase messages
+│       │   ├── NavAuth.js              # Avatar + menú de cuenta + badge de carrito en el navbar
+│       │   ├── AuthForm.js             # Login/registro de cliente (email + Google opcional)
+│       │   ├── ProfilePage.js          # Perfil: subida de avatar a Storage, nombre, logout
+│       │   ├── CartManager.js          # Carrito: cantidad, eliminar, checkout simulado (orders/subscriptions)
+│       │   ├── ServicesPage.js         # "Mis servicios" (subscriptions: activo / próximamente)
+│       │   ├── LoginForm.js            # Login de admin (Supabase, chequea rol admin)
+│       │   └── AdminApp.js             # Dashboard: mensajes + CRUD productos (Supabase)
 │       └── services/
-│           └── api.js           # Fetch wrapper centralizado
+│           └── supabase.js             # Cliente Supabase + helpers basePath/url/currentPath
+│           └── api.js                  # Fetch wrapper (legacy, no usado en Supabase)
+├── supabase/
+│   └── schema.sql                  # Schema: profiles, products, cart_items, orders, subscriptions + RLS
 ├── backend/
 │   ├── app.js                   # Entry point de Express (dev local)
 │   ├── config/
@@ -68,10 +79,14 @@ MagicOS-Webpage/
 │   │       ├── home.ejs                  # Vacía — pendiente rediseño del ecosistema (landing en /productos/magicos)
 │   │       ├── productos.ejs          # Grid de productos
 │   │       ├── product-*.ejs          # Página por producto (magicos, sirius-laptop, chip-n1-kinetic, blackbox-cloud)
-│   │       ├── configure.ejs          # Configurador con opciones
-│   │       ├── contact.ejs            # Formulario de contacto (FormSubmit)
-│   │       ├── login.ejs              # Login de admin (dev local)
-│   │       ├── dashboard.ejs          # Panel de admin (dev local)
+│   │       ├── configure.ejs          # Configurador con opciones + "Añadir al carrito"
+│   │       ├── contact.ejs            # Formulario de contacto (FormSubmit + tabla messages)
+│   │       ├── cuenta-login.ejs       # Login/registro de cliente (Supabase Auth)
+│   │       ├── cuenta-perfil.ejs      # Perfil: avatar (Storage) + nombre + logout
+│   │       ├── carrito.ejs            # Carrito (solo con cuenta) + checkout simulado
+│   │       ├── cuenta-servicios.ejs   # "Mis servicios" (subscriptions)
+│   │       ├── login.ejs              # Login de admin (Supabase, rol admin)
+│   │       ├── dashboard.ejs          # Panel de admin (Supabase: mensajes + CRUD productos)
 │   │       └── 404.ejs
 │   ├── data/
 │   │   ├── magicos.db           # SQLite file (ignorado en git)
@@ -102,33 +117,31 @@ MagicOS-Webpage/
 | GET | `/productos/:slug` | `product-<slug>.ejs` | Página individual por producto | ✅ |
 | GET | `/productos/:slug/configure` | `configure.ejs` | Configurador de producto | ✅ |
 | GET | `/contacto` | `contact.ejs` | Formulario de contacto (**FormSubmit**) | ✅ |
-| GET | `/admin/login` | `login.ejs` | Login para admin (dev local) | ✅ dev local |
-| GET | `/admin/dashboard` | `dashboard.ejs` | Panel de administración (dev local) | ✅ dev local |
+| GET | `/cuenta/login` | `cuenta-login.ejs` | Login/registro de cliente (Supabase) | ✅ |
+| GET | `/cuenta/perfil` | `cuenta-perfil.ejs` | Perfil (avatar + nombre + logout) | ✅ |
+| GET | `/carrito` | `carrito.ejs` | Carrito (solo con cuenta) + checkout | ✅ |
+| GET | `/cuenta/servicios` | `cuenta-servicios.ejs` | "Mis servicios" (subscriptions) | ✅ |
+| GET | `/admin/login` | `login.ejs` | Login para admin (Supabase) | ✅ |
+| GET | `/admin/dashboard` | `dashboard.ejs` | Panel de administración (Supabase) | ✅ |
 
 ### API REST (JSON)
 
-> **Nota:** en el deploy de GitHub Pages la web es estática; los endpoints REST de
-> Express solo aplican al dev local. El formulario de contacto se persiste vía
-> **FormSubmit**. Auth/admin se replanteará con **Supabase**. 
-> (La tabla `messages` en SQLite quedó como referencia del modelo; el envío real
-> llega por correo a través de FormSubmit.)
+> **Nota:** en el deploy de GitHub Pages la web es estática; ya no hay endpoints
+> REST de Express. **Todo** (auth, admin, mensajes, carrito, pedidos) corre contra
+> **Supabase** con el SDK de cliente + RLS. Los endpoints antiguos de
+> `/api/auth` y `/api/admin` se eliminaron de `backend/app.js`.
 
-| Método | Ruta | Protegida | Descripción | Estado |
-|--------|------|-----------|-------------|--------|
-| POST | `/api/contact` | No | Enviar mensaje de contacto | ✅ reemplazado por FormSubmit |
-| POST | `/api/auth/login` | No | Autenticar admin, devuelve JWT | ✅ dev local |
-| GET | `/api/admin/messages` | Sí | Listar mensajes recibidos | ✅ dev local |
-| PATCH | `/api/admin/messages/:id` | Sí | Marcar leído/no leído | ✅ dev local |
-| DELETE | `/api/admin/messages/:id` | Sí | Eliminar mensaje | ✅ dev local |
-| GET | `/api/admin/products` | Sí | Listar productos | ✅ dev local |
-| POST | `/api/admin/products` | Sí | Crear producto | ✅ dev local |
-| GET | `/api/admin/products/:id` | Sí | Obtener producto | ✅ dev local |
-| PUT | `/api/admin/products/:id` | Sí | Editar producto | ✅ dev local |
-| DELETE | `/api/admin/products/:id` | Sí | Eliminar producto | ✅ dev local |
-| GET | `/api/admin/products/:id/options` | Sí | Listar opciones de producto | ✅ dev local |
-| PUT | `/api/admin/products/:id/options` | Sí | Reemplazar opciones | ✅ dev local |
-| POST | `/api/ai/chat` | No | Chat con IA vía Mistral | ⏳ |
-| GET | `/api/products/:slug` | No | Datos de producto + opciones | ⏳ (datos servidos por SSR/prerender) |
+| Recurso | Operaciones | Dónde |
+|---------|-------------|-------|
+| `auth.users` + `auth` | signUp, signInWithPassword, signInWithOAuth (Google), signOut | SDK `supabase.auth` |
+| `profiles` | perfil propio (rol, nombre, avatar_url) — trigger crea fila al registrarse | tabla pública + RLS |
+| `products` / `product_options` | catálogo lectura pública; CRUD admin (rol `admin`) | tabla pública + RLS |
+| `messages` | insert público (contacto) + gestión admin | tabla pública + RLS |
+| `cart_items` | solo el dueño (`auth.uid() = user_id`) | tabla pública + RLS |
+| `orders` | el usuario crea su pedido y lo lee; admin lee todos | tabla pública + RLS |
+| `subscriptions` | el usuario crea sus servicios y los lee; admin lee todos | tabla pública + RLS |
+| `storage.avatars` | subida pública de fotos de perfil (bucket `avatars`) | Storage |
+| POST | `/api/ai/chat` | Chat con IA vía Mistral | ⏳ |
 
 ---
 
@@ -398,6 +411,43 @@ o copy de marketing.
       `GET/PUT/DELETE /products/:id`, `GET/PUT /products/:id/options`,
       `GET/PATCH/DELETE /messages/:id`
 
+### Fase 4b — Migración a Supabase (cuentas + carrito + admin en GitHub Pages)
+
+**Objetivo:** que **todo** (admin, cuentas de cliente, carrito, servicios) funcione
+en el deploy estático de GitHub Pages, sin backend Express.
+
+- [x] `supabase/schema.sql` — `profiles` (trigger `handle_new_user`), `products`,
+      `product_options`, `messages`, `cart_items`, `orders`, `subscriptions`,
+      función `is_admin()` y políticas RLS por usuario/admin
+- [x] `scripts/seed-supabase.js` (`npm run seed:supabase`) — crea admin
+      (`admin@magicos.io` / `admin123`, rol admin), 4 productos con sus opciones,
+      2 mensajes de ejemplo y el bucket `avatars`
+- [x] Cliente: `frontend/vendor/supabase.js` (UMD) + `config.js` (URL + anon key)
+      + `services/supabase.js` (helpers `url`/`currentPath` con `data-base-path`)
+- [x] Cuentas de cliente: `AuthForm.js` (email/contraseña + Google opcional con
+      flag `GOOGLE` en config), trigger crea el perfil al registrarse
+- [x] Avatar en el navbar: `NavAuth.js` — desktop a la derecha del menú; mobile
+      absoluto a la izquierda (el toggle queda a la derecha); foto desde
+      Storage + avatar de Google + fallback de iniciales; sin sesión despliega
+      menú "Iniciar sesión / Crear cuenta"; badge de carrito con contador
+- [x] Carrito solo con cuenta: `CartManager.js` + botón "Añadir al carrito" en
+      el configurador (redirige a login con `next` si no hay sesión)
+- [x] Checkout simulado: crea `orders` + `subscriptions` (los no disponibles
+      quedan `proximamente`) y vacía el carrito
+- [x] "Mis servicios": `ServicesPage.js` (licencias activas / próximamente)
+- [x] Contacto: `ContactForm.js` inserta también en `messages` (además de FormSubmit)
+- [x] Admin a Supabase: `LoginForm.js` (chequea rol `admin`) y `AdminApp.js`
+      (mensajes + CRUD productos/opciones) sin endpoints Express
+- [x] `backend/app.js` — eliminados `/api/auth` y `/api/admin` (Express solo
+      sirve páginas públicas en dev local); nuevas rutas de cuenta/carrito
+- [x] CSS sección 22 — cuenta, carrito, servicios, avatar y menú de usuario
+- [ ] Aplicar `supabase/schema.sql` en el SQL Editor de Supabase
+- [ ] `npm run seed:supabase` (requiere el schema aplicado)
+- [ ] Dashboard de Supabase → Auth → URL Configuration: redirects
+      `http://localhost:3000/**` y `https://josesepin3.github.io/MagicOS-Webpage/**`
+- [ ] Google OAuth en Supabase (opcional) y poner `GOOGLE: true` en `config.js`
+- [ ] Probar local (`npm run dev` + `npx serve dist`) y desplegar a `main`
+
 ### Fase 5 — IA
 
 **Objetivo:** Chatbot con Mistral API.
@@ -466,6 +516,7 @@ o copy de marketing.
 ```bash
 npm install
 npm run seed          # Poblar BD local (dev) + regenerar backend/data/products.json
+npm run seed:supabase # Poblar Supabase (admin, productos, opciones, mensajes) — requiere schema aplicado
 npm run dev           # Servidor Express local (nodemon, http://localhost:3000)
 npm run build         # Prerender estático EJS → dist/ (sin SQLite ni módulos nativos)
 ```
@@ -498,7 +549,9 @@ PORT=3000
 JWT_SECRET=...
 MISTRAL_API_KEY=...
 MISTRAL_API_URL=https://api.mistral.ai/v1/chat/completions
-# Futuro (auth): SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
+SUPABASE_URL=https://ukfbueqhnxehifisidan.supabase.co
+SUPABASE_ANON_KEY=eyJ...   # key pública (también va en frontend/js/config.js)
+SUPABASE_SERVICE_ROLE_KEY=eyJ...  # solo para el seed (¡nunca al frontend!)
 ```
 
 ### Patrón de componentes (Vanilla JS)
