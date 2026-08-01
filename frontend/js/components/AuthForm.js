@@ -20,6 +20,7 @@
   const params = new URLSearchParams(window.location.search);
   let mode = params.get('mode') === 'register' ? 'register' : 'login';
   const next = params.get('next') || '/cuenta/perfil';
+  const preview = params.get('preview');
   let submitting = false;
 
   if (window.MagicOSConfig && MagicOSConfig.GOOGLE) {
@@ -179,4 +180,8 @@
   if (nameInput) nameInput.addEventListener('input', () => showFieldError(nameInput, ''));
 
   setMode(mode);
+
+  if (preview === 'verify') {
+    showVerificationNotice('demo@magic.example');
+  }
 })();
