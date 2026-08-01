@@ -47,21 +47,52 @@ Nuestra solución no es solo una aplicación; es un ecosistema cerrado de hardwa
 
 ## 🌐 Sobre este Repositorio (`Magic-Webpage`)
 
-Este proyecto está estructurado como una aplicación **Full-Stack** integrada, dividiendo responsabilidades de forma clara y escalable.
+La plataforma web de Magic, estructurada como una aplicación **Full-Stack** con JavaScript como lenguaje principal:
+
+- **Producción:** sitio estático generado con `scripts/build-static.js` (prerender de las vistas EJS → `dist/`) y desplegado en **GitHub Pages**, con **Supabase** como backend de servicios (cuentas, carrito y panel de administración).
+- **Desarrollo local:** servidor **Express** (`backend/app.js`) que sirve las vistas EJS y el frontend, con SQLite para datos locales.
 
 ### 📁 Estructura del Proyecto
 ```text
-├── frontend/    # Interfaz de usuario, estilos premium (CSS) y vistas de la Landing Page
-├── backend/     # Lógica del servidor, APIs y procesamiento de datos desarrollado en JavaScript (Node.js)
-└── docs/        # Documentación técnica, Canvas de negocio y recursos del ecosistema Magic
+├── frontend/            # Interfaz de usuario
+│   ├── img/             # Assets (logo, galaxia, productos)
+│   ├── js/
+│   │   ├── components/  # Módulos: NavAuth, HomeCinema, CartManager, ...
+│   │   └── services/    # api.js, supabase.js
+│   ├── vendor/          # Librerías locales (GSAP, ScrollTrigger, Lenis, Supabase)
+│   └── style.css        # Diseño premium (tema oscuro, resplandores)
+├── backend/             # App Express para desarrollo local
+│   ├── views/           # Plantillas EJS (prerender en el build)
+│   ├── routes/          # home, productos, contacto, cuenta, admin
+│   ├── middleware/      # autenticación
+│   ├── data/            # products.json (+ SQLite en dev)
+│   └── app.js / seed.js
+├── scripts/             # build-static.js, seed-supabase.js
+├── supabase/            # schema.sql (backend de producción)
+├── docs/                # ROADMAP.md y mockups del ecosistema
+└── .github/workflows/   # Deploy automático a GitHub Pages
 ```
-### 💻 Tecnologías que se implementarán:
 
-- Front-End: HTML5 semántico, CSS3 avanzado (gradientes oscuros, resplandores Kinetic™ y diseño premium responsivo) y JavaScript para interactividad.
+### 💻 Tecnologías
 
-- Back-End: JavaScript (Node.js) para la gestión del servidor, APIs y arquitectura lógica de la plataforma.
+- **Front-End:** HTML5 semántico, CSS3 avanzado (gradientes oscuros, resplandores Kinetic™ y diseño premium responsivo) y JavaScript.
+- **Animación:** GSAP + ScrollTrigger + Lenis para la homepage cinematográfica.
+- **Vistas:** EJS, prerenderizadas a HTML estático en el build.
+- **Back-End (dev):** Node.js + Express.
+- **Back-End (prod):** Supabase (PostgreSQL + Auth).
+- **Deploy:** GitHub Pages (Actions) y Netlify (config `netlify.toml`).
 
-- Control de Versiones: Git & GitHub bajo metodologías limpias de commits.
+### 🚦 Desarrollo y Deploy
+
+```bash
+npm install        # dependencias
+npm run dev        # Express en http://localhost:3000
+npm run build      # prerender EJS → dist/
+npm run seed       # datos de desarrollo (SQLite)
+npm run seed:supabase   # seed del backend de Supabase
+```
+
+Al hacer push a `main`, el workflow de GitHub Actions genera el build y publica el sitio en `josesepin3.github.io/Magic-Webpage` (base path `/Magic-Webpage`).
 
 ---
 
