@@ -1908,7 +1908,10 @@ html.reveal-js [data-reveal].revealed {
 }
 
 .contact-form input,
-.contact-form textarea {
+.contact-form textarea,
+.login-card input,
+.product-dialog .form-field input,
+.product-dialog .form-field textarea {
 	width: 100%;
 	padding: 14px 16px;
 	border: 1px solid transparent;
@@ -1920,12 +1923,18 @@ html.reveal-js [data-reveal].revealed {
 }
 
 .contact-form input::placeholder,
-.contact-form textarea::placeholder {
+.contact-form textarea::placeholder,
+.login-card input::placeholder,
+.product-dialog .form-field input::placeholder,
+.product-dialog .form-field textarea::placeholder {
 	color: rgba(255, 255, 255, 0.4);
 }
 
 .contact-form input:focus,
-.contact-form textarea:focus {
+.contact-form textarea:focus,
+.login-card input:focus,
+.product-dialog .form-field input:focus,
+.product-dialog .form-field textarea:focus {
 	border-color: rgba(53, 132, 228, 0.6);
 	background: rgba(255, 255, 255, 0.1);
 	box-shadow: 0 0 0 4px rgba(53, 132, 228, 0.15);
@@ -1937,11 +1946,15 @@ html.reveal-js [data-reveal].revealed {
 	min-height: 120px;
 }
 
-.contact-form .is-invalid {
+.contact-form .is-invalid,
+.login-card .is-invalid,
+.product-dialog .form-field .is-invalid {
 	border-color: rgba(255, 69, 58, 0.7);
 }
 
-.contact-form .is-invalid:focus {
+.contact-form .is-invalid:focus,
+.login-card .is-invalid:focus,
+.product-dialog .form-field .is-invalid:focus {
 	border-color: rgba(255, 69, 58, 0.8);
 	box-shadow: 0 0 0 4px rgba(255, 69, 58, 0.15);
 }
