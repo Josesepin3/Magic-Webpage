@@ -403,22 +403,162 @@ input, textarea, button {
    ═══════════════════════════════════════════════════ */
 
 .sirius-hero {
+	position: relative;
 	background: #000;
+	/* Entra bajo el navbar fijo */
+	margin-top: calc(var(--header-height) * -1);
 }
 
-/* Override base .hero::after: taller fade to black (pill + price area) */
+/* Sin fade inferior del .hero base: el degradado negro va sobre la laptop */
 .sirius-hero::after {
-	height: 55%;
-	background: linear-gradient(transparent, rgba(0, 0, 0, 0.92) 72%);
+	content: none;
+}
+
+/* Banda azul cielo desde el borde superior, fundida a transparente.
+   Queda por debajo del navbar (z-index 100) gracias al margin-top.
+   Plateau sólido hasta ~55% para que el título quede sobre el azul. */
+.sirius-hero::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: calc(var(--header-height) + 250px);
+	background: linear-gradient(180deg, #5699c9 0%, #5699c9 55%, rgba(86, 153, 201, 0) 100%);
+	pointer-events: none;
+	z-index: 0;
+}
+
+.sirius-hero-copy {
+	position: relative;
+	z-index: 2;
+	padding: calc(var(--header-height) + 26px) var(--page-padding) 0;
+	text-align: center;
+}
+
+.sirius-eyebrow {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.3em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.88);
+}
+
+.sirius-title {
+	margin: 12px 0 0;
+	font-size: clamp(3rem, 9vw, 6.5rem);
+	font-weight: 900;
+	line-height: 1;
+	letter-spacing: -0.03em;
+	color: #ffffff;
+	text-shadow: 0 2px 18px rgba(0, 0, 0, 0.3);
+}
+
+/* Laptop full-bleed: el contenedor se extiende de borde a borde y la
+   imagen queda centrada a lo ancho. */
+.sirius-hero-visual {
+	position: relative;
+	width: calc(100% + (var(--page-padding) * 2));
+	margin-left: calc(var(--page-padding) * -1);
+	margin-top: clamp(8px, 2vw, 24px);
+}
+
+.sirius-hero-visual img {
+	display: block;
+	width: min(calc(100% - (var(--page-padding) * 2)), 920px);
+	margin: 0 auto;
+	height: auto;
+}
+
+/* Degradado negro full-bleed que separa la parte superior del hero de la
+   inferior: transparente desde un poco más abajo de la mitad de la laptop
+   hasta negro en el borde. */
+.sirius-hero-fade {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 54%;
+	bottom: 0;
+	background: linear-gradient(180deg, transparent 0%, #000 100%);
+	pointer-events: none;
+	z-index: 1;
+}
+
+.sirius-hero-caption {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	bottom: clamp(12px, 2.5vw, 28px);
+	z-index: 2;
+	width: min(92%, 620px);
+	color: #fff;
+	text-align: center;
+}
+
+.sirius-tagline {
+	margin: 0;
+	font-size: clamp(1rem, 1.8vw, 1.3rem);
+	font-weight: 600;
+	line-height: 1.5;
+	color: rgba(255, 255, 255, 0.95);
+}
+
+.sirius-hero-panel {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 12px 18px;
+	margin-top: 16px;
+}
+
+.sirius-pill {
+	font-size: 0.7rem;
+	font-weight: 600;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: #ffffff;
+	background: rgba(0, 0, 0, 0.45);
+	border: 1px solid rgba(255, 255, 255, 0.35);
+	border-radius: 999px;
+	padding: 6px 14px;
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+}
+
+.sirius-price {
+	margin: 0;
+	font-size: clamp(1.2rem, 2.4vw, 1.7rem);
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: -0.02em;
+}
+
+.sirius-cta {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 30px;
+	padding: 40px 0 72px;
+	text-align: center;
+}
+
+.sirius-promos {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: clamp(24px, 5vw, 64px);
 }
 
 .sirius-promo-group {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 12px;
+	gap: 14px;
 	max-width: 100%;
-	font-size: clamp(1rem, 1.6vw, 1.4rem);
+	font-size: clamp(1rem, 1.6vw, 1.3rem);
 }
 
 .sirius-promo-text {
@@ -433,59 +573,8 @@ input, textarea, button {
 	flex: 0 0 auto;
 	min-width: 0;
 	width: auto;
-	height: 128px;
+	height: 116px;
 	overflow: visible;
-}
-
-.sirius-hero-panel {
-	position: absolute;
-	z-index: 1;
-	bottom: 20px;
-	left: 50%;
-	transform: translateX(-50%);
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 10px;
-	width: max-content;
-	max-width: 92%;
-	pointer-events: auto;
-}
-
-.sirius-pill {
-	font-size: 0.72rem;
-	font-weight: 600;
-	letter-spacing: 0.08em;
-	color: #ffffff;
-	background: rgba(0, 0, 0, 0.38);
-	border: 1px solid rgba(255, 255, 255, 0.4);
-	border-radius: 999px;
-	padding: 4px 14px;
-}
-
-.sirius-price {
-	margin: 0;
-	font-size: clamp(1.3rem, 2.6vw, 2.2rem);
-	font-weight: 700;
-	line-height: 1;
-}
-
-.sirius-cta {
-	position: relative;
-	z-index: 0;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 28px;
-	padding: 32px 0 8px;
-	text-align: center;
-}
-
-.sirius-promos {
-	display: flex;
-	justify-content: center;
-	flex-wrap: wrap;
-	gap: 40px;
 }
 
 .sirius-actions {
@@ -498,7 +587,7 @@ input, textarea, button {
 .sirius-btn {
 	display: inline-block;
 	font-size: 0.95rem;
-	font-weight: 500;
+	font-weight: 600;
 	padding: 11px 26px;
 	border-radius: 999px;
 	text-decoration: none;
@@ -535,31 +624,24 @@ input, textarea, button {
    ═══════════════════════════════════════════════════ */
 
 .sirius-modular {
-	padding: 72px 0 8px;
 	text-align: center;
 }
 
-.sirius-modular h2 {
-	margin: 0 0 12px;
-	font-size: clamp(1.6rem, 3.2vw, 2.4rem);
-	font-weight: 700;
-	letter-spacing: -0.02em;
-}
-
 .sirius-modular-sub {
-	margin: 0 auto;
+	margin: 12px auto 0;
 	max-width: 560px;
 	font-size: clamp(0.95rem, 1.6vw, 1.1rem);
 	font-weight: 500;
-	line-height: 1.5;
+	line-height: 1.55;
 	color: rgba(255, 255, 255, 0.85);
 }
 
 .sirius-modular img {
 	display: block;
-	margin: 40px auto 0;
-	max-width: min(420px, 100%);
+	margin: 48px auto 0;
+	max-width: min(440px, 100%);
 	height: auto;
+	filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.5));
 	transition: transform 0.4s ease;
 }
 
@@ -570,12 +652,15 @@ input, textarea, button {
 }
 
 .sirius-features {
+	text-align: center;
+}
+
+.sirius-features-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 20px;
 	max-width: 960px;
-	margin: 48px auto 0;
-	padding-bottom: 24px;
+	margin: 0 auto;
 }
 
 .sirius-feature-card {
@@ -607,6 +692,11 @@ input, textarea, button {
 
 .sirius-feature-card--n1 .feature-icon {
 	color: #b660ff;
+}
+
+.sirius-feature-card--n1 .feature-icon-img {
+	width: 24px;
+	height: 24px;
 }
 
 .sirius-feature-card h3 {
@@ -1384,9 +1474,32 @@ footer p {
     gap: 16px;
   }
 
+  /* En vertical la descripción no cabe sobre el degradado: pasa al flujo
+     normal, debajo de la laptop, sobre el fondo negro. */
+  .sirius-hero-caption {
+    position: relative;
+    left: auto;
+    transform: none;
+    z-index: 2;
+    margin-top: 22px;
+    margin-left: calc(var(--page-padding) * 2);
+    width: calc(100% - (var(--page-padding) * 4));
+  }
+
+  /* En vertical la laptop ocupa todo el ancho (h ≈ 0.4628 · viewport),
+     así que 54% de su alto ≈ 25vw. El degradado así empieza sobre la
+     pantalla y se ve nítido separando la laptop del texto. */
+  .sirius-hero-fade {
+    top: 25vw;
+  }
+
   .sirius-hero-panel {
-    bottom: 12px;
-    gap: 8px;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .sirius-tagline {
+    font-size: 1rem;
   }
 
   .sirius-btn {
@@ -1398,11 +1511,7 @@ footer p {
     height: 80px;
   }
 
-  .hero-back-text {
-    display: none;
-  }
-
-  .sirius-features {
+  .sirius-features-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -4,19 +4,24 @@
 
         <section id="que_es">
             <div class="hero sirius-hero">
-                <a href="/productos" class="hero-back-btn">← <span class="hero-back-text">Volver a productos</span></a>
-                <img src="/img/sirius-hero-1920.webp"
-                     srcset="/img/sirius-hero-1200.webp 1200w, /img/sirius-hero-1920.webp 1920w, /img/sirius-hero-2400.webp 2400w"
-                     sizes="100vw"
-                     width="1920" height="1146"
-                     alt="Sirius Laptop" fetchpriority="high">
-                <div class="sirius-hero-panel">
-                    <% if (product.status === 'coming_soon') { %>
-                        <span class="sirius-pill">PROXIMAMENTE</span>
-                    <% } %>
-                    <% if (product.base_price) { %>
-                        <p class="sirius-price">Desde $<%= product.base_price.toLocaleString() %></p>
-                    <% } %>
+                <div class="sirius-hero-copy">
+                    <span class="sirius-eyebrow">Sirius Laptop</span>
+                    <h1 class="sirius-title">Sirius</h1>
+                </div>
+                <div class="sirius-hero-visual">
+                    <img src="/img/laptop.svg" alt="Sirius Laptop" fetchpriority="high">
+                    <div class="sirius-hero-fade" aria-hidden="true"></div>
+                    <div class="sirius-hero-caption">
+                        <p class="sirius-tagline"><%= product.tagline %></p>
+                        <div class="sirius-hero-panel">
+                            <% if (product.status === 'coming_soon') { %>
+                                <span class="sirius-pill">PROXIMAMENTE</span>
+                            <% } %>
+                            <% if (product.base_price) { %>
+                                <p class="sirius-price">Desde $<%= product.base_price.toLocaleString() %></p>
+                            <% } %>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -38,33 +43,42 @@
             </div>
         </section>
 
-        <section class="sirius-modular" data-reveal>
+        <section class="hm-section sirius-modular" data-reveal>
             <% const modularFeature = features.find(f => f.title === 'Diseño Modular'); %>
-            <h2><%= modularFeature ? modularFeature.title : 'Diseño Modular' %></h2>
-            <p class="sirius-modular-sub"><%= modularFeature ? modularFeature.description : 'Cada componente se reemplaza individualmente. Adiós a la obsolescencia programada.' %></p>
+            <div class="hm-section-head">
+                <span class="hm-eyebrow">Hardware</span>
+                <h2><%= modularFeature ? modularFeature.title : 'Diseño Modular' %></h2>
+                <p class="sirius-modular-sub"><%= modularFeature ? modularFeature.description : 'Cada componente se reemplaza individualmente. Adiós a la obsolescencia programada.' %></p>
+            </div>
             <img src="/img/modular-device.svg" alt="Módulos intercambiables de la Sirius Laptop">
         </section>
 
         <% if (features.length > 0) { %>
-            <section class="sirius-features" data-reveal>
-                <% features.forEach((feature, index) => { %>
-                    <% if (feature.title === 'Diseño Modular') return; %>
-                    <article class="sirius-feature-card <%= feature.title === 'Privacidad por Defecto' ? 'sirius-feature-card--privacy' : 'sirius-feature-card--n1' %>" data-reveal data-reveal-delay="<%= index * 80 %>">
-                        <span class="feature-icon" aria-hidden="true">
-                            <% if (feature.title === 'Privacidad por Defecto') { %>
-                                <svg class="feature-icon-img" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path d="m 2 0 c -0.550781 0 -1 0.449219 -1 1 v 8 c 0 2.5 1.816406 4.246094 3.445312 5.332031 c 1.628907 1.085938 3.238282 1.617188 3.238282 1.617188 c 0.207031 0.070312 0.425781 0.070312 0.632812 0 c 0 0 1.609375 -0.53125 3.238282 -1.617188 c 1.628906 -0.085937 3.445312 -2.832031 3.445312 -5.332031 v -8 c 0 -0.550781 -0.449219 -1 -1 -1 z m 1 2 h 10 v 7 c 0 1.5 -1.183594 2.753906 -2.554688 3.667969 c -1.214843 0.808593 -2.179687 1.128906 -2.445312 1.226562 c -0.265625 -0.097656 -1.230469 -0.417969 -2.445312 -1.226562 c -1.371094 -0.914063 -2.554688 -2.167969 -2.554688 -3.667969 z m 1 1 v 6 c 0 1 0.867188 2.007812 2.109375 2.835938 c 0.933594 0.621093 1.472656 0.785156 1.890625 0.949218 v -9.785156 z m 0 0" fill="currentColor"/>
-                                </svg>
-                            <% } else { %>
-                                <svg class="feature-icon-img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path d="M15,9H9V15H15V9M13,13H11V11H13V13M22,11V9H20V7A2,2 0 0,0 18,5H16V3H14V5H10V3H8V5H6A2,2 0 0,0 4,7V9H2V11H4V13H2V15H4V17A2,2 0 0,0 6,19H8V21H10V19H14V21H16V19H18A2,2 0 0,0 20,17V15H22V13H20V11H22M18,17H6V7H18V17Z" fill="currentColor"/>
-                                </svg>
-                            <% } %>
-                        </span>
-                        <h3><%= feature.title %></h3>
-                        <p><%= feature.description %></p>
-                    </article>
-                <% }) %>
+            <section class="hm-section sirius-features" data-reveal>
+                <div class="hm-section-head">
+                    <span class="hm-eyebrow">Características</span>
+                    <h2>Rendimiento y privacidad de serie</h2>
+                </div>
+                <div class="sirius-features-grid">
+                    <% features.forEach((feature, index) => { %>
+                        <% if (feature.title === 'Diseño Modular') return; %>
+                        <article class="sirius-feature-card <%= feature.title === 'Privacidad por Defecto' ? 'sirius-feature-card--privacy' : 'sirius-feature-card--n1' %>" data-reveal data-reveal-delay="<%= index * 80 %>">
+                            <span class="feature-icon" aria-hidden="true">
+                                <% if (feature.title === 'Privacidad por Defecto') { %>
+                                    <svg class="feature-icon-img" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path d="m 2 0 c -0.550781 0 -1 0.449219 -1 1 v 8 c 0 2.5 1.816406 4.246094 3.445312 5.332031 c 1.628907 1.085938 3.238282 1.617188 3.238282 1.617188 c 0.207031 0.070312 0.425781 0.070312 0.632812 0 c 0 0 1.609375 -0.53125 3.238282 -1.617188 c 1.628906 -0.085937 3.445312 -2.832031 3.445312 -5.332031 v -8 c 0 -0.550781 -0.449219 -1 -1 -1 z m 1 2 h 10 v 7 c 0 1.5 -1.183594 2.753906 -2.554688 3.667969 c -1.214843 0.808593 -2.179687 1.128906 -2.445312 1.226562 c -0.265625 -0.097656 -1.230469 -0.417969 -2.445312 -1.226562 c -1.371094 -0.914063 -2.554688 -2.167969 -2.554688 -3.667969 z m 1 1 v 6 c 0 1 0.867188 2.007812 2.109375 2.835938 c 0.933594 0.621093 1.472656 0.785156 1.890625 0.949218 v -9.785156 z m 0 0" fill="currentColor"/>
+                                    </svg>
+                                <% } else { %>
+                                    <svg class="feature-icon-img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path d="M15,9H9V15H15V9M13,13H11V11H13V13M22,11V9H20V7A2,2 0 0,0 18,5H16V3H14V5H10V3H8V5H6A2,2 0 0,0 4,7V9H2V11H4V13H2V15H4V17A2,2 0 0,0 6,19H8V21H10V19H14V21H16V19H18A2,2 0 0,0 20,17V15H22V13H20V11H22M18,17H6V7H18V17Z" fill="currentColor"/>
+                                    </svg>
+                                <% } %>
+                            </span>
+                            <h3><%= feature.title %></h3>
+                            <p><%= feature.description %></p>
+                        </article>
+                    <% }) %>
+                </div>
             </section>
         <% } %>
     </main>
