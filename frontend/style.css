@@ -8,6 +8,8 @@ html,
 body {
 	margin: 0;
 	overscroll-behavior-y: none;
+	overflow-x: hidden;
+	overflow-x: clip;
 }
 
 html {
@@ -3536,7 +3538,6 @@ html.reveal-js [data-reveal].revealed {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	overflow: hidden;
 }
 
 .hm-featured-glow {
