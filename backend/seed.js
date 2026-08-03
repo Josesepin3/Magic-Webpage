@@ -52,7 +52,7 @@ const productsData = [
     name: 'MagicOS', slug: 'magicos',
     tagline: 'El sistema operativo que pone tu privacidad primero.',
     description: 'MagicOS es un sistema operativo premium con núcleo diseñado para el procesamiento estrictamente local. Interfaz minimalista, seguridad radical y cero dependencia de la nube.',
-    base_price: 0, category: 'os', status: 'available', image_url: '/img/MagicOS.png',
+    base_price: 0, category: 'os', status: 'available', image_url: '/img/MagicOS White.svg',
     features: [
       { title: 'Privacidad Radical', description: 'Procesamiento 100% local. Sin telemetría, sin rastreo.', img: '' },
       { title: 'Interfaz Minimalista', description: 'Diseñado para la productividad sin distracciones.', img: '' }

@@ -3645,3 +3645,376 @@ html.reveal-js [data-reveal].revealed {
 		text-align: center;
 	}
 }
+
+/* ═══════════════════════════════════════════════════
+   11. MAGICOS PRODUCT PAGE — CINEMÁTICA
+   ═══════════════════════════════════════════════════ */
+
+.magicos-hero {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: min(88svh, 760px);
+	margin-top: calc(var(--header-height) * -1);
+	padding-bottom: 72px;
+	background: #000;
+}
+
+/* Cierre del hero: el degradado negro queda POR ENCIMA de los glows
+   (z-index 2, por delante del .magicos-hero-inner z-index 1) y más alto
+   que el de la base para fundir suavemente los glows con el cuerpo. */
+.magicos-hero::after {
+	height: 260px;
+	z-index: 2;
+}
+
+/* Replica del sistema de glows del mockup original (hero-magicos.svg):
+   formas concéntricas sobre negro con blur proporcional al radio + banda
+   de gradiente arcoíris (cian -> ámbar -> verde -> magenta) emborronada +
+   núcleo blanco + aura de 3 blobs pastel (azul/verde/rosa) + doble sparkle
+   (arcoíris nítido bajo el blanco). El rayado giratorio y el pulso aportan
+   el dinamismo actual; el parallax del cursor se mantiene muy sutil. */
+.magicos-glow {
+	position: absolute;
+	border-radius: 50%;
+	pointer-events: none;
+	will-change: transform, opacity;
+}
+
+/* Halo ambiente gigante: la banda arcoíris emborronada con blur enorme
+   (equivalente al circle57 del original, blur = radio). Sube por detrás
+   del navbar fijo para fundirse con la parte superior. */
+.magicos-glow--ambient {
+	left: 50%;
+	top: 22%;
+	width: min(150vw, 920px);
+	height: min(150vw, 920px);
+	margin-left: calc(min(150vw, 920px) / -2);
+	margin-top: calc(min(150vw, 920px) / -2);
+	background: linear-gradient(90deg,
+		rgba(86, 205, 255, 0.5) 0%,
+		rgba(255, 176, 41, 0.5) 33.3%,
+		rgba(181, 246, 154, 0.5) 66.6%,
+		rgba(236, 35, 255, 0.5) 100%);
+	filter: blur(160px);
+	animation: hm-glow-pulse 9s ease-in-out infinite;
+}
+
+/* Glow del sparkle: sistema concéntrico centrado en el sparkle del logo
+   (izquierda ~10.5% del ancho). Vive dentro de .magicos-hero-logo-wrap,
+   por lo que queda siempre anclado a la estrella (se mueve con el logo). */
+.magicos-glow--spark {
+	left: calc(50% - min(35vw, 277px));
+	top: 50%;
+	width: min(48vw, 460px);
+	height: min(48vw, 460px);
+	margin-left: calc(min(48vw, 460px) / -2);
+	margin-top: calc(min(48vw, 460px) / -2);
+	filter: none;
+}
+
+/* Glow medio arcoíris (equivalente al path52 del original): banda de
+   gradiente emborronada justo detrás del núcleo. */
+.magicos-glow-halo {
+	position: absolute;
+	inset: -12%;
+	border-radius: 50%;
+	filter: blur(90px);
+	background: linear-gradient(90deg,
+		rgba(86, 205, 255, 0.55) 0%,
+		rgba(255, 176, 41, 0.55) 33.3%,
+		rgba(181, 246, 154, 0.55) 66.6%,
+		rgba(236, 35, 255, 0.55) 100%);
+}
+
+/* Núcleo blanco brillante (equivalente al path56: r=76, blur 20).
+   Intensidad contenida para no apagar el sparkle del logo. */
+.magicos-glow-core {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 22%;
+	height: 22%;
+	margin-left: -11%;
+	margin-top: -11%;
+	border-radius: 50%;
+	background: #ffffff;
+	filter: blur(16px);
+	opacity: 0.6;
+}
+
+/* Aura pastel de 3 blobs (equivalente a path59/ellipse60/ellipse61):
+   azul arriba-izquierda, verde y rosa hacia abajo-derecha del sparkle. */
+.magicos-glow-pastel {
+	position: absolute;
+	border-radius: 50%;
+	filter: blur(70px);
+	opacity: 0.55;
+}
+
+.magicos-glow-pastel--blue {
+	left: 12%;
+	top: 8%;
+	width: 34%;
+	height: 34%;
+	background: radial-gradient(circle, rgba(98, 160, 234, 0.95), transparent 70%);
+}
+
+.magicos-glow-pastel--green {
+	left: 40%;
+	top: 36%;
+	width: 30%;
+	height: 30%;
+	background: radial-gradient(circle, rgba(129, 238, 146, 0.95), transparent 70%);
+}
+
+.magicos-glow-pastel--pink {
+	left: 46%;
+	top: 48%;
+	width: 32%;
+	height: 32%;
+	background: radial-gradient(circle, rgba(238, 129, 221, 0.95), transparent 70%);
+}
+
+.magicos-hero-inner {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 26px;
+	width: 100%;
+	padding: 0 var(--page-padding);
+	will-change: transform;
+}
+
+.magicos-hero-logo-wrap {
+	position: relative;
+	width: min(88vw, 700px);
+	margin-top: 40px;
+}
+
+.magicos-hero .magicos-hero-logo {
+	display: block;
+	width: 100%;
+	height: auto;
+	margin-top: 0;
+	position: relative;
+	z-index: 1;
+	will-change: transform;
+}
+
+.magicos-hero-tagline {
+	font-size: clamp(1.05rem, 2vw, 1.4rem);
+	letter-spacing: 0.02em;
+	opacity: 0.65;
+	margin: 0;
+}
+
+.magicos-hero .hero-back-btn {
+	top: 20px;
+	left: 20px;
+}
+
+/* Encabezados de sección estilo homepage */
+.mop-head {
+	margin-bottom: 44px;
+}
+
+/* Variante sobre fondo morado (#get_involved) */
+#get_involved .hm-eyebrow {
+	color: rgba(255, 255, 255, 0.85);
+}
+
+#get_involved .hm-section-head {
+	margin-bottom: 28px;
+}
+
+#get_involved .hm-section-head p {
+	color: rgba(255, 255, 255, 0.72);
+}
+
+/* ═══════════════════════════════════════════════════
+   12. MAGICOS — CARROUSEL SCROLLYTELLING DE FUNCIONES
+   ═══════════════════════════════════════════════════ */
+
+/* Base (sin JS / prefers-reduced-motion): tarjetas apiladas */
+.mop-carousel {
+	--mop-card-w: min(88vw, 720px);
+	--mop-card-h: min(56vh, 430px);
+	max-width: 1080px;
+	margin: 0 auto;
+	padding: 0 var(--page-padding);
+}
+
+.mop-slides {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.mop-slide {
+	border-radius: 18px;
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.06);
+}
+
+.mop-card {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-areas: "text visual";
+	align-items: center;
+	gap: 22px;
+	padding: 26px 30px;
+	background: var(--mop-accent);
+	color: var(--mop-ink, #fff);
+}
+
+.mop-card-text { grid-area: text; }
+.mop-card-title { margin: 0 0 10px; font-size: 1.35rem; color: inherit; }
+.mop-card-desc { margin: 0; line-height: 1.6; opacity: 0.85; color: inherit; }
+.mop-card-visual { grid-area: visual; display: flex; align-items: center; justify-content: center; }
+.mop-card-img { max-width: 100%; max-height: 200px; object-fit: contain; }
+.mop-card-icon { width: clamp(110px, 20vw, 180px); height: auto; opacity: 0.95; }
+
+.mop-pill { display: none; }
+.mop-meta { display: none; }
+
+/* Colores temáticos por función */
+.mop-slide--ui { --mop-accent: #3584e4; }
+.mop-slide--security { --mop-accent: #ff7800; }
+.mop-slide--performance { --mop-accent: #e5a50a; --mop-ink: #141414; }
+.mop-slide--open { --mop-accent: #33d17a; --mop-ink: #0f241a; }
+.mop-slide--compat { --mop-accent: #ed333b; }
+
+/* ── Modo carrousel activo (JS + GSAP) ─────────────────── */
+.mop-carousel.is-mop-active {
+	position: relative;
+	width: 100vw;
+	max-width: none;
+	margin: 0 0 76px calc(50% - 50vw);
+	padding: 0;
+	height: var(--mop-card-h);
+}
+
+.mop-carousel.is-mop-active .mop-slides {
+	position: relative;
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.mop-carousel.is-mop-active .mop-slide {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: var(--mop-card-w);
+	height: var(--mop-card-h);
+	margin: calc(var(--mop-card-h) / -2) 0 0 calc(var(--mop-card-w) / -2);
+	border-radius: 0;
+	background: transparent;
+	overflow: visible;
+	pointer-events: none;
+	will-change: transform, opacity;
+}
+
+.mop-carousel.is-mop-active .mop-card {
+	position: absolute;
+	inset: 0;
+	padding: clamp(22px, 4vw, 44px);
+	border-radius: 20px;
+	box-shadow: 0 30px 70px -24px rgba(0, 0, 0, 0.6);
+	pointer-events: auto;
+	overflow: hidden;
+	transform-origin: center;
+	will-change: transform, opacity;
+}
+
+.mop-carousel.is-mop-active .mop-pill {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: var(--mop-pill-size);
+	height: var(--mop-pill-size);
+	margin: calc(var(--mop-pill-size) / -2) 0 0 calc(var(--mop-pill-size) / -2);
+	border: none;
+	padding: 0;
+	border-radius: 50%;
+	cursor: pointer;
+	background: var(--mop-accent);
+	color: var(--mop-ink, #fff);
+	box-shadow: 0 10px 26px -8px rgba(0, 0, 0, 0.5);
+	pointer-events: auto;
+	transform-origin: center;
+	will-change: transform, opacity;
+}
+
+.mop-pill-icon {
+	width: 40%;
+	height: 40%;
+	transition: transform 0.2s ease;
+}
+
+.mop-slide.is-pill .mop-card { pointer-events: none; }
+.mop-slide.is-card .mop-pill { pointer-events: none; }
+.mop-slide.is-hidden { pointer-events: none; }
+
+@media (hover: hover) {
+	.mop-pill:hover .mop-pill-icon { transform: scale(1.18); }
+}
+
+.mop-carousel.is-mop-active .mop-meta {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	position: absolute;
+	left: 50%;
+	bottom: -44px;
+	transform: translateX(-50%);
+	color: rgba(255, 255, 255, 0.6);
+	font-size: 0.92rem;
+	letter-spacing: 0.06em;
+	white-space: nowrap;
+}
+
+.mop-counter-num { color: rgba(255, 255, 255, 0.9); font-variant-numeric: tabular-nums; }
+
+.mop-progress {
+	display: block;
+	width: 130px;
+	height: 3px;
+	border-radius: 3px;
+	background: rgba(255, 255, 255, 0.16);
+	overflow: hidden;
+}
+
+.mop-progress-bar {
+	display: block;
+	height: 100%;
+	width: 20%;
+	border-radius: 3px;
+	background: rgba(255, 255, 255, 0.9);
+}
+
+@media (max-width: 640px) {
+	.mop-carousel.is-mop-active .mop-meta {
+		display: none;
+	}
+
+	.mop-card {
+		grid-template-columns: 1fr;
+		grid-template-areas: "text" "visual";
+		text-align: left;
+	}
+
+	.mop-card-img { max-height: 120px; }
+	.mop-card-icon { width: clamp(90px, 30vw, 130px); }
+}
+
