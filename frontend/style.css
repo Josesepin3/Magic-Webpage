@@ -3645,3 +3645,82 @@ html.reveal-js [data-reveal].revealed {
 		text-align: center;
 	}
 }
+
+/* ═══════════════════════════════════════════════════
+   11. MAGICOS PRODUCT PAGE — CINEMÁTICA
+   ═══════════════════════════════════════════════════ */
+
+/* Hero estilo homepage: logo centrado + glow + tagline */
+.magicos-hero {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: min(88svh, 760px);
+	padding-bottom: 72px;
+	background: #000;
+}
+
+.magicos-glow {
+	position: absolute;
+	left: 50%;
+	top: 52%;
+	width: min(120vw, 780px);
+	height: min(120vw, 780px);
+	margin-left: calc(min(120vw, 780px) / -2);
+	margin-top: calc(min(120vw, 780px) / -2);
+	border-radius: 50%;
+	pointer-events: none;
+	filter: blur(80px);
+	background: radial-gradient(circle, rgba(53, 132, 228, 0.28) 0%, rgba(129, 61, 156, 0.16) 45%, transparent 70%);
+	animation: hm-glow-pulse 9s ease-in-out infinite;
+}
+
+.magicos-hero-inner {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 26px;
+	width: 100%;
+	padding: 0 var(--page-padding);
+	will-change: transform;
+}
+
+.magicos-hero .magicos-hero-logo {
+	width: min(88vw, 640px);
+	height: auto;
+	margin-top: 40px;
+}
+
+.magicos-hero-tagline {
+	font-size: clamp(1.05rem, 2vw, 1.4rem);
+	letter-spacing: 0.02em;
+	opacity: 0.65;
+	margin: 0;
+}
+
+.magicos-hero .hero-back-btn {
+	top: 20px;
+	left: 20px;
+}
+
+/* Encabezados de sección estilo homepage */
+.mop-head {
+	margin-bottom: 44px;
+}
+
+/* Variante sobre fondo morado (#get_involved) */
+#get_involved .hm-eyebrow {
+	color: rgba(255, 255, 255, 0.85);
+}
+
+#get_involved .hm-section-head {
+	margin-bottom: 28px;
+}
+
+#get_involved .hm-section-head p {
+	color: rgba(255, 255, 255, 0.72);
+}
+

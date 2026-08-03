@@ -1,19 +1,24 @@
 <%- include('../partials/header') %>
 
-    <main>
+    <main class="magicos-cinema">
 
         <section id="que_es">
-            <div class="hero">
+            <div class="hero magicos-hero">
                 <a href="/productos" class="hero-back-btn">← <span class="hero-back-text">Volver a productos</span></a>
-                <img src="/img/MagicOS.png" alt="MagicOS Logo">
-                <div class="hero-overlay">
-                    <p>Magia en la punta de tus dedos</p>
+                <div class="magicos-glow" aria-hidden="true"></div>
+                <div class="magicos-hero-inner">
+                    <img class="magicos-hero-logo" src="/img/MagicOS.png" alt="MagicOS Logo" width="1920" height="1080" fetchpriority="high">
+                    <p class="magicos-hero-tagline">Magia en la punta de tus dedos</p>
                 </div>
             </div>
         </section>
 
-        <section id="funciones">
-            <h2>Funciones</h2>
+        <section id="funciones" class="hm-section">
+            <div class="hm-section-head mop-head">
+                <span class="hm-eyebrow">Funciones</span>
+                <h2>Un sistema operativo que pone tu privacidad primero.</h2>
+                <p>Interfaz intuitiva, seguridad radical y rendimiento optimizado, todo con procesamiento estrictamente local.</p>
+            </div>
             <ul class="manual-features-grid">
                 <li class="feature-card feature-card-ui" data-reveal data-reveal-delay="0" style="grid-column: 1 / span 3; grid-row: 1 / span 1;">
                     <div class="card-grid">
@@ -88,9 +93,12 @@
             </ul>
         </section>
 
-        <section id="get_involved" data-reveal>
-            <h2>Involúcrese</h2>
-            <h3>Si quieres involucrarte con MagicOS, aquí está cómo puedes contribuir.</h3>
+        <section id="get_involved">
+            <div class="hm-section-head mop-head mop-head--on-accent">
+                <span class="hm-eyebrow">Comunidad</span>
+                <h2>Involúcrate</h2>
+                <p>Si quieres contribuir con MagicOS, aquí está cómo puedes ayudar.</p>
+            </div>
             <ul class="steps-grid">
                 <li>
                     <span class="step-number">1</span>
