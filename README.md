@@ -80,17 +80,25 @@ La plataforma web de Magic, estructurada como una aplicación **Full-Stack** con
 - **Vistas:** EJS, prerenderizadas a HTML estático en el build.
 - **Back-End (dev):** Node.js + Express.
 - **Back-End (prod):** Supabase (PostgreSQL + Auth).
-- **Deploy:** GitHub Pages (Actions) y Netlify (config `netlify.toml`).
+- **Deploy:** GitHub Pages (Actions, `BASE_PATH=/Magic-Webpage`).
 
 ### 🚦 Desarrollo y Deploy
 
 ```bash
 npm install        # dependencias
 npm run dev        # Express en http://localhost:3000
-npm run build      # prerender EJS → dist/
+npm run build      # prerender EJS → dist/ (se sirve con: npx serve dist)
 npm run seed       # datos de desarrollo (SQLite)
 npm run seed:supabase   # seed del backend de Supabase
 ```
+
+### 🛠 Flujo de trabajo (fixes)
+
+- **Rama de trabajo:** `dev`. Los fixes se prueban en **localhost** (`npm run dev`
+  o `npx serve dist` tras `npm run build`) en DevTools y el dispositivo.
+- **Solo cuando verificas que se resolvió** se mergea a `main` (squash merge, un
+  commit limpio por fix) → push → GH Pages publica la versión estable.
+- Los intentos fallidos se iteran en `dev` y **no llegan a `main`**.
 
 Al hacer push a `main`, el workflow de GitHub Actions genera el build y publica el sitio en `josesepin3.github.io/Magic-Webpage` (base path `/Magic-Webpage`).
 

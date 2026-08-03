@@ -6,6 +6,3 @@ node_modules/
 backend/data/*
 !backend/data/products.json
 dist/
-
-# Local Netlify folder
-.netlify
