@@ -112,6 +112,87 @@
     });
   });
 
+  // ── CARROUSEL SCROLLYTELLING DE FUNCIONES ───────────────
+  const carousel = document.querySelector('[data-mop-carousel]');
+  if (carousel) {
+    const slides = gsap.utils.toArray('[data-mop-slide]', carousel);
+    const n = slides.length;
+    if (n > 1) {
+      const cards = slides.map((s) => s.querySelector('.mop-card'));
+      const pills = slides.map((s) => s.querySelector('.mop-pill'));
+      const numEl = carousel.querySelector('.mop-counter-num');
+      const barEl = carousel.querySelector('.mop-progress-bar');
+      const isMobile = () => window.matchMedia('(max-width: 640px)').matches;
+
+      carousel.classList.add('is-mop-active');
+
+      let lastVw = window.innerWidth;
+      let spacing = 400;
+      let pillY = 0;
+      function measure() {
+        lastVw = window.innerWidth;
+        const w = slides[0].offsetWidth;
+        const h = slides[0].offsetHeight;
+        if (isMobile()) {
+          spacing = 52;
+          pillY = h / 2 + 52;
+        } else {
+          spacing = w / 2 + 40;
+          pillY = 0;
+        }
+      }
+      measure();
+
+      function render(progress) {
+        if (!Number.isFinite(progress)) progress = 0;
+        progress = Math.max(0, Math.min(n - 1, progress));
+        if (window.innerWidth !== lastVw) measure();
+        slides.forEach((slide, i) => {
+          const off = i - progress;
+          const a = Math.abs(off);
+          const cVis = Math.max(0, 1 - a / 0.6);
+          const pVis = Math.max(0, Math.min(1, (a - 0.4) / 0.4));
+          gsap.set(cards[i], {
+            x: off * spacing,
+            y: pillY * (1 - cVis),
+            scale: 1 - 0.06 * (1 - cVis),
+            opacity: cVis,
+            zIndex: cVis > 0 ? 5 : 1
+          });
+          gsap.set(pills[i], {
+            x: off * spacing,
+            y: pillY * pVis,
+            scale: 0.85 + 0.15 * pVis,
+            opacity: pVis
+          });
+        });
+        if (numEl) numEl.textContent = Math.min(n, Math.max(1, Math.round(progress) + 1));
+        if (barEl) barEl.style.width = Math.min(100, (progress / (n - 1)) * 100) + '%';
+      }
+
+      const st = ScrollTrigger.create({
+        trigger: carousel,
+        start: 'top top',
+        end: () => '+=' + (n - 1) * Math.round(window.innerHeight * 0.9),
+        pin: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => render(self.progress * (n - 1)),
+        onRefresh: function () { render(this.progress * (n - 1)); }
+      });
+
+      pills.forEach((pill, i) => {
+        pill.addEventListener('click', () => {
+          const target = st.start + (st.end - st.start) * (i / (n - 1));
+          if (window.__pageLenis) window.__pageLenis.scrollTo(target);
+          else window.scrollTo({ top: target, behavior: 'smooth' });
+        });
+      });
+
+      render(0);
+    }
+  }
+
   window.addEventListener('load', () => ScrollTrigger.refresh());
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => ScrollTrigger.refresh());
 })();
