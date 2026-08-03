@@ -3875,7 +3875,27 @@ html.reveal-js [data-reveal].revealed {
 }
 
 .mop-card-text { grid-area: text; }
-.mop-card-title { margin: 0 0 10px; font-size: 1.35rem; color: inherit; }
+.mop-card-text::before {
+	content: '—';
+	display: block;
+	margin-bottom: 10px;
+	font-size: 0.72rem;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	opacity: 0.62;
+}
+.mop-slide--ui .mop-card-text::before { content: '01 — Interfaz'; }
+.mop-slide--security .mop-card-text::before { content: '02 — Privacidad'; }
+.mop-slide--performance .mop-card-text::before { content: '03 — Rendimiento'; }
+.mop-slide--open .mop-card-text::before { content: '04 — Open Source'; }
+.mop-slide--compat .mop-card-text::before { content: '05 — Compatibilidad'; }
+.mop-card-title {
+	margin: 0 0 12px;
+	font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+	line-height: 1.15;
+	letter-spacing: -0.015em;
+	color: inherit;
+}
 .mop-card-desc { margin: 0; line-height: 1.6; opacity: 0.85; color: inherit; }
 .mop-card-visual { grid-area: visual; display: flex; align-items: center; justify-content: center; }
 .mop-card-img { max-width: 100%; max-height: 200px; object-fit: contain; }
