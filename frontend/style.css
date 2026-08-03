@@ -7,10 +7,11 @@
 html,
 body {
 	margin: 0;
+	overscroll-behavior-y: none;
 }
 
 html {
-	height: 100%;
+	height: auto;
 }
 
 *,
@@ -31,7 +32,7 @@ body {
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
-	min-height: 100vh;
+	min-height: 100svh;
 }
 
 /* Sticky footer: main crece para empujar el footer al borde inferior
@@ -87,6 +88,7 @@ input, textarea, button {
 	right: 0;
 	z-index: 100;
 	height: var(--header-height);
+	transform: translateZ(0);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
