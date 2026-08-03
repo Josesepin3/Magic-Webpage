@@ -55,6 +55,48 @@
   if (logo) tl.from(logo, { opacity: 0, y: -28, duration: 1.3, ease: 'power2.out' }, 0);
   if (tagline) tl.from(tagline, { opacity: 0, y: 22, duration: 0.9 }, 0.65);
 
+  // Glows del hero: el spark sigue al cursor (parallax) y respira con un
+  // pulso suave; el ambiente se mueve más lento para dar profundidad.
+  const hero = document.querySelector('.magicos-hero');
+  const glowSpark = document.querySelector('.magicos-glow--spark');
+  const glowAmbient = document.querySelector('.magicos-glow--ambient');
+  const hoverOK = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (glowSpark) {
+    gsap.to(glowSpark, {
+      scale: 1.12,
+      opacity: 0.82,
+      duration: 3.6,
+      yoyo: true,
+      repeat: -1,
+      ease: 'sine.inOut',
+      delay: 1.6
+    });
+  }
+
+  if (hero && hoverOK && (glowSpark || glowAmbient)) {
+    const sparkX = glowSpark ? gsap.quickTo(glowSpark, 'x', { duration: 0.9, ease: 'power3.out' }) : null;
+    const sparkY = glowSpark ? gsap.quickTo(glowSpark, 'y', { duration: 0.9, ease: 'power3.out' }) : null;
+    const ambX = glowAmbient ? gsap.quickTo(glowAmbient, 'x', { duration: 1.4, ease: 'power3.out' }) : null;
+    const ambY = glowAmbient ? gsap.quickTo(glowAmbient, 'y', { duration: 1.4, ease: 'power3.out' }) : null;
+
+    function moveHeroGlow(e) {
+      const r = hero.getBoundingClientRect();
+      const x = e.clientX - r.left - r.width / 2;
+      const y = e.clientY - r.top - r.height / 2;
+      if (sparkX) { sparkX(x * 0.02); sparkY(y * 0.02); }
+      if (ambX) { ambX(x * 0.015); ambY(y * 0.015); }
+    }
+
+    function resetHeroGlow() {
+      if (sparkX) { sparkX(0); sparkY(0); }
+      if (ambX) { ambX(0); ambY(0); }
+    }
+
+    hero.addEventListener('pointermove', moveHeroGlow);
+    hero.addEventListener('pointerleave', resetHeroGlow);
+  }
+
   // Títulos de sección: las palabras suben una por una al entrar
   root.querySelectorAll('.mop-head h2').forEach((h2) => {
     const inners = splitWords(h2);
@@ -91,11 +133,10 @@
   if (!hasST) return;
 
   // Parallax del hero al hacer scroll
-  const hero = document.querySelector('.magicos-hero');
   const heroInner = document.querySelector('.magicos-hero-inner');
   if (hero && heroInner) {
     gsap.to(heroInner, {
-      yPercent: 16,
+      yPercent: 8,
       opacity: 0.35,
       ease: 'none',
       scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true }

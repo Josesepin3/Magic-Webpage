@@ -3650,30 +3650,131 @@ html.reveal-js [data-reveal].revealed {
    11. MAGICOS PRODUCT PAGE — CINEMÁTICA
    ═══════════════════════════════════════════════════ */
 
-/* Hero estilo homepage: logo centrado + glow + tagline */
 .magicos-hero {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	min-height: min(88svh, 760px);
+	margin-top: calc(var(--header-height) * -1);
 	padding-bottom: 72px;
 	background: #000;
 }
 
+/* Cierre del hero: el degradado negro queda POR ENCIMA de los glows
+   (z-index 2, por delante del .magicos-hero-inner z-index 1) y más alto
+   que el de la base para fundir suavemente los glows con el cuerpo. */
+.magicos-hero::after {
+	height: 260px;
+	z-index: 2;
+}
+
+/* Replica del sistema de glows del mockup original (hero-magicos.svg):
+   formas concéntricas sobre negro con blur proporcional al radio + banda
+   de gradiente arcoíris (cian -> ámbar -> verde -> magenta) emborronada +
+   núcleo blanco + aura de 3 blobs pastel (azul/verde/rosa) + doble sparkle
+   (arcoíris nítido bajo el blanco). El rayado giratorio y el pulso aportan
+   el dinamismo actual; el parallax del cursor se mantiene muy sutil. */
 .magicos-glow {
 	position: absolute;
-	left: 50%;
-	top: 52%;
-	width: min(120vw, 780px);
-	height: min(120vw, 780px);
-	margin-left: calc(min(120vw, 780px) / -2);
-	margin-top: calc(min(120vw, 780px) / -2);
 	border-radius: 50%;
 	pointer-events: none;
-	filter: blur(80px);
-	background: radial-gradient(circle, rgba(53, 132, 228, 0.28) 0%, rgba(129, 61, 156, 0.16) 45%, transparent 70%);
+	will-change: transform, opacity;
+}
+
+/* Halo ambiente gigante: la banda arcoíris emborronada con blur enorme
+   (equivalente al circle57 del original, blur = radio). Sube por detrás
+   del navbar fijo para fundirse con la parte superior. */
+.magicos-glow--ambient {
+	left: 50%;
+	top: 22%;
+	width: min(150vw, 920px);
+	height: min(150vw, 920px);
+	margin-left: calc(min(150vw, 920px) / -2);
+	margin-top: calc(min(150vw, 920px) / -2);
+	background: linear-gradient(90deg,
+		rgba(86, 205, 255, 0.5) 0%,
+		rgba(255, 176, 41, 0.5) 33.3%,
+		rgba(181, 246, 154, 0.5) 66.6%,
+		rgba(236, 35, 255, 0.5) 100%);
+	filter: blur(160px);
 	animation: hm-glow-pulse 9s ease-in-out infinite;
+}
+
+/* Glow del sparkle: sistema concéntrico centrado en el sparkle del logo
+   (izquierda ~10.5% del ancho). Vive dentro de .magicos-hero-logo-wrap,
+   por lo que queda siempre anclado a la estrella (se mueve con el logo). */
+.magicos-glow--spark {
+	left: calc(50% - min(35vw, 277px));
+	top: 50%;
+	width: min(48vw, 460px);
+	height: min(48vw, 460px);
+	margin-left: calc(min(48vw, 460px) / -2);
+	margin-top: calc(min(48vw, 460px) / -2);
+	filter: none;
+}
+
+/* Glow medio arcoíris (equivalente al path52 del original): banda de
+   gradiente emborronada justo detrás del núcleo. */
+.magicos-glow-halo {
+	position: absolute;
+	inset: -12%;
+	border-radius: 50%;
+	filter: blur(90px);
+	background: linear-gradient(90deg,
+		rgba(86, 205, 255, 0.55) 0%,
+		rgba(255, 176, 41, 0.55) 33.3%,
+		rgba(181, 246, 154, 0.55) 66.6%,
+		rgba(236, 35, 255, 0.55) 100%);
+}
+
+/* Núcleo blanco brillante (equivalente al path56: r=76, blur 20).
+   Intensidad contenida para no apagar el sparkle del logo. */
+.magicos-glow-core {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 22%;
+	height: 22%;
+	margin-left: -11%;
+	margin-top: -11%;
+	border-radius: 50%;
+	background: #ffffff;
+	filter: blur(16px);
+	opacity: 0.6;
+}
+
+/* Aura pastel de 3 blobs (equivalente a path59/ellipse60/ellipse61):
+   azul arriba-izquierda, verde y rosa hacia abajo-derecha del sparkle. */
+.magicos-glow-pastel {
+	position: absolute;
+	border-radius: 50%;
+	filter: blur(70px);
+	opacity: 0.55;
+}
+
+.magicos-glow-pastel--blue {
+	left: 12%;
+	top: 8%;
+	width: 34%;
+	height: 34%;
+	background: radial-gradient(circle, rgba(98, 160, 234, 0.95), transparent 70%);
+}
+
+.magicos-glow-pastel--green {
+	left: 40%;
+	top: 36%;
+	width: 30%;
+	height: 30%;
+	background: radial-gradient(circle, rgba(129, 238, 146, 0.95), transparent 70%);
+}
+
+.magicos-glow-pastel--pink {
+	left: 46%;
+	top: 48%;
+	width: 32%;
+	height: 32%;
+	background: radial-gradient(circle, rgba(238, 129, 221, 0.95), transparent 70%);
 }
 
 .magicos-hero-inner {
@@ -3688,10 +3789,20 @@ html.reveal-js [data-reveal].revealed {
 	will-change: transform;
 }
 
-.magicos-hero .magicos-hero-logo {
-	width: min(88vw, 640px);
-	height: auto;
+.magicos-hero-logo-wrap {
+	position: relative;
+	width: min(88vw, 700px);
 	margin-top: 40px;
+}
+
+.magicos-hero .magicos-hero-logo {
+	display: block;
+	width: 100%;
+	height: auto;
+	margin-top: 0;
+	position: relative;
+	z-index: 1;
+	will-change: transform;
 }
 
 .magicos-hero-tagline {
