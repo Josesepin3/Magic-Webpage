@@ -9,8 +9,7 @@
 > **Estado (1 ago 2026):** Backend fundado, catálogo y configurador funcionando,
 > rebranding a **Magic** (rutas `/productos`), navbar liquid-glass, página de
 > Sirius rediseñada según maqueta, responsive móvil ajustado y **deploy en
-> GitHub Pages funcionando** (requisito del proyecto; Netlify quedó bloqueado por
-> créditos de build). Fases 2, 3 y 4 completas. **Migración a Supabase**
+> GitHub Pages funcionando** (requisito del proyecto). Fases 2, 3 y 4 completas. **Migración a Supabase**
 > implementada (Fase 4b): cuentas de cliente (email/contraseña + Google opcional),
 > avatar en el navbar, carrito solo con cuenta, checkout simulado, "Mis
 > servicios" y el admin (login/CRUD/mensajes) ahora corren 100% contra Supabase
@@ -94,7 +93,6 @@ Magic-Webpage/
 │   └── seed.js                  # Poblar BD local + generar products.json
 ├── scripts/
 │   └── build-static.js          # Prerender EJS → dist/ (build de GitHub Pages)
-├── netlify.toml                 # Config de build/deploy en Netlify
 ├── docs/
 │   ├── mockups/                 # Maquetas de diseño (Sirius.svg)
 │   └── ROADMAP.md               # Este archivo
@@ -523,25 +521,21 @@ npm run build         # Prerender estático EJS → dist/ (sin SQLite ni módulo
 
 ### Deploy (GitHub Pages — requerimiento del proyecto)
 
-> **Importante:** Netlify bloqueó los deploys (créditos de build del plan gratuito,
-> periodo 16 jul → 16 ago 2026), así que el deploy oficial ahora es **GitHub Pages**.
-
 - **GitHub Pages:** `https://josesepin3.github.io/Magic-Webpage/`
   - Workflow `.github/workflows/deploy.yml`: en cada push a `main` corre
-    `npm ci` + `npm run build` (en runners de GitHub, sin límite de créditos) y
-    publica `dist/` vía `actions/deploy-pages`.
+    `npm ci` + `npm run build` y publica `dist/` vía `actions/deploy-pages`.
   - El build usa `BASE_PATH=/Magic-Webpage` para prefijar las rutas absolutas
     (`href/src/srcset`) en el HTML prerenderizado (`scripts/build-static.js`).
-  - En dev local y Netlify el `BASE_PATH` queda vacío (rutas de raíz).
-- **Netlify** (`magic-os.netlify.app`): quedó deshabilitado por límite de créditos.
-  El sitio estático seguiría desplegándose si se repone crédito (los datos ya están
-  en `main`), pero la web oficial es GitHub Pages.
-- `netlify.toml`: build `npm run build`, publish `dist` (ya no es el canal principal).
+  - En dev local el `BASE_PATH` queda vacío (rutas de raíz).
+- **Flujo de trabajo:** los fixes se trabajan y prueban en **localhost** sobre la
+  rama `dev` (`npm run dev` o `npx serve dist`); **solo se mergea a `main`
+  cuando se confirma que el fix resolvió el problema** (squash merge, un commit
+  limpio por fix). `main` queda como la versión estable desplegada; los intentos
+  fallidos no se mergean.
 - Formularios: FormSubmit (`https://formsubmit.co/josesepint3@gmail.com`) con
   `data-ajax="true"` + `ContactForm.js`. El envío llega por correo al email de la
   cuenta; la primera vez que se envía hay que confirmar la activación que llega
-  a la bandeja. (Netlify Forms era solo Netlify; en GitHub Pages el POST no
-  tiene backend, por eso se migró.)
+  a la bandeja (GitHub Pages no tiene backend, por eso se usa FormSubmit).
 
 ### Variables de entorno (`.env`)
 ```
