@@ -3782,11 +3782,12 @@ html.reveal-js [data-reveal].revealed {
 
 /* ── Modo carrousel activo (JS + GSAP) ─────────────────── */
 .mop-carousel.is-mop-active {
-	--mop-pill-size: 60px;
 	position: relative;
-	height: var(--mop-card-h);
-	margin: 0 auto 76px;
+	width: 100vw;
+	max-width: none;
+	margin: 0 0 76px calc(50% - 50vw);
 	padding: 0;
+	height: var(--mop-card-h);
 }
 
 .mop-carousel.is-mop-active .mop-slides {
@@ -3807,6 +3808,7 @@ html.reveal-js [data-reveal].revealed {
 	background: transparent;
 	overflow: visible;
 	pointer-events: none;
+	will-change: transform, opacity;
 }
 
 .mop-carousel.is-mop-active .mop-card {
@@ -3816,6 +3818,8 @@ html.reveal-js [data-reveal].revealed {
 	border-radius: 20px;
 	box-shadow: 0 30px 70px -24px rgba(0, 0, 0, 0.6);
 	pointer-events: auto;
+	overflow: hidden;
+	transform-origin: center;
 	will-change: transform, opacity;
 }
 
@@ -3837,6 +3841,7 @@ html.reveal-js [data-reveal].revealed {
 	color: var(--mop-ink, #fff);
 	box-shadow: 0 10px 26px -8px rgba(0, 0, 0, 0.5);
 	pointer-events: auto;
+	transform-origin: center;
 	will-change: transform, opacity;
 }
 
@@ -3845,6 +3850,10 @@ html.reveal-js [data-reveal].revealed {
 	height: 40%;
 	transition: transform 0.2s ease;
 }
+
+.mop-slide.is-pill .mop-card { pointer-events: none; }
+.mop-slide.is-card .mop-pill { pointer-events: none; }
+.mop-slide.is-hidden { pointer-events: none; }
 
 @media (hover: hover) {
 	.mop-pill:hover .mop-pill-icon { transform: scale(1.18); }
@@ -3884,10 +3893,6 @@ html.reveal-js [data-reveal].revealed {
 }
 
 @media (max-width: 640px) {
-	.mop-carousel.is-mop-active {
-		--mop-pill-size: 36px;
-	}
-
 	.mop-carousel.is-mop-active .mop-meta {
 		display: none;
 	}
