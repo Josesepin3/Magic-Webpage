@@ -17,6 +17,17 @@
 > ejecutar `npm run seed:supabase`, configurar redirects de Auth y Google OAuth,
 > y probar/deploy. Siguiente: Fase 5 (IA con Mistral).
 
+> **Estado (28 ago 2026):** MagicOS ya no está "vacío": se creó la **página de
+> MagicOS** (`/productos/magicos`) siguiendo su maqueta propia — hero con glows
+> arcoíris fiel al mockup, logo en SVG y parallax, carrousel scrollytelling por
+> pasos tipo row con morph tarjeta-píldora (vertical en móvil) y eyebrows
+> numerados + títulos grandes (**mergeado a `main`**). El **hero de Sirius** se
+> rediseñó según maqueta: título "Sirius", laptop en SVG full-bleed, banda azul
+> cielo, degradado negro full-bleed separando la zona superior de la inferior, y
+> caption (tagline + pill + precio) — desktop y responsivo móvil ajustado
+> (**mergeado a `main`**). Deploy removido de Netlify y documentado a GitHub Pages.
+> **Siguiente: Fase 5 (IA con Mistral).**
+
 ---
 
 ## Stack Tecnológico
@@ -77,7 +88,7 @@ Magic-Webpage/
 │   │   └── pages/
 │   │       ├── home.ejs                  # Vacía — pendiente rediseño del ecosistema (landing en /productos/magicos)
 │   │       ├── productos.ejs          # Grid de productos
-│   │       ├── product-*.ejs          # Página por producto (magicos, sirius-laptop, chip-n1-kinetic, blackbox-cloud)
+│   │       ├── product-*.ejs          # Página por producto (magicos ✔, sirius-laptop ✔, chip-n1-kinetic, blackbox-cloud)
 │   │       ├── configure.ejs          # Configurador con opciones + "Añadir al carrito"
 │   │       ├── contact.ejs            # Formulario de contacto (FormSubmit + tabla messages)
 │   │       ├── cuenta-login.ejs       # Login/registro de cliente (Supabase Auth)
@@ -465,7 +476,7 @@ en el deploy estático de GitHub Pages, sin backend Express.
 - [ ] Estados vacío ("No hay productos", "No hay mensajes")
 - [~] Animaciones CSS: hover en cards ✅, scroll reveal ✅ (Fase 2)
 - [x] Validación en tiempo real en formularios (Fase 3 — ContactForm.js)
-- [~] Responsive real probado en mobile/tablet/desktop (Sirius en curso)
+- [~] Responsive real probado en mobile/tablet/desktop (Sirius y MagicOS ajustados ✔)
 - [x] `.gitignore` (node_modules, .env, *.db)
 - [x] Comentarios técnicos en código clave
 - [x] Documentación de cómo ejecutar el proyecto
