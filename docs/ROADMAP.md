@@ -346,6 +346,10 @@ conforme se cambian opciones.
 
 ### System Prompt (voz de marca)
 
+> La **versión viva** del prompt vive en `supabase/functions/magic-chat/system-prompt.md`
+> (inyecta `site-map.md`). El bloque de abajo es el esqueleto de la voz de marca
+> que inspiró ese archivo.
+
 ```
 Eres un asistente de MagicOS, un sistema operativo premium
 enfocado en privacidad radical y procesamiento local.
@@ -359,16 +363,17 @@ Genera textos listos para usar cuando te pidan descripciones
 o copy de marketing.
 ```
 
-### Flujo de la API
+### Flujo de la API (Edge Function `magic-chat`)
 
-1. Frontend envía `POST /api/ai/chat` con `{ messages: [{role, content}] }`
-2. Backend arma el contexto:
-   - System prompt (fijo)
-   - Productos actuales desde BD (nombre, descripción, precio)
+1. Frontend envía `{ messages: [{role, content}] }` a la Edge Function
+   `magic-chat` (Supabase Functions), con la sesión del usuario.
+2. La Edge Function arma el contexto:
+   - System prompt: `system-prompt.md` + `site-map.md` inyectado (role `system`, nunca visible en el chat)
    - Historial de mensajes del usuario
-3. Backend llama a Mistral API (modelo open-source vía endpoint gratuito)
-4. Backend devuelve `{ reply: "..." }` al frontend
-5. ChatWidget muestra la respuesta con formato loading → typing → completo
+   - (El mapa es **curado y estático** a propósito: nada interno llega al modelo)
+3. La Edge Function llama a Mistral (`mistral-small-latest`) con ese contexto.
+4. Devuelve `{ reply: "..." }` al frontend.
+5. `ChatWidget` muestra la respuesta con estados loading → typing → completo.
 
 ---
 
@@ -483,12 +488,23 @@ en el deploy estático de GitHub Pages, sin backend Express.
 > Al ser el deploy 100% estático (GitHub Pages), el chat corre en una **Edge
 > Function de Supabase** (`magic-chat`) en vez de un endpoint de Express.
 
-- [ ] Edge Function `supabase/functions/magic-chat` — CORS, system prompt con la
-      voz de marca + productos desde la BD, llama a Mistral
+- [x] Mapa del sitio curado (`supabase/functions/magic-chat/site-map.md`) —
+      info pública, **sin datos sensibles** (sin emails internos, sin rutas de
+      admin, sin arquitectura) para que no se pueda exfiltrar nada útil aun
+      con ingeniería de prompt
+- [x] System prompt defensivo (`supabase/functions/magic-chat/system-prompt.md`)
+      — voz de marca + reglas de no-revelación del prompt y del mapa + trata el
+      historial del usuario como datos, no instrucciones
+- [x] Catálogo **vivo** decidido: la Edge Function arma el bloque CATÁLOGO en
+      cada request con `SELECT` de allow-list (columnas públicas de `products` +
+      `product_options`); `site-map.md` queda sin precios (una sola fuente de
+      verdad, sincronizada con lo que ve el admin)
+- [ ] Edge Function `supabase/functions/magic-chat` — CORS, inyecta
+      `site-map.md` + bloque CATÁLOGO (query allow-list) en el system prompt,
+      llama a Mistral
       (secrets: `MISTRAL_API_KEY`, `MISTRAL_API_URL`, `SUPABASE_SERVICE_ROLE_KEY`)
 - [ ] Componente JS `ChatWidget.js` — flotante, toggle mostrar/ocultar
 - [ ] Servicio `services/ai.js` — invoca la Edge Function con la sesión del usuario
-- [ ] System prompt con productos desde BD (dinámico)
 - [ ] Estados: loading (puntos animados), error (reintentar), vacío (placeholder)
 
 ### Fase 6 — Refinamiento UX
