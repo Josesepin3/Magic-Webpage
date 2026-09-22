@@ -24,13 +24,13 @@
     close: '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">' +
       '<path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>' +
       '</svg>',
-    expand: '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">' +
+    sidebar: '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">' +
       '<rect x="1" y="3" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/>' +
-      '<path d="M10 3v10" stroke="currentColor" stroke-width="1.4"/>' +
+      '<rect x="10.2" y="4.9" width="1.5" height="6.2" rx="0.75" fill="currentColor"/>' +
       '</svg>',
-    collapse: '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">' +
+    pip: '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">' +
       '<rect x="1" y="3" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/>' +
-      '<path d="M6 3v10" stroke="currentColor" stroke-width="1.4"/>' +
+      '<rect x="8.6" y="6.6" width="5" height="4" rx="1" fill="currentColor"/>' +
       '</svg>',
     send: '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">' +
       '<path d="M8 2v10M8 12L4.5 8.5M8 12l3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' +
@@ -287,9 +287,9 @@
     document.body.classList.toggle('chat-shell', sidebar);
     panel.classList.toggle('chat-panel--sidebar', sidebar);
     if (sidebar) {
-      expandBtn.setAttribute('aria-label', 'Volver al modo tarjeta');
-      expandBtn.title = 'Volver al modo tarjeta';
-      expandBtn.innerHTML = SVG.collapse;
+      expandBtn.setAttribute('aria-label', 'Convertir en ventana flotante');
+      expandBtn.title = 'Convertir en ventana flotante';
+      expandBtn.innerHTML = SVG.pip;
       // Espejo: la ventana arranca donde estaba el scroll del documento.
       if (!wasSidebar) {
         savedDocScroll = preScroll;
@@ -299,7 +299,7 @@
     } else {
       expandBtn.setAttribute('aria-label', 'Convertir en panel lateral');
       expandBtn.title = 'Convertir en panel lateral';
-      expandBtn.innerHTML = SVG.expand;
+      expandBtn.innerHTML = SVG.sidebar;
     }
     if (nowLeaving) restoreDocScroll();
     syncScrollLock(sidebar);
@@ -495,11 +495,21 @@
 
     document.addEventListener('click', function (ev) {
       if (!state.open) return;
-      if (state.mode === 'card') {
-        var t = ev.target;
-        if (panel.contains(t) || fab.contains(t)) return;
-        closePanel();
+      if (state.mode !== 'card') return;
+      // Ignorar el segundo click de un doble click: durante un toggle rápido
+      // sidebar->float el panel se anima y ese click puede caer fuera del
+      // rectángulo nuevo.
+      if (ev.detail > 1) return;
+      // Usar composedPath() (no ev.target): al hacer toggle sidebar->card,
+      // applyMode() reemplaza el innerHTML del botón y el target del click
+      // queda desacoplado del DOM, rompiendo panel.contains(target).
+      if (ev.composedPath) {
+        var path = ev.composedPath();
+        if (path.indexOf(panel) !== -1 || path.indexOf(fab) !== -1) return;
+      } else if (panel.contains(ev.target) || fab.contains(ev.target)) {
+        return;
       }
+      closePanel();
     });
 
     window.addEventListener('resize', function () {

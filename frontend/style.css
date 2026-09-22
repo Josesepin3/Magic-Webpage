@@ -4398,6 +4398,12 @@ html.reveal-js [data-reveal].revealed {
 .chat-btn:active { transform: scale(0.92); }
 .chat-btn svg { display: block; }
 
+/* Cerrar: disco más claro alrededor del glyph (botón de ventana) */
+.chat-close-btn {
+	background-color: rgba(255, 255, 255, 0.14);
+}
+.chat-close-btn:hover { background-color: rgba(255, 255, 255, 0.26); }
+
 /* ── Cuerpo / mensajes ─────────────────────────────── */
 .chat-body {
 	flex: 1 1 auto;
