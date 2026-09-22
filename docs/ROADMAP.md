@@ -28,6 +28,16 @@
 > (**mergeado a `main`**). Deploy removido de Netlify y documentado a GitHub Pages.
 > **Siguiente: Fase 5 (IA con Mistral).**
 
+> **Estado (22 sep 2026):** el backend queda **listo para producción**
+> (**Fase 8**): los precios de carrito/pedidos ya no se pueden manipular desde el
+> cliente (triggers en Supabase recalculan `unit_price`/`total` desde la BD),
+> anti-spam en `messages`, `subscriptions` normalizadas desde `products`, CSP +
+> headers de seguridad en todo el sitio, middleware de errores con respuestas
+> JSON/HTML y sin filtraciones en prod, `GET /health`, límites de payload, tests
+> (`npm test`) y código muerto eliminado (`auth.js`/`adminApi.js`/`api.js`).
+> **Pendiente:** re-ejecutar `supabase/schema.sql` (incluye los triggers) en el
+> SQL Editor. **Siguiente: Fase 5 (IA con Edge Functions).**
+
 ---
 
 ## Stack Tecnológico
@@ -64,27 +74,29 @@ Magic-Webpage/
 │       │   ├── CartManager.js          # Carrito: cantidad, eliminar, checkout simulado (orders/subscriptions)
 │       │   ├── ServicesPage.js         # "Mis servicios" (subscriptions: activo / próximamente)
 │       │   ├── LoginForm.js            # Login de admin (Supabase, chequea rol admin)
+│       │   ├── SiteHeader.js           # Menú móvil + alineación del toggle (extraído del footer para CSP)
 │       │   └── AdminApp.js             # Dashboard: mensajes + CRUD productos (Supabase)
 │       └── services/
 │           └── supabase.js             # Cliente Supabase + helpers basePath/url/currentPath
-│           └── api.js                  # Fetch wrapper (legacy, no usado en Supabase)
 ├── supabase/
-│   └── schema.sql                  # Schema: profiles, products, cart_items, orders, subscriptions + RLS
+│   └── schema.sql                  # Schema: profiles, products, cart_items, orders, subscriptions
+│                                  # + RLS + triggers de integridad (precios server-side) y anti-spam
 ├── backend/
-│   ├── app.js                   # Entry point de Express (dev local)
+│   ├── app.js                   # Entry point de Express (dev local): /health, headers, errores
 │   ├── config/
 │   │   └── db.js                # Inicialización SQLite + schemas
 │   ├── middleware/
-│   │   └── auth.js              # requireAuth (JWT Bearer) + signToken
+│   │   ├── security.js          # Headers: nosniff, XFO, referrer, permissions-policy
+│   │   └── errors.js            # 404 (JSON/HTML) + error handler sin stack en producción
 │   ├── routes/
 │   │   ├── home.js              # GET /
 │   │   ├── products.js          # GET /productos, /productos/:slug, /productos/:slug/configure
 │   │   ├── contact.js           # GET /contacto
-│   │   ├── auth.js              # POST /api/auth/login
-│   │   ├── admin.js             # GET /admin/login, /admin/dashboard
-│   │   └── adminApi.js          # /api/admin/* protegidas (mensajes + CRUD productos)
+│   │   └── admin.js             # GET /admin/login, /admin/dashboard
+│   ├── test/
+│   │   └── app.test.js          # Smoke tests (node:test): health, 404, headers, payload limits
 │   ├── views/
-│   │   ├── partials/            # header.ejs, footer.ejs, n1-badge.ejs, blackbox-badge.ejs
+│   │   ├── partials/            # header.ejs (CSP + referrer), footer.ejs, n1-badge.ejs, blackbox-badge.ejs
 │   │   └── pages/
 │   │       ├── home.ejs                  # Vacía — pendiente rediseño del ecosistema (landing en /productos/magicos)
 │   │       ├── productos.ejs          # Grid de productos
@@ -97,7 +109,8 @@ Magic-Webpage/
 │   │       ├── cuenta-servicios.ejs   # "Mis servicios" (subscriptions)
 │   │       ├── login.ejs              # Login de admin (Supabase, rol admin)
 │   │       ├── dashboard.ejs          # Panel de admin (Supabase: mensajes + CRUD productos)
-│   │       └── 404.ejs
+│   │       ├── 404.ejs
+│   │       └── 500.ejs
 │   ├── data/
 │   │   ├── magicos.db           # SQLite file (ignorado en git)
 │   │   └── products.json        # Datos de productos para el build estático (commiteado)
@@ -137,20 +150,22 @@ Magic-Webpage/
 
 > **Nota:** en el deploy de GitHub Pages la web es estática; ya no hay endpoints
 > REST de Express. **Todo** (auth, admin, mensajes, carrito, pedidos) corre contra
-> **Supabase** con el SDK de cliente + RLS. Los endpoints antiguos de
-> `/api/auth` y `/api/admin` se eliminaron de `backend/app.js`.
+> **Supabase** con el SDK de cliente + RLS. Los archivos de los endpoints antiguos
+> (`routes/auth.js`, `routes/adminApi.js`, `middleware/auth.js`,
+> `services/api.js`) se eliminaron del repo (Fase 8). El servidor Express solo
+> sirve páginas en dev local + `GET /health`.
 
 | Recurso | Operaciones | Dónde |
 |---------|-------------|-------|
 | `auth.users` + `auth` | signUp, signInWithPassword, signInWithOAuth (Google), signOut | SDK `supabase.auth` |
 | `profiles` | perfil propio (rol, nombre, avatar_url) — trigger crea fila al registrarse | tabla pública + RLS |
 | `products` / `product_options` | catálogo lectura pública; CRUD admin (rol `admin`) | tabla pública + RLS |
-| `messages` | insert público (contacto) + gestión admin | tabla pública + RLS |
-| `cart_items` | solo el dueño (`auth.uid() = user_id`) | tabla pública + RLS |
-| `orders` | el usuario crea su pedido y lo lee; admin lee todos | tabla pública + RLS |
-| `subscriptions` | el usuario crea sus servicios y los lee; admin lee todos | tabla pública + RLS |
+| `messages` | insert público (contacto) + gestión admin; **anti-spam: máx. 5/email/10min** | tabla pública + RLS |
+| `cart_items` | solo el dueño (`auth.uid() = user_id`); **precio recalculado en la BD** | tabla pública + RLS |
+| `orders` | el usuario crea su pedido y lo lee; admin lee todos; **total siempre calculado en la BD** | tabla pública + RLS |
+| `subscriptions` | el usuario crea sus servicios y los lee; admin lee todos; **estado resuelto desde `products`** | tabla pública + RLS |
 | `storage.avatars` | subida pública de fotos de perfil (bucket `avatars`) | Storage |
-| POST | `/api/ai/chat` | Chat con IA vía Mistral | ⏳ |
+| Edge Function `magic-chat` | Chat con IA vía Mistral | Supabase Edge Functions | ⏳ |
 
 ---
 
@@ -461,9 +476,14 @@ en el deploy estático de GitHub Pages, sin backend Express.
 
 **Objetivo:** Chatbot con Mistral API.
 
+> Al ser el deploy 100% estático (GitHub Pages), el chat corre en una **Edge
+> Function de Supabase** (`magic-chat`) en vez de un endpoint de Express.
+
+- [ ] Edge Function `supabase/functions/magic-chat` — CORS, system prompt con la
+      voz de marca + productos desde la BD, llama a Mistral
+      (secrets: `MISTRAL_API_KEY`, `MISTRAL_API_URL`, `SUPABASE_SERVICE_ROLE_KEY`)
 - [ ] Componente JS `ChatWidget.js` — flotante, toggle mostrar/ocultar
-- [ ] Servicio `services/ai.js` — llama a `POST /api/ai/chat`
-- [ ] Ruta `POST /api/ai/chat` — arma contexto + llama a Mistral
+- [ ] Servicio `services/ai.js` — invoca la Edge Function con la sesión del usuario
 - [ ] System prompt con productos desde BD (dinámico)
 - [ ] Estados: loading (puntos animados), error (reintentar), vacío (placeholder)
 
@@ -480,6 +500,40 @@ en el deploy estático de GitHub Pages, sin backend Express.
 - [x] `.gitignore` (node_modules, .env, *.db)
 - [x] Comentarios técnicos en código clave
 - [x] Documentación de cómo ejecutar el proyecto
+
+### Fase 8 — Backend listo para producción (hardening)
+
+**Objetivo:** que el backend "básico" quede como si fuera a lanzarse hoy.
+
+- [x] **Integridad de precios (Supabase):** `supabase/schema.sql` ahora incluye
+  - `recalc_unit_price()` — calcula `unit_price` desde `products.base_price` +
+    `product_options.price_modifier` (rechaza opciones inexistentes)
+  - Trigger en `cart_items` — fuerza nombre, slug y precio desde la BD
+  - Trigger en `orders` — reconstruye `items` y recalcula `total`; `status`
+    forzado a `confirmed`
+  - Trigger en `subscriptions` — `status` resuelto desde `products.status`
+    (el cliente no puede marcar un producto `coming_soon` como activo)
+- [x] **Anti-spam (Supabase):** trigger en `messages` — normaliza campos y limita
+      a máx. 5 mensajes por email cada 10 minutos
+- [x] **Headers de seguridad (Express dev):** `middleware/security.js` —
+      `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`,
+      `COOP`; `x-powered-by` deshabilitado
+- [x] **CSP + XSS (sitio estático):** CSP vía `<meta>` en `header.ejs`
+      (`script-src 'self'`, sin `unsafe-inline` de scripts), `Referrer-Policy` por
+      meta; el script inline del footer pasó a `SiteHeader.js`; el JSON inline de
+      `configure.ejs` se escapa (evita romper el `</script>`)
+- [x] **Middleware de errores:** `middleware/errors.js` — 404 JSON para `/api/*`
+      y HTML para el resto; error handler 500 con página `500.ejs`, sin stack ni
+      mensajes internos en producción
+- [x] **Endurecimiento Express:** límites de payload (`100kb`), `GET /health`,
+      `app.js` exporta la app (tests) y escucha solo si es el entry point
+- [x] **Tests:** `backend/test/app.test.js` con `node:test` (`npm test`) —
+      health, 404 JSON/HTML, headers de seguridad, límite de payload
+- [x] **Código muerto eliminado:** `backend/routes/auth.js`,
+      `backend/routes/adminApi.js`, `backend/middleware/auth.js`,
+      `frontend/js/services/api.js`
+- [ ] Re-ejecutar `supabase/schema.sql` en el SQL Editor (parte 4b sigue
+      pendiente: aplicar schema → `npm run seed:supabase` → redirects Auth)
 
 ---
 
@@ -527,6 +581,7 @@ npm install
 npm run seed          # Poblar BD local (dev) + regenerar backend/data/products.json
 npm run seed:supabase # Poblar Supabase (admin, productos, opciones, mensajes) — requiere schema aplicado
 npm run dev           # Servidor Express local (nodemon, http://localhost:3000)
+npm test              # Smoke tests del backend (node:test)
 npm run build         # Prerender estático EJS → dist/ (sin SQLite ni módulos nativos)
 ```
 
@@ -551,13 +606,27 @@ npm run build         # Prerender estático EJS → dist/ (sin SQLite ni módulo
 ### Variables de entorno (`.env`)
 ```
 PORT=3000
-JWT_SECRET=...
+JWT_SECRET=...          # legacy, sin uso (la API de auth se eliminó en Fase 8)
 MISTRAL_API_KEY=...
 MISTRAL_API_URL=https://api.mistral.ai/v1/chat/completions
 SUPABASE_URL=https://ukfbueqhnxehifisidan.supabase.co
 SUPABASE_ANON_KEY=eyJ...   # key pública (también va en frontend/js/config.js)
 SUPABASE_SERVICE_ROLE_KEY=eyJ...  # solo para el seed (¡nunca al frontend!)
 ```
+
+### Endurecimiento en producción
+
+- **Precios confiables:** los triggers de `supabase/schema.sql` recalculan
+  `unit_price`/`total` en la BD; el frontend solo envía `product_id` + `options`,
+  así que manipular precios desde el cliente es inútil.
+- **Anti-spam:** `messages` rechaza más de 5 envíos por email cada 10 min y exige
+  email + mensaje no vacíos.
+- **CSP:** se aplica por `<meta>` en `header.ejs` (GitHub Pages no permite cabeceras
+  HTTP). `script-src 'self'` sin `unsafe-inline`: todo el JS es externo.
+- **Express (dev):** headers de seguridad, `GET /health`, límites de payload,
+  errores 404/500 sin filtrar internals en `NODE_ENV=production`.
+- **Supabase:** la integridad (triggers) vive en el schema; aplicarlo en el SQL
+  Editor es lo que falta para que todo esto quede activo en el deploy.
 
 ### Patrón de componentes (Vanilla JS)
 ```js

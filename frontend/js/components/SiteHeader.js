@@ -1,0 +1,63 @@
+// Toggle del menú móvil + alineación del toggle con el título (antes inline en footer.ejs).
+// Se extrajo a archivo externo para que la CSP pueda usar script-src 'self' sin 'unsafe-inline'.
+(function () {
+  function initMenuToggle() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const mainNav = document.getElementById('main-nav');
+    if (menuToggle && mainNav) {
+      menuToggle.addEventListener('click', () => {
+        const expanded = menuToggle.getAttribute('aria-expanded') === 'true';
+        menuToggle.setAttribute('aria-expanded', String(!expanded));
+        mainNav.classList.toggle('open');
+      });
+
+      const mq = window.matchMedia('(min-width:601px)');
+      function mqHandler(e) {
+        if (e.matches) {
+          mainNav.classList.remove('open');
+          menuToggle.setAttribute('aria-expanded', 'false');
+        }
+      }
+      if (mq.addEventListener) mq.addEventListener('change', mqHandler); else mq.addListener(mqHandler);
+      mqHandler(mq);
+    }
+  }
+
+  function alignMenuToggleToTitle() {
+    const siteHeader = document.querySelector('.site-header');
+    const siteTitle = document.querySelector('.site-title');
+    const toggle = document.querySelector('.menu-toggle');
+    const mobileNavUser = document.querySelector('.nav-user--mobile');
+    if (!siteHeader || !siteTitle || !toggle) return;
+    if (!window.matchMedia('(max-width:600px)').matches) {
+      toggle.style.top = '';
+      toggle.style.transform = '';
+      if (mobileNavUser) {
+        mobileNavUser.style.top = '';
+      }
+      return;
+    }
+    const headerRect = siteHeader.getBoundingClientRect();
+    const titleRect = siteTitle.getBoundingClientRect();
+    const titleCenter = titleRect.top - headerRect.top + (titleRect.height / 2);
+    const topForToggle = Math.max(6, Math.round(titleCenter));
+    toggle.style.top = topForToggle + 'px';
+    toggle.style.transform = 'translateY(-50%)';
+    if (mobileNavUser) {
+      mobileNavUser.style.top = topForToggle + 'px';
+    }
+  }
+
+  function init() {
+    initMenuToggle();
+    window.addEventListener('load', alignMenuToggleToTitle);
+    window.addEventListener('resize', (() => {
+      let t;
+      return () => { clearTimeout(t); t = setTimeout(alignMenuToggleToTitle, 80); };
+    })());
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignMenuToggleToTitle);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();

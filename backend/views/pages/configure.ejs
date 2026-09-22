@@ -61,7 +61,7 @@
         <% if (product.status !== 'available') { %><p class="out-of-stock">No hay stock</p><% } %>
       </div>
 
-      <script id="options-data" type="application/json"><%= JSON.stringify(options) %></script>
+      <script id="options-data" type="application/json"><%= JSON.stringify(options).replace(/</g, '\\u003c') %></script>
     </main>
 
 <%- include('../partials/footer') %>

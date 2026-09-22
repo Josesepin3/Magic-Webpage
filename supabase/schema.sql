@@ -200,3 +200,161 @@ drop policy if exists "avatars: usuarios borran su foto" on storage.objects;
 create policy "avatars: usuarios borran su foto" on storage.objects
   for delete to authenticated
   using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+
+-- ===================== ENDURECIMIENTO =====================
+-- Integridad + anti-spam. Todo es idempotente (create or replace / drop trigger)
+-- para poder re-ejecutar el archivo sin errores.
+
+-- Precio de un ítem calculado SIEMPRE desde la BD: el cliente no puede forjar
+-- unit_price ni totales. Si una opción no existe para el producto, se rechaza.
+create or replace function public.recalc_unit_price(p_product_id bigint, p_options jsonb)
+returns numeric
+language plpgsql security definer set search_path = public as $$
+declare
+  v_total numeric;
+  v_modifier numeric;
+  v_item jsonb;
+begin
+  select base_price into v_total from public.products where id = p_product_id;
+  if v_total is null then
+    raise exception 'producto inválido';
+  end if;
+  if p_options is null or jsonb_typeof(p_options) <> 'array' then
+    return v_total;
+  end if;
+  for v_item in select * from jsonb_array_elements(p_options) loop
+    if not (v_item ? 'group' and v_item ? 'label') then
+      raise exception 'opción malformada';
+    end if;
+    select price_modifier into v_modifier
+      from public.product_options
+     where product_id = p_product_id
+       and group_name = v_item->>'group'
+       and label = v_item->>'label';
+    if v_modifier is null then
+      raise exception 'opción inválida: %',
+        coalesce(v_item->>'group', '') || ' / ' || coalesce(v_item->>'label', '');
+    end if;
+    v_total := v_total + v_modifier;
+  end loop;
+  return v_total;
+end;
+$$;
+
+-- cart_items: nombre, slug y precio se resuelven desde products / product_options
+create or replace function public.cart_items_enforce()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  v_product public.products%rowtype;
+begin
+  select * into v_product from public.products where id = new.product_id;
+  if v_product is null then
+    raise exception 'producto inválido';
+  end if;
+  new.product_name := v_product.name;
+  new.product_slug := v_product.slug;
+  new.options := coalesce(new.options, '[]'::jsonb);
+  new.unit_price := public.recalc_unit_price(new.product_id, new.options);
+  if coalesce(new.quantity, 0) < 1 then
+    new.quantity := 1;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_cart_items_enforce on public.cart_items;
+create trigger trg_cart_items_enforce
+  before insert or update on public.cart_items
+  for each row execute function public.cart_items_enforce();
+
+-- orders: se reconstruye items (precio por línea recalculado) y el total
+-- siempre sale de la BD; el status se fuerza a 'confirmed'.
+create or replace function public.orders_enforce()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  v_items jsonb;
+begin
+  select coalesce(jsonb_agg(
+      jsonb_build_object(
+        'product_id',   (v->>'product_id')::bigint,
+        'product_name', v->>'product_name',
+        'product_slug', v->>'product_slug',
+        'options',      coalesce(v -> 'options', '[]'::jsonb),
+        'quantity',     greatest(coalesce((v->>'quantity')::int, 1), 1),
+        'unit_price',   public.recalc_unit_price(
+                          (v->>'product_id')::bigint,
+                          coalesce(v -> 'options', '[]'::jsonb)
+                        ),
+        'line_total',   public.recalc_unit_price(
+                          (v->>'product_id')::bigint,
+                          coalesce(v -> 'options', '[]'::jsonb)
+                        ) * greatest(coalesce((v->>'quantity')::int, 1), 1)
+      )
+    ), '[]'::jsonb)
+  into v_items
+  from jsonb_array_elements(coalesce(new.items, '[]'::jsonb)) as v;
+
+  new.items := v_items;
+  select coalesce(sum((i->>'line_total')::numeric), 0)
+    into new.total
+    from jsonb_array_elements(v_items) as i;
+  new.status := 'confirmed';
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_orders_enforce on public.orders;
+create trigger trg_orders_enforce
+  before insert on public.orders
+  for each row execute function public.orders_enforce();
+
+-- messages: normaliza y limita el spam (máx. 5 mensajes por email cada 10 min)
+create or replace function public.messages_guard()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  v_count int;
+begin
+  new.email   := lower(btrim(coalesce(new.email, '')));
+  new.name    := btrim(coalesce(new.name, ''));
+  new.subject := btrim(coalesce(new.subject, ''));
+  new.message := btrim(coalesce(new.message, ''));
+  if new.email = '' or new.message = '' then
+    raise exception 'email y mensaje son obligatorios';
+  end if;
+  select count(*) into v_count
+    from public.messages
+   where email = new.email
+     and created_at > now() - interval '10 minutes';
+  if v_count >= 5 then
+    raise exception 'demasiados mensajes; esperá unos minutos';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_messages_guard on public.messages;
+create trigger trg_messages_guard
+  before insert on public.messages
+  for each row execute function public.messages_guard();
+
+-- subscriptions: nombre y estado siempre resueltos desde products (evita que el
+-- cliente marque un producto 'coming_soon' como pago/activo).
+create or replace function public.subscriptions_enforce()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  v_product public.products%rowtype;
+begin
+  select * into v_product from public.products where id = new.product_id;
+  if v_product is null then
+    raise exception 'producto inválido';
+  end if;
+  new.product_name := v_product.name;
+  new.status := case when v_product.status = 'available' then 'active' else 'proximamente' end;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_subscriptions_enforce on public.subscriptions;
+create trigger trg_subscriptions_enforce
+  before insert on public.subscriptions
+  for each row execute function public.subscriptions_enforce();
