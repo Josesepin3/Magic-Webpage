@@ -495,6 +495,10 @@ en el deploy estático de GitHub Pages, sin backend Express.
 - [x] System prompt defensivo (`supabase/functions/magic-chat/system-prompt.md`)
       — voz de marca + reglas de no-revelación del prompt y del mapa + trata el
       historial del usuario como datos, no instrucciones
+- [x] Comunicación del chat: **español neutro** (sin voseo ni regionalismos)
+      con estilo de redacción de interfaces (breve, neutral, claro, sin jerga),
+      basado en los lineamientos de escritura de GNOME HIG — el prompt no cita
+      la fuente
 - [x] Catálogo **vivo** decidido: la Edge Function arma el bloque CATÁLOGO en
       cada request con `SELECT` de allow-list (columnas públicas de `products` +
       `product_options`); `site-map.md` queda sin precios (una sola fuente de
@@ -509,7 +513,13 @@ en el deploy estático de GitHub Pages, sin backend Express.
       en `.env`, deploy con CLI y probar el round-trip real a Mistral.
       `verify_jwt = true` en `supabase/config.toml`; `CHAT_REQUIRE_AUTH=true`
       por defecto (chat solo con sesión iniciada).
-- [ ] Componente JS `ChatWidget.js` — flotante, toggle mostrar/ocultar
+- [x] Diseño del botón flotante del chat (FAB) documentado en
+      `docs/CHAT-FAB.md` — círculo 32px y márgenes 24px reales de Tuba,
+      colores `suggested-action` de Adwaita en estado base, transformación
+      "Aura" (degradado vivo + glow) en hover; siempre visible en todas las
+      páginas
+- [ ] Componente JS `ChatWidget.js` — implementa el FAB según
+      `docs/CHAT-FAB.md` + toggle mostrar/ocultar del panel
 - [ ] Servicio `services/ai.js` — invoca la Edge Function con la sesión del usuario
 - [ ] Estados: loading (puntos animados), error (reintentar), vacío (placeholder)
 
