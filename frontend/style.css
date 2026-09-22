@@ -4157,9 +4157,9 @@ html.reveal-js [data-reveal].revealed {
    y mayor que un botón común (~34px en Adwaita): 56px es el estándar para
    botones flotantes, con glyph de 24px (proporción ~0.43, similar a la
    del 16px/34px de un botón circular común).
-   Hover "Aura" = degradado con los colores del glow del hero de MagicOS
-   (cian #56cdff -> ámbar #ffb029 -> verde #b5f69a -> magenta #ec23ff) +
-   glow, ícono con contraste.
+   Hover "Aura" = degradado con 3 colores del glow del hero de MagicOS que
+   contrastan entre sí (ámbar #ffb029 -> verde claro #b5f69a -> rosa
+   #ee81dd) + glow con radio amplio y suave, ícono con contraste.
    ═══════════════════════════════════════════════════ */
 
 .chat-fab {
@@ -4198,7 +4198,7 @@ html.reveal-js [data-reveal].revealed {
 	position: absolute;
 	inset: 0;
 	border-radius: inherit;
-	background-image: linear-gradient(135deg, #56cdff 0%, #ffb029 33%, #b5f69a 66%, #ec23ff 100%);
+	background-image: linear-gradient(135deg, #ffb029 0%, #b5f69a 50%, #ee81dd 100%);
 	opacity: 0;
 	transition: opacity 0.3s ease;
 }
@@ -4206,7 +4206,7 @@ html.reveal-js [data-reveal].revealed {
 /* Estado activo (panel abierto): el degradado Aura queda fijo */
 .chat-fab--active {
 	color: #241f31; /* contraste sobre el degradado vivo */
-	box-shadow: 0 0 16px rgba(236, 35, 255, 0.5), 0 0 34px rgba(86, 205, 255, 0.35);
+	box-shadow: 0 0 32px rgba(238, 129, 221, 0.35), 0 0 64px rgba(181, 246, 154, 0.25);
 }
 
 .chat-fab--active::before {
@@ -4217,7 +4217,7 @@ html.reveal-js [data-reveal].revealed {
 @media (hover: hover) {
 	.chat-fab:hover {
 		color: #241f31;
-		box-shadow: 0 0 16px rgba(236, 35, 255, 0.5), 0 0 34px rgba(86, 205, 255, 0.35);
+		box-shadow: 0 0 32px rgba(238, 129, 221, 0.35), 0 0 64px rgba(181, 246, 154, 0.25);
 	}
 
 	.chat-fab:hover::before {
