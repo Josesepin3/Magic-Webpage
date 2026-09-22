@@ -4151,11 +4151,12 @@ html.reveal-js [data-reveal].revealed {
 /* ═══════════════════════════════════════════════════
    CHAT FAB — botón flotante del asistente (Magic Assistant)
 
-   Base = Adwaita (.circular + .suggested-action): círculo 40px
-   (ícono 16px + padding interno 12px), márgenes externos 24px,
-   acento #3584e4, ícono blanco, plano. El glyph de 16px en un círculo
-   amplio replica la proporción real del .circular de Adwaita
-   (min 34px + padding 0 con ícono estándar de 16px).
+   Base = Adwaita (.circular + .suggested-action) en escala de FAB:
+   círculo 56px (ícono 24px + padding interno 16px), márgenes externos
+   24px, acento #3584e4, ícono blanco, plano. El FAB usa una escala propia
+   y mayor que un botón común (~34px en Adwaita): 56px es el estándar para
+   botones flotantes, con glyph de 24px (proporción ~0.43, similar a la
+   del 16px/34px de un botón circular común).
    Hover "Aura" = degradado de tonos vivos + glow, ícono con contraste.
    ═══════════════════════════════════════════════════ */
 
@@ -4166,9 +4167,9 @@ html.reveal-js [data-reveal].revealed {
 	z-index: 200;
 	display: grid;
 	place-items: center;
-	width: 40px;
-	height: 40px;
-	padding: 12px;
+	width: 56px;
+	height: 56px;
+	padding: 16px;
 	margin: 0;
 	border: none;
 	border-radius: 50%;
@@ -4184,8 +4185,8 @@ html.reveal-js [data-reveal].revealed {
 	position: relative;
 	z-index: 1;
 	display: block;
-	width: 16px;
-	height: 16px;
+	width: 24px;
+	height: 24px;
 }
 
 /* El degradado "Aura" vive en un pseudo-elemento para animar su opacidad
