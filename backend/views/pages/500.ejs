@@ -1,0 +1,16 @@
+<%- include('../partials/header') %>
+
+    <main class="product-page" style="min-height: 60vh; display: flex; align-items: center; justify-content: center; text-align: center;">
+        <div>
+            <p class="hero-eyebrow" style="color:#1c71d8;">500</p>
+            <h1 style="font-size: clamp(2rem, 6vw, 3.5rem); margin: 8px 0;">Ocurrió un error</h1>
+            <p style="color: rgba(255,255,255,0.8); max-width: 480px; margin: 0 auto;">
+                <%= typeof message !== 'undefined' ? message : 'Algo salió mal. Intentalo de nuevo en unos minutos.' %>
+            </p>
+            <p style="margin-top: 24px;">
+                <a class="btn-primary" href="/" style="display:inline-block; padding: 10px 24px; border-radius: 999px; background:#1c71d8; color:#fff; text-decoration:none;">Volver al inicio</a>
+            </p>
+        </div>
+    </main>
+
+<%- include('../partials/footer') %>
