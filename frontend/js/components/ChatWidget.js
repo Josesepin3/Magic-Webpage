@@ -3,8 +3,9 @@
 // círculo 56px táctil (glyph 24px + padding interno 16px) y margen externo
 // 24px. Un FAB usa una escala propia, mayor que un botón común (~34px en
 // Adwaita): 56px es el estándar flotante con ícono de 24px. Acento
-// #3584e4, ícono blanco, plano. Hover "Aura": degradado de tonos vivos +
-// glow e ícono con contraste. El panel del chat se agrega en la parte de
+// #3584e4, ícono blanco, plano. Hover "Aura": degradado con los colores
+// del glow del hero de MagicOS (cian -> ámbar -> verde -> magenta) + glow
+// e ícono con contraste. El panel del chat se agrega en la parte de
 // frontend (pendiente); acá queda el toggle como stub.
 (function () {
   function buildChatIcon() {

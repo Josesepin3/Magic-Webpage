@@ -4157,7 +4157,9 @@ html.reveal-js [data-reveal].revealed {
    y mayor que un botón común (~34px en Adwaita): 56px es el estándar para
    botones flotantes, con glyph de 24px (proporción ~0.43, similar a la
    del 16px/34px de un botón circular común).
-   Hover "Aura" = degradado de tonos vivos + glow, ícono con contraste.
+   Hover "Aura" = degradado con los colores del glow del hero de MagicOS
+   (cian #56cdff -> ámbar #ffb029 -> verde #b5f69a -> magenta #ec23ff) +
+   glow, ícono con contraste.
    ═══════════════════════════════════════════════════ */
 
 .chat-fab {
@@ -4196,7 +4198,7 @@ html.reveal-js [data-reveal].revealed {
 	position: absolute;
 	inset: 0;
 	border-radius: inherit;
-	background-image: linear-gradient(135deg, #49a1ff 0%, #3584e4 38%, #9141ac 72%, #d56199 100%);
+	background-image: linear-gradient(135deg, #56cdff 0%, #ffb029 33%, #b5f69a 66%, #ec23ff 100%);
 	opacity: 0;
 	transition: opacity 0.3s ease;
 }
@@ -4204,7 +4206,7 @@ html.reveal-js [data-reveal].revealed {
 /* Estado activo (panel abierto): el degradado Aura queda fijo */
 .chat-fab--active {
 	color: #241f31; /* contraste sobre el degradado vivo */
-	box-shadow: 0 0 14px rgba(129, 65, 172, 0.55);
+	box-shadow: 0 0 16px rgba(236, 35, 255, 0.5), 0 0 34px rgba(86, 205, 255, 0.35);
 }
 
 .chat-fab--active::before {
@@ -4215,7 +4217,7 @@ html.reveal-js [data-reveal].revealed {
 @media (hover: hover) {
 	.chat-fab:hover {
 		color: #241f31;
-		box-shadow: 0 0 14px rgba(129, 65, 172, 0.55);
+		box-shadow: 0 0 16px rgba(236, 35, 255, 0.5), 0 0 34px rgba(86, 205, 255, 0.35);
 	}
 
 	.chat-fab:hover::before {
@@ -4238,6 +4240,16 @@ html.reveal-js [data-reveal].revealed {
 	.chat-fab:active {
 		transform: none;
 		filter: none;
+	}
+}
+
+/* En mobile el botón flotante cubre parte del footer: se reserva espacio
+   inferior (56px FAB + 24px margen + 8px de aire = 88px) para que el
+   contenido del final de página quede siempre por encima de la zona del
+   botón, aun con el scroll al fondo. */
+@media (max-width: 640px) {
+	body {
+		padding-bottom: 88px;
 	}
 }
 
