@@ -4176,6 +4176,13 @@ html.reveal-js [data-reveal].revealed {
 	display: contents;
 }
 
+/* Segundo wrapper (dentro de .site-shell): en modo normal también es
+   neutro; bajo body.chat-shell se convierte en el scroller interno de la
+   ventana (el shell fijo recorta al radio; acá rueda el contenido). */
+.site-shell-inner {
+	display: contents;
+}
+
 .chat-fab {
 	position: fixed;
 	right: max(24px, env(safe-area-inset-right));
@@ -4605,34 +4612,53 @@ html.reveal-js [data-reveal].revealed {
 		display: grid;
 	}
 
-	/* La página pasa a ser una ventana flotante redondeada con gutter
-	   24px y gap 24px frente a la sidebar. margin-right =
-	   24 (gap) + 420 (sidebar) + 24 (gutter derecho). */
+	/* La página pasa a ser una "ventana" fija en pantalla: el doc deja de
+	   rodar y el contenido rueda DENTRO del rectángulo (siempre visible,
+	   con gutters de 24px y gap de 24px frente a la sidebar). */
 	body.chat-shell {
 		padding: 0;
+		overflow: hidden; /* el scroll vive adentro de la ventana */
 	}
 
 	body.chat-shell .site-shell {
+		position: fixed;
+		top: 24px;
+		left: 24px;
+		right: calc(420px + 48px); /* 24 (gap) + 420 (sidebar) + 24 (gutter) */
+		bottom: 24px;
 		display: flex;
 		flex-direction: column;
-		margin: 24px;
-		margin-right: calc(420px + 48px);
-		min-height: calc(100dvh - 48px);
 		border-radius: 12px;
-		overflow: clip;
+		overflow: hidden; /* recorta TODO (incl. scrollbars internos) al radio */
 		background: #000000;
 		z-index: 0;
-		transition: margin 0.32s ease, min-height 0.32s ease;
 	}
 
-	/* La cabecera flota dentro de la ventana (sticky) con la misma
-	   lógica de hoy: glass arriba, contenido pasando debajo. */
+	/* Scroller interno: hereda el área del shell y es el que rueda. */
+	body.chat-shell .site-shell-inner {
+		display: flex;
+		flex-direction: column;
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
+		overflow-x: hidden;
+		overscroll-behavior: contain;
+		scrollbar-width: thin;
+		scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+	}
+
+	/* La cabecera queda pegada al tope de la ventana y el contenido rueda
+	   debajo (sticky relativo al scroll interno). Resetea el left/right:0
+	   de la base (fixed de página completa). */
 	body.chat-shell .site-header {
 		position: sticky;
-		top: 24px;
+		top: 0;
+		left: auto;
+		right: auto;
 		height: var(--header-height);
 		border-radius: 12px 12px 0 0;
 		z-index: 100;
+		flex: 0 0 auto;
 	}
 
 	/* Reemplaza el padding lateral que daba <body> (24px) */

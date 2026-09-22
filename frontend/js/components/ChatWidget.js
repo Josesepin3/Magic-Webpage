@@ -62,6 +62,8 @@
   var expandBtn = null;
   var closeBtn = null;
   var typingEl = null;
+  var lastSidebar = false;
+  var savedDocScroll = 0;
 
   /* ── Persistencia (solo sesión) ─────────────────── */
 
@@ -267,19 +269,122 @@
     return window.innerWidth || document.documentElement.clientWidth || 0;
   }
 
-  function applyMode() {
+  var innerEl = null;
+
+  function getInner() {
+    if (!innerEl) innerEl = document.querySelector('.site-shell-inner');
+    return innerEl;
+  }
+
+  function applyMode(mirrorFrom) {
+    // Capturar la posición del doc ANTES de togglear chat-shell: al fijar la
+    // ventana el documento deja de rodar y el navegador clampa scrollY a 0.
+    var preScroll = typeof mirrorFrom === 'number' ? mirrorFrom : (window.scrollY || 0);
     var sidebar = state.mode === 'sidebar' && getWidth() >= DESKTOP_MIN;
+    var wasSidebar = lastSidebar;
+    var nowLeaving = wasSidebar && !sidebar;
+    lastSidebar = sidebar;
     document.body.classList.toggle('chat-shell', sidebar);
     panel.classList.toggle('chat-panel--sidebar', sidebar);
     if (sidebar) {
       expandBtn.setAttribute('aria-label', 'Volver al modo tarjeta');
       expandBtn.title = 'Volver al modo tarjeta';
       expandBtn.innerHTML = SVG.collapse;
+      // Espejo: la ventana arranca donde estaba el scroll del documento.
+      if (!wasSidebar) {
+        savedDocScroll = preScroll;
+        var inner = getInner();
+        if (inner) inner.scrollTop = preScroll;
+      }
     } else {
       expandBtn.setAttribute('aria-label', 'Convertir en panel lateral');
       expandBtn.title = 'Convertir en panel lateral';
       expandBtn.innerHTML = SVG.expand;
     }
+    if (nowLeaving) restoreDocScroll();
+    syncScrollLock(sidebar);
+  }
+
+  function restoreDocScroll() {
+    var s = savedDocScroll;
+    requestAnimationFrame(function () {
+      try { window.scrollTo(0, s); } catch (err) { /* sin salto */ }
+    });
+  }
+
+  // Con la sidebar, la ventana interna del shell es el scroller: el doc ya
+  // no roda, así que Lenis (home/magicos) se detiene POR COMPLETO
+  // (destroy desacopla el wheel y permite scroll nativo dentro de la
+  // ventana — stop() no sirve: esta versión hace preventDefault del wheel
+  // aun estando stopped). Al salir se recrea Lenis con sus opciones y se
+  // refrescan los triggers de GSAP.
+  //
+  // En ventana tampoco hay reveals de scroll: ScrollTrigger no volverá a
+  // dispararse (el scroll del doc está congelado), así que todo lo que
+  // quedaría oculto/invisible se fuerza a su estado final.
+  function syncScrollLock(locked) {
+    if (locked) {
+      haltLenis();
+      completeReveals();
+    } else {
+      resumeLenis();
+      if (window.ScrollTrigger && typeof window.ScrollTrigger.refresh === 'function') {
+        try { window.ScrollTrigger.refresh(); } catch (err) { /* opcional */ }
+      }
+    }
+  }
+
+  function haltLenis() {
+    var name = window.__homeLenis ? '__homeLenis' : (window.__pageLenis ? '__pageLenis' : null);
+    var lenis = name ? window[name] : null;
+    if (!lenis) return;
+    if (lenis.__chatTicker && window.gsap) {
+      try { window.gsap.ticker.remove(lenis.__chatTicker); } catch (err) { /* opcional */ }
+    }
+    window.__chatScrollBackup = {
+      name: name,
+      options: lenis.options || { duration: 1.1, smoothWheel: true }
+    };
+    try { lenis.destroy(); } catch (err) { /* opcional */ }
+    window[name] = null;
+  }
+
+  function resumeLenis() {
+    var backup = window.__chatScrollBackup;
+    if (!backup || !window.Lenis || window[backup.name]) return;
+    try {
+      var lenis = new Lenis(backup.options);
+      window[backup.name] = lenis;
+      if (window.gsap && window.ScrollTrigger) {
+        lenis.on('scroll', window.ScrollTrigger.update);
+        var tickFn = (function (l) {
+          return function (time) { l.raf(time * 1000); };
+        })(lenis);
+        window.gsap.ticker.add(tickFn);
+        window.gsap.ticker.lagSmoothing(0);
+        lenis.__chatTicker = tickFn;
+      }
+    } catch (err) { /* Lenis opcional */ }
+  }
+
+  // Estado final de los reveals atados al scroll (ScrollTrigger). Solo a los
+  // elementos de scroll; el timeline temporal del hero se deja intacto.
+  function completeReveals() {
+    try {
+      if (!window.gsap) return;
+      var g = window.gsap;
+      g.set('.hm-reveal', { opacity: 1, y: 0 });
+      g.set('.steps-grid li', { opacity: 1, y: 0 });
+      g.set('.hm-manifiesto-text .hm-word-inner', { opacity: 1 });
+      g.set('.mop-head .hm-word-inner', { yPercent: 0 });
+    } catch (err) { /* sin GSAP: se queda tal cual */ }
+    // El toggle "logo del hero en pantalla → ocultar el del navbar" es del
+    // ScrollTrigger del doc, congelado en modo ventana: se muestra el logo.
+    try {
+      document.querySelectorAll('.site-title.site-title--home-hidden').forEach(function (el) {
+        el.classList.remove('site-title--home-hidden');
+      });
+    } catch (err) { /* opcional */ }
   }
 
   function toggleMode() {
@@ -325,7 +430,11 @@
     if (inputEl) state.draft = inputEl.value;
     state.open = false;
     panel.classList.remove('chat-panel--open');
+    var wasSidebar = lastSidebar;
     document.body.classList.remove('chat-shell');
+    lastSidebar = false;
+    syncScrollLock(false);
+    if (wasSidebar) restoreDocScroll();
     fab.classList.remove('chat-fab--hidden');
     fab.setAttribute('aria-expanded', 'false');
     saveState();

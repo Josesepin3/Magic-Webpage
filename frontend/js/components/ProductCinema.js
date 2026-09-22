@@ -41,8 +41,11 @@
       window.__pageLenis = lenis;
       if (hasST) {
         lenis.on('scroll', ScrollTrigger.update);
-        gsap.ticker.add((time) => lenis.raf(time * 1000));
+        const lenisTick = (time) => lenis.raf(time * 1000);
+        gsap.ticker.add(lenisTick);
         gsap.ticker.lagSmoothing(0);
+        // ChatWidget lo usa para pausar/retomar Lenis en modo ventana.
+        lenis.__chatTicker = lenisTick;
       }
     } catch (e) { /* Lenis opcional */ }
   }
