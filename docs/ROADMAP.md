@@ -503,6 +503,12 @@ en el deploy estático de GitHub Pages, sin backend Express.
       `site-map.md` + bloque CATÁLOGO (query allow-list) en el system prompt,
       llama a Mistral
       (secrets: `MISTRAL_API_KEY`, `MISTRAL_API_URL`, `SUPABASE_SERVICE_ROLE_KEY`)
+      **Estado:** código listo (`index.ts` + `lib.ts`), `deno check` OK y
+      e2e local 18/18 verdes (auth 401/400, sanitize, catálogo con sus 13
+      opciones, system prompt armado). Pendiente: setear `MISTRAL_API_KEY`
+      en `.env`, deploy con CLI y probar el round-trip real a Mistral.
+      `verify_jwt = true` en `supabase/config.toml`; `CHAT_REQUIRE_AUTH=true`
+      por defecto (chat solo con sesión iniciada).
 - [ ] Componente JS `ChatWidget.js` — flotante, toggle mostrar/ocultar
 - [ ] Servicio `services/ai.js` — invoca la Edge Function con la sesión del usuario
 - [ ] Estados: loading (puntos animados), error (reintentar), vacío (placeholder)

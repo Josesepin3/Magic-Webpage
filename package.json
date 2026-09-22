@@ -12,7 +12,8 @@
     "seed": "node backend/seed.js",
     "build": "node scripts/build-static.js",
     "seed:supabase": "node scripts/seed-supabase.js",
-    "test": "node --test backend/test/*.test.js"
+    "test": "node --test backend/test/*.test.js",
+    "deploy:chat": "supabase functions deploy magic-chat"
   },
   "repository": {
     "type": "git",
