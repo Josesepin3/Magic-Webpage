@@ -4147,3 +4147,94 @@ html.reveal-js [data-reveal].revealed {
 	.mop-card-icon { width: clamp(90px, 30vw, 130px); }
 }
 
+
+/* ═══════════════════════════════════════════════════
+   CHAT FAB — botón flotante del asistente (Magic Assistant)
+
+   Base = Adwaita (.circular + .suggested-action): círculo 32px
+   (ícono 16px + padding interno 8px), márgenes externos 24px,
+   acento #3584e4, ícono blanco, plano.
+   Hover "Aura" = degradado de tonos vivos + glow, ícono con contraste.
+   ═══════════════════════════════════════════════════ */
+
+.chat-fab {
+	position: fixed;
+	right: max(24px, env(safe-area-inset-right));
+	bottom: max(24px, env(safe-area-inset-bottom));
+	z-index: 200;
+	display: grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	padding: 8px;
+	margin: 0;
+	border: none;
+	border-radius: 50%;
+	background-color: #3584e4; /* Adwaita accent-bg */
+	color: #ffffff; /* Adwaita accent-fg */
+	cursor: pointer;
+	line-height: 0;
+	-webkit-tap-highlight-color: transparent;
+	transition: color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, filter 0.3s ease;
+}
+
+.chat-fab-icon {
+	position: relative;
+	z-index: 1;
+	display: block;
+	width: 16px;
+	height: 16px;
+}
+
+/* El degradado "Aura" vive en un pseudo-elemento para animar su opacidad
+   (background-image no es interpolable entre estados). */
+.chat-fab::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background-image: linear-gradient(135deg, #49a1ff 0%, #3584e4 38%, #9141ac 72%, #d56199 100%);
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+/* Estado activo (panel abierto): el degradado Aura queda fijo */
+.chat-fab--active {
+	color: #241f31; /* contraste sobre el degradado vivo */
+	box-shadow: 0 0 14px rgba(129, 65, 172, 0.55);
+}
+
+.chat-fab--active::before {
+	opacity: 1;
+}
+
+/* Hover solo en dispositivos con hover real (patrón de los .btn del sitio) */
+@media (hover: hover) {
+	.chat-fab:hover {
+		color: #241f31;
+		box-shadow: 0 0 14px rgba(129, 65, 172, 0.55);
+	}
+
+	.chat-fab:hover::before {
+		opacity: 1;
+	}
+
+	.chat-fab:active {
+		transform: scale(0.92);
+		filter: brightness(0.95);
+	}
+}
+
+/* Respeto por "reducir movimiento" */
+@media (prefers-reduced-motion: reduce) {
+	.chat-fab,
+	.chat-fab::before {
+		transition: none;
+	}
+
+	.chat-fab:active {
+		transform: none;
+		filter: none;
+	}
+}
+

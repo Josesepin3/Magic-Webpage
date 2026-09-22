@@ -513,13 +513,13 @@ en el deploy estático de GitHub Pages, sin backend Express.
       en `.env`, deploy con CLI y probar el round-trip real a Mistral.
       `verify_jwt = true` en `supabase/config.toml`; `CHAT_REQUIRE_AUTH=true`
       por defecto (chat solo con sesión iniciada).
-- [x] Diseño del botón flotante del chat (FAB) documentado en
-      `docs/CHAT-FAB.md` — círculo 32px y márgenes 24px reales de Tuba,
-      colores `suggested-action` de Adwaita en estado base, transformación
-      "Aura" (degradado vivo + glow) en hover; siempre visible en todas las
-      páginas
-- [ ] Componente JS `ChatWidget.js` — implementa el FAB según
-      `docs/CHAT-FAB.md` + toggle mostrar/ocultar del panel
+- [x] Botón flotante del chat (FAB) implementado en `ChatWidget.js` —
+      círculo 32px y márgenes 24px reales (referencia: Tuba), base
+      `suggested-action` de Adwaita (#3584e4), transformación "Aura"
+      (degradado vivo + glow en hover, ícono con contraste), siempre visible
+      en todas las páginas
+- [~] Componente JS `ChatWidget.js` — FAB listo; pendiente el panel del chat
+      (el toggle queda como stub: abre/cierra el estado visual)
 - [ ] Servicio `services/ai.js` — invoca la Edge Function con la sesión del usuario
 - [ ] Estados: loading (puntos animados), error (reintentar), vacío (placeholder)
 
