@@ -4244,12 +4244,17 @@ html.reveal-js [data-reveal].revealed {
 }
 
 /* En mobile el botón flotante cubre parte del footer: se reserva espacio
-   inferior (56px FAB + 24px margen + 8px de aire = 88px) para que el
-   contenido del final de página quede siempre por encima de la zona del
-   botón, aun con el scroll al fondo. */
+   inferior (56px FAB + 24px margen + 8px de aire = 88px) DENTRO del
+   propio footer (mismo color, sin franja negra del body) para que el
+   contenido del final de página quede por encima de la zona del botón, aun
+   con el scroll al fondo. */
 @media (max-width: 640px) {
 	body {
-		padding-bottom: 88px;
+		padding-bottom: 0;
+	}
+
+	footer {
+		padding-bottom: calc(24px + 88px); /* 24px propios + 88px de zona del FAB */
 	}
 }
 
