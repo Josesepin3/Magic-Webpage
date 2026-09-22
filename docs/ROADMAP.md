@@ -35,8 +35,11 @@
 > headers de seguridad en todo el sitio, middleware de errores con respuestas
 > JSON/HTML y sin filtraciones en prod, `GET /health`, límites de payload, tests
 > (`npm test`) y código muerto eliminado (`auth.js`/`adminApi.js`/`api.js`).
-> **Pendiente:** re-ejecutar `supabase/schema.sql` (incluye los triggers) en el
-> SQL Editor. **Siguiente: Fase 5 (IA con Edge Functions).**
+> **Estado del deploy:** schema re-ejecutado y seed aplicados y **verificados**
+> (probes con limpieza: precios recalculados server-side, opciones inventadas
+> rechazadas, anti-spam activo), redirects de Auth configurados. Restan la
+> **prueba final** local y (opcional) Google OAuth.
+> **Siguiente: Fase 5 (IA con Edge Functions).**
 
 ---
 
@@ -465,9 +468,10 @@ en el deploy estático de GitHub Pages, sin backend Express.
 - [x] `backend/app.js` — eliminados `/api/auth` y `/api/admin` (Express solo
       sirve páginas públicas en dev local); nuevas rutas de cuenta/carrito
 - [x] CSS sección 22 — cuenta, carrito, servicios, avatar y menú de usuario
-- [ ] Aplicar `supabase/schema.sql` en el SQL Editor de Supabase
-- [ ] `npm run seed:supabase` (requiere el schema aplicado)
-- [ ] Dashboard de Supabase → Auth → URL Configuration: redirects
+- [x] Aplicar `supabase/schema.sql` en el SQL Editor de Supabase
+      (aplicado 22 sep 2026 — verificado: triggers de integridad y anti-spam activos)
+- [x] `npm run seed:supabase` (requiere el schema aplicado)
+- [x] Dashboard de Supabase → Auth → URL Configuration: redirects
       `http://localhost:3000/**` y `https://josesepin3.github.io/Magic-Webpage/**`
 - [ ] Google OAuth en Supabase (opcional) y poner `GOOGLE: true` en `config.js`
 - [ ] Probar local (`npm run dev` + `npx serve dist`) y desplegar a `main`
@@ -532,8 +536,10 @@ en el deploy estático de GitHub Pages, sin backend Express.
 - [x] **Código muerto eliminado:** `backend/routes/auth.js`,
       `backend/routes/adminApi.js`, `backend/middleware/auth.js`,
       `frontend/js/services/api.js`
-- [ ] Re-ejecutar `supabase/schema.sql` en el SQL Editor (parte 4b sigue
-      pendiente: aplicar schema → `npm run seed:supabase` → redirects Auth)
+- [x] Re-ejecutar `supabase/schema.sql` en el SQL Editor — **aplicado y
+      verificado** (probes con limpieza: precios recalculados, opciones
+      inventadas rechazadas, anti-spam activo). Resta la **prueba final** local
+      y (opcional) Google OAuth
 
 ---
 
