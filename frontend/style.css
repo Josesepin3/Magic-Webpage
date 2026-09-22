@@ -4149,18 +4149,32 @@ html.reveal-js [data-reveal].revealed {
 
 
 /* ═══════════════════════════════════════════════════
-   CHAT FAB — botón flotante del asistente (Magic Assistant)
+   CHAT — Asistente Magic (FAB + panel card/sidebar)
 
-   Base = Adwaita (.circular + .suggested-action) en escala de FAB:
-   círculo 56px (ícono 24px + padding interno 16px), márgenes externos
-   24px, acento #3584e4, ícono blanco, plano. El FAB usa una escala propia
-   y mayor que un botón común (~34px en Adwaita): 56px es el estándar para
-   botones flotantes, con glyph de 24px (proporción ~0.43, similar a la
-   del 16px/34px de un botón circular común).
-   Hover "Aura" = degradado con 3 colores del glow del hero de MagicOS que
-   contrastan entre sí (ámbar #ffb029 -> verde claro #b5f69a -> rosa
-   #ee81dd) + glow con radio amplio y suave, ícono con contraste.
+   FAB = Adwaita (.circular + .suggested-action) en escala flotante:
+   círculo 56px (ícono 24px + padding interno 16px), márgenes 24px, acento
+   #3584e4, plano. Hover "Aura": degradado con 3 colores del glow del hero
+   (ámbar #ffb029 -> verde claro #b5f69a -> rosa #ee81dd) + glow suave.
+
+   Panel: dos modos de "ventana Adwaita" (fondo #241f31, radio 12px, bordes
+   sutiles) + un tercer estado mobile:
+   - card (por defecto): tarjeta flotante en la esquina (400px × 75svh).
+   - sidebar (≥1024px): 420px de altura completa a la derecha, sin scrim.
+     Al abrir, la página vuelve a ser una "ventana" (radio 12, gutter 24,
+     gap 24px) vía .site-shell, así el chat se siente nativo al contenido.
+   - mobile (≤640px): sheet de ancho completo.
+   Todo lo del modo sidebar vive bajo @media (min-width: 1024px); el resto
+   de breakpoints (card/sheet) queda separado para no romper mobile.
    ═══════════════════════════════════════════════════ */
+
+/* Wrapper estructural de header+main+footer (se abre en header.ejs, se
+   cierra en footer.ejs). Por defecto neutro: display: contents hace que
+   sus hijos participen en el layout de <body> como si el wrapper no
+   existiera (layout actual intacto). Solo cobra forma como "ventana" bajo
+   body.chat-shell + @media (min-width: 1024px). */
+.site-shell {
+	display: contents;
+}
 
 .chat-fab {
 	position: fixed;
@@ -4203,7 +4217,9 @@ html.reveal-js [data-reveal].revealed {
 	transition: opacity 0.3s ease;
 }
 
-/* Estado activo (panel abierto): el degradado Aura queda fijo */
+/* Estado activo: degradado Aura fijo, útil si el panel no cubre la esquina
+   (hoy el FAB se oculta .chat-fab--hidden mientras el panel está abierto,
+   estas reglas quedan como base del estado abierto). */
 .chat-fab--active {
 	color: #241f31; /* contraste sobre el degradado vivo */
 	box-shadow: 0 0 32px rgba(238, 129, 221, 0.35), 0 0 64px rgba(181, 246, 154, 0.25);
@@ -4240,6 +4256,433 @@ html.reveal-js [data-reveal].revealed {
 	.chat-fab:active {
 		transform: none;
 		filter: none;
+	}
+}
+
+/* ─────────────────────────────────────────────────────
+   FAB oculto mientras el panel está abierto (el panel cubre la esquina)
+   ───────────────────────────────────────────────────── */
+.chat-fab--hidden {
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────
+   PANEL — estructura y geometría base (modo card)
+   ───────────────────────────────────────────────────── */
+.chat-panel {
+	position: fixed;
+	right: max(24px, env(safe-area-inset-right));
+	bottom: max(24px, env(safe-area-inset-bottom));
+	z-index: 210;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	width: min(400px, calc(100vw - 48px));
+	height: min(75svh, 640px);
+	border-radius: 12px;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: #241f31; /* Adwaita dark: superficie de ventana clásica */
+	color: #ffffff;
+	box-shadow: 0 24px 56px rgba(0, 0, 0, 0.5);
+	opacity: 0;
+	transform: scale(0.72);
+	transform-origin: 100% 100%; /* crece desde la esquina del FAB */
+	visibility: hidden;
+	pointer-events: none;
+	transition:
+		width 0.3s ease,
+		height 0.3s ease,
+		transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1),
+		opacity 0.22s ease,
+		visibility 0.3s;
+}
+
+.chat-panel--open {
+	opacity: 1;
+	transform: none;
+	visibility: visible;
+	pointer-events: auto;
+}
+
+/* Apertura/restauración sin animación (navegación entre páginas) */
+.chat-panel--no-anim {
+	transition: none;
+}
+
+/* ── Cabecera ──────────────────────────────────────── */
+.chat-topbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 16px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	flex: 0 0 auto;
+}
+
+.chat-topbar-id {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	min-width: 0;
+}
+
+.chat-status-dot {
+	width: 10px;
+	height: 10px;
+	flex: 0 0 auto;
+	border-radius: 50%;
+	background: #57e389; /* Adwaita success */
+	box-shadow: 0 0 0 0 rgba(87, 227, 137, 0.45);
+	animation: chat-dot-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes chat-dot-pulse {
+	0%, 100% { box-shadow: 0 0 0 0 rgba(87, 227, 137, 0.45); }
+	50% { box-shadow: 0 0 0 6px rgba(87, 227, 137, 0); }
+}
+
+.chat-topbar-titles {
+	display: flex;
+	flex-direction: column;
+	line-height: 1.25;
+	min-width: 0;
+}
+
+.chat-title {
+	font-size: 15px;
+	font-weight: 700;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.chat-status {
+	font-size: 12px;
+	color: #9a9996; /* Adwaita secondary-fg */
+}
+
+.chat-topbar-actions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex: 0 0 auto;
+}
+
+/* Botones flat circulares Adwaita: .circular min 34px, glyph 16px */
+.chat-btn {
+	width: 34px;
+	height: 34px;
+	display: grid;
+	place-items: center;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: transparent;
+	color: #ffffff;
+	cursor: pointer;
+	transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.chat-btn:hover { background-color: rgba(255, 255, 255, 0.08); }
+.chat-btn:active { transform: scale(0.92); }
+.chat-btn svg { display: block; }
+
+/* ── Cuerpo / mensajes ─────────────────────────────── */
+.chat-body {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+/* Estado vacío: bienvenida + chips de preguntas rápidas */
+.chat-empty {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin: auto 0;
+}
+
+.chat-welcome {
+	align-self: flex-start;
+	max-width: 88%;
+	padding: 12px 16px;
+	border-radius: 12px 12px 12px 4px;
+	background: #3d3846; /* Adwaita fill */
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.chat-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.chat-chip {
+	font: inherit;
+	font-size: 13px;
+	padding: 6px 12px;
+	border-radius: 6px;
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	background: transparent;
+	color: #ffffff;
+	cursor: pointer;
+	transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.chat-chip:hover { background-color: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.28); }
+.chat-chip:active { transform: scale(0.97); }
+
+/* Mensajes: usuario = burbuja acento; asistente = tarjeta elevada */
+.chat-msg {
+	max-width: 78%;
+	font-size: 14px;
+	line-height: 1.45;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	animation: chat-msg-in 0.24s ease;
+}
+
+@keyframes chat-msg-in {
+	from { opacity: 0; transform: translateY(6px); }
+	to { opacity: 1; transform: none; }
+}
+
+.chat-msg--user {
+	align-self: flex-end;
+	padding: 10px 14px;
+	border-radius: 12px 12px 4px 12px;
+	background: #3584e4; /* Adwaita accent */
+	color: #ffffff;
+}
+
+.chat-msg--assistant {
+	align-self: flex-start;
+	padding: 10px 14px;
+	border-radius: 12px 12px 12px 4px;
+	background: #3d3846; /* Adwaita fill */
+	color: #ffffff;
+}
+
+/* Indicador de escritura (3 puntos Adwaita) */
+.chat-msg--typing {
+	align-self: flex-start;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 12px 16px;
+	border-radius: 12px 12px 12px 4px;
+	background: #3d3846;
+}
+
+.chat-msg--typing i {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.75);
+	animation: chat-typing 1.2s ease-in-out infinite;
+}
+
+.chat-msg--typing i:nth-child(2) { animation-delay: 0.16s; }
+.chat-msg--typing i:nth-child(3) { animation-delay: 0.32s; }
+
+@keyframes chat-typing {
+	0%, 60%, 100% { opacity: 0.35; transform: translateY(0); }
+	30% { opacity: 1; transform: translateY(-3px); }
+}
+
+/* Error inline con reintento (estilo banner Adwaita) */
+.chat-error {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	padding: 8px 12px;
+	border-radius: 6px;
+	border: 1px solid rgba(224, 27, 36, 0.35); /* Adwaita destructive */
+	background: rgba(224, 27, 36, 0.12);
+	color: #ff6f69; /* Adwaita error-fg */
+	font-size: 13px;
+	line-height: 1.4;
+	animation: chat-msg-in 0.24s ease;
+}
+
+.chat-error-text { flex: 1 1 auto; }
+
+.chat-retry {
+	font: inherit;
+	font-size: 13px;
+	font-weight: 700;
+	padding: 5px 10px;
+	border: none;
+	border-radius: 6px;
+	background: #3584e4;
+	color: #ffffff;
+	cursor: pointer;
+	transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.chat-retry:hover { filter: brightness(1.08); }
+.chat-retry:active { transform: scale(0.96); }
+
+/* ── Input ─────────────────────────────────────────── */
+.chat-input {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 16px;
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	flex: 0 0 auto;
+}
+
+.chat-entry {
+	flex: 1 1 auto;
+	min-width: 0;
+	font: inherit;
+	font-size: 14px;
+	color: #ffffff;
+	background: #3d3846; /* Adwaita fill (fondo de entry) */
+	border: 1px solid transparent;
+	border-radius: 6px;
+	padding: 8px 12px;
+	outline: none;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chat-entry::placeholder { color: #9a9996; }
+
+.chat-entry:focus {
+	border-color: #3584e4;
+	box-shadow: 0 0 0 2px rgba(53, 132, 228, 0.4);
+}
+
+.chat-send-btn {
+	width: 34px;
+	height: 34px;
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: #3584e4; /* suggested-action */
+	color: #ffffff;
+	cursor: pointer;
+	transition: filter 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.chat-send-btn:hover { filter: brightness(1.08); }
+.chat-send-btn:active { transform: scale(0.92); }
+.chat-send-btn:disabled { opacity: 0.4; cursor: default; transform: none; filter: none; }
+
+/* ─────────────────────────────────────────────────────
+   MODO SIDEBAR (≥1024px) — la página se vuelve "ventana"
+   ───────────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+	/* El panel deja de ser tarjeta y ocupa la altura completa a la
+	   derecha. Sigue anclado abajo como la card (bottom: 24px base):
+	   la transición de altura crece hacia arriba dentro del gutter. */
+	.chat-panel--sidebar {
+		width: 420px;
+		height: calc(100dvh - 48px);
+		border-radius: 12px;
+	}
+
+	/* Botón card<->sidebar solo tiene sentido en desktop */
+	.chat-expand-btn {
+		display: grid;
+	}
+
+	/* La página pasa a ser una ventana flotante redondeada con gutter
+	   24px y gap 24px frente a la sidebar. margin-right =
+	   24 (gap) + 420 (sidebar) + 24 (gutter derecho). */
+	body.chat-shell {
+		padding: 0;
+	}
+
+	body.chat-shell .site-shell {
+		display: flex;
+		flex-direction: column;
+		margin: 24px;
+		margin-right: calc(420px + 48px);
+		min-height: calc(100dvh - 48px);
+		border-radius: 12px;
+		overflow: clip;
+		background: #000000;
+		z-index: 0;
+		transition: margin 0.32s ease, min-height 0.32s ease;
+	}
+
+	/* La cabecera flota dentro de la ventana (sticky) con la misma
+	   lógica de hoy: glass arriba, contenido pasando debajo. */
+	body.chat-shell .site-header {
+		position: sticky;
+		top: 24px;
+		height: var(--header-height);
+		border-radius: 12px 12px 0 0;
+		z-index: 100;
+	}
+
+	/* Reemplaza el padding lateral que daba <body> (24px) */
+	body.chat-shell main {
+		padding: 0 var(--page-padding);
+	}
+}
+
+/* ─────────────────────────────────────────────────────
+   MOBILE (≤640px) — sheet de ancho completo.
+   (Separado del sidebar de desktop a propósito: el chat mobile se
+   refina aparte, sin tocar el modo de escritorio.)
+   ───────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+	.chat-panel {
+		left: 0;
+		right: 0;
+		bottom: 0;
+		top: auto;
+		width: 100%;
+		height: min(86svh, 700px);
+		border-radius: 12px 12px 0 0;
+		transform-origin: 50% 100%;
+	}
+
+	.chat-input {
+		padding-bottom: max(12px, env(safe-area-inset-bottom));
+	}
+}
+
+@media (max-width: 1023px) {
+	.chat-expand-btn {
+		display: none;
+	}
+}
+
+/* Respeto por "reducir movimiento" en el panel */
+@media (prefers-reduced-motion: reduce) {
+	.chat-panel,
+	.chat-panel--sidebar,
+	.chat-panel--no-anim,
+	body.chat-shell .site-shell {
+		transition: none;
+	}
+
+	.chat-msg,
+	.chat-error,
+	.chat-status-dot,
+	.chat-msg--typing i {
+		animation: none;
 	}
 }
 
