@@ -254,6 +254,24 @@ input, textarea, button {
 	mask-image: linear-gradient(to bottom, transparent 86.2%, #000 91.2%, #000 96%, transparent 100%);
 }
 
+/* En mobile las 20 capas del glass progresivo son demasiado caras: cada
+   capa fuerza su propio backdrop-filter. Se apagan y el header queda como
+   una sola franja con un único desenfoque (mucho más barato). En desktop se
+   conserva el glass progresivo. */
+@media (max-width: 640px) {
+	.glass-layer {
+		display: none;
+	}
+
+	.glass {
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		/* La franja corta el desenfoque de golpe: cerramos el borde con una
+		   línea de 1px para separar header y contenido. */
+		border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+	}
+}
+
 .site-title {
 	margin: 0;
 	font-size: 1.25rem;
