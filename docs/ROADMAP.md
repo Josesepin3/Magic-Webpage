@@ -506,11 +506,18 @@ en el deploy estático de GitHub Pages, sin backend Express.
 - [ ] Edge Function `supabase/functions/magic-chat` — CORS, inyecta
       `site-map.md` + bloque CATÁLOGO (query allow-list) en el system prompt,
       llama a Mistral
-      (secrets: `MISTRAL_API_KEY`, `MISTRAL_API_URL`, `SUPABASE_SERVICE_ROLE_KEY`)
-      **Estado:** código listo (`index.ts` + `lib.ts`), `deno check` OK y
-      e2e local 18/18 verdes (auth 401/400, sanitize, catálogo con sus 13
-      opciones, system prompt armado). Pendiente: setear `MISTRAL_API_KEY`
-      en `.env`, deploy con CLI y probar el round-trip real a Mistral.
+      (secrets: `MISTRAL_API_KEY`, `MISTRAL_MODEL`, `MISTRAL_API_URL`,
+      `SUPABASE_SERVICE_ROLE_KEY`)
+      **Estado:** código listo (`index.ts` + `lib.ts`), `deno check` OK y e2e
+      local 30/30 verdes (`supabase/functions/magic-chat/e2e.ts`: auth 401/400,
+      sanitize, catálogo vivo con sus 13 opciones, reintento ante 429 con
+      servidor falso y round-trip real a Mistral). `MISTRAL_API_KEY` ya está en
+      el `.env` local (chmod 600, ignorado por git). El plan de Mistral es el
+      gratuito: solo sirve modelos abiertos, así que `DEFAULT_MODEL` pasó a
+      `ministral-14b-latest` (`mistral-small-*` y `mistral-medium-*` responden
+      `429 rate_limited`) y `callMistral` reintenta ante 429/503 respetando
+      `Retry-After`. Pendiente: deploy con CLI (`supabase secrets set` +
+      `npm run deploy:chat`); en esta máquina no hay CLI de Supabase ni Docker.
       `verify_jwt = true` en `supabase/config.toml`; `CHAT_REQUIRE_AUTH=true`
       por defecto (chat solo con sesión iniciada).
 - [x] Botón flotante del chat (FAB) implementado en `ChatWidget.js` —
@@ -646,6 +653,7 @@ npm run build         # Prerender estático EJS → dist/ (sin SQLite ni módulo
 PORT=3000
 JWT_SECRET=...          # legacy, sin uso (la API de auth se eliminó en Fase 8)
 MISTRAL_API_KEY=...
+MISTRAL_MODEL=ministral-14b-latest   # el plan gratuito solo sirve modelos abiertos
 MISTRAL_API_URL=https://api.mistral.ai/v1/chat/completions
 SUPABASE_URL=https://ukfbueqhnxehifisidan.supabase.co
 SUPABASE_ANON_KEY=eyJ...   # key pública (también va en frontend/js/config.js)

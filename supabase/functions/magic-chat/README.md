@@ -30,6 +30,7 @@ supabase login
 supabase link --project-ref ukfbueqhnxehifisidan
 supabase secrets set \
   MISTRAL_API_KEY=TU_KEY \
+  MISTRAL_MODEL=ministral-14b-latest \
   MISTRAL_API_URL=https://api.mistral.ai/v1/chat/completions
 npm run deploy:chat
 ```
@@ -45,8 +46,15 @@ Secrets ya configurados por cloud (no hace falta setearlos): `SUPABASE_URL` y
 |---|---|---|
 | `MISTRAL_API_KEY` | — | **requerida**; key de la API de Mistral |
 | `MISTRAL_API_URL` | `https://api.mistral.ai/v1/chat/completions` | endpoint de chat |
-| `MISTRAL_MODEL` | `mistral-small-latest` | modelo a usar |
+| `MISTRAL_MODEL` | `ministral-14b-latest` | modelo a usar (el plan actual solo sirve modelos abiertos: ministral / codestral / voxtral) |
 | `CHAT_REQUIRE_AUTH` | `true` | `false` permite chat sin login (revisar anti-abuso) |
+
+El plan contratado hoy es el gratuito: `mistral-small-*`, `mistral-medium-*` y
+`magistral-*` responden `429 rate_limited`. Por eso el modelo por defecto es
+`ministral-14b-latest`; si se cambia de plan alcanza con setear `MISTRAL_MODEL`
+(no hace falta tocar el código). `callMistral` reintenta hasta 3 intentos ante
+`429`/`503` (respeta `Retry-After`), porque el plan limita a pocas requests por
+segundo.
 
 `supabase/config.toml` define `verify_jwt = true`: la plataforma ya exige un JWT
 válido del proyecto antes de invocar, y la función además verifica que el
@@ -56,10 +64,11 @@ usuario exista (doble capa).
 
 ```bash
 deno check supabase/functions/magic-chat/index.ts        # tipos
-# e2e (importa index.ts, levanta el handler en :8765 y prueba auth, catálogo y
-# round-trip real a Mistral; salta el round-trip si MISTRAL_API_KEY está vacía):
+# e2e: levanta el handler real en :8765 y prueba auth, validaciones, catálogo
+# vivo, reintento ante 429 (con un servidor falso) y round-trip real a Mistral.
+# Necesita MISTRAL_API_KEY en el .env (raíz del repo):
 deno run --allow-net --allow-env --allow-read --env-file=.env \
-  /tmp/opencode/magic-chat-e2e.ts
+  supabase/functions/magic-chat/e2e.ts
 ```
 
 Nota: los `.md` se importan como texto (`with { type: "text" }`). Si el CLI de

@@ -6,8 +6,14 @@ import systemPrompt from "./system-prompt.md" with { type: "text" };
 
 export const MAX_HISTORY = 20; // mensajes del historial que entran al contexto
 export const MAX_MESSAGE_CHARS = 4000; // recorte por mensaje
-export const DEFAULT_MODEL = "mistral-small-latest";
+// Plan actual: solo sirve modelos abiertos (ministral / codestral / voxtral).
+// `mistral-small-latest` y `mistral-medium-latest` responden 429 rate_limited.
+// Se cambia sin tocar el código con la variable MISTRAL_MODEL.
+export const DEFAULT_MODEL = "ministral-14b-latest";
 export const MISTRAL_DEFAULT_URL = "https://api.mistral.ai/v1/chat/completions";
+/** Intentos totales ante límite de ritmo (429) o caída pasajera (503). */
+export const MAX_ATTEMPTS = 3;
+const RETRY_WAIT_MS = [1000, 2500];
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -131,33 +137,59 @@ export interface MistralOptions {
   maxTokens?: number;
 }
 
-/** Llama a la API de chat de Mistral y devuelve la respuesta del modelo. */
-export async function callMistral(opts: MistralOptions): Promise<string> {
-  const res = await fetch(opts.url ?? MISTRAL_DEFAULT_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${opts.apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: opts.model ?? DEFAULT_MODEL,
-      messages: [{ role: "system", content: opts.system }, ...opts.history],
-      temperature: opts.temperature ?? 0.7,
-      max_tokens: opts.maxTokens ?? 600,
-    }),
-    signal: AbortSignal.timeout(30_000),
-  });
+/** Espera antes de reintentar: respeta `Retry-After` si el proveedor lo manda. */
+function retryWaitMs(headers: Headers, attempt: number): number {
+  const retryAfter = Number(headers.get("retry-after"));
+  if (Number.isFinite(retryAfter) && retryAfter > 0) return Math.min(retryAfter * 1000, 5000);
+  return RETRY_WAIT_MS[attempt - 1] ?? RETRY_WAIT_MS[RETRY_WAIT_MS.length - 1];
+}
 
-  const data: unknown = await res.json().catch(() => null);
-  if (!res.ok) {
-    const detail = (data as { error?: { message?: string } } | null)?.error?.message;
-    throw new Error(`Mistral ${res.status}: ${detail ?? JSON.stringify(data ?? {}).slice(0, 200)}`);
+/**
+ * Llama a la API de chat de Mistral y devuelve la respuesta del modelo.
+ * Reintenta solo cuando el error es de ritmo (429) o de servicio (503): el plan
+ * limita a pocas requests por segundo y una conversación puede encadenarlas.
+ */
+export async function callMistral(opts: MistralOptions): Promise<string> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const res = await fetch(opts.url ?? MISTRAL_DEFAULT_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${opts.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: opts.model ?? DEFAULT_MODEL,
+        messages: [{ role: "system", content: opts.system }, ...opts.history],
+        temperature: opts.temperature ?? 0.7,
+        max_tokens: opts.maxTokens ?? 600,
+      }),
+      signal: AbortSignal.timeout(30_000),
+    });
+
+    const data: unknown = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      const detail = (data as { error?: { message?: string } } | null)?.error?.message;
+      lastError = new Error(
+        `Mistral ${res.status}: ${detail ?? JSON.stringify(data ?? {}).slice(0, 200)}`,
+      );
+      const transitorio = res.status === 429 || res.status === 503;
+      if (!transitorio || attempt === MAX_ATTEMPTS) throw lastError;
+      const wait = retryWaitMs(res.headers, attempt);
+      console.warn(`magic-chat: Mistral ${res.status}, reintento ${attempt} en ${wait} ms`);
+      await new Promise((r) => setTimeout(r, wait));
+      continue;
+    }
+
+    const reply = (data as { choices?: Array<{ message?: { content?: unknown } }> } | null)
+      ?.choices?.[0]?.message?.content;
+    if (typeof reply !== "string" || !reply.trim()) throw new Error("Mistral respondió vacío");
+    return reply.trim();
   }
 
-  const reply = (data as { choices?: Array<{ message?: { content?: unknown } }> } | null)
-    ?.choices?.[0]?.message?.content;
-  if (typeof reply !== "string" || !reply.trim()) throw new Error("Mistral respondió vacío");
-  return reply.trim();
+  throw lastError ?? new Error("Mistral no respondió");
 }
 
 /** Export para que index.ts inyecte los assets .md sin duplicar imports. */
