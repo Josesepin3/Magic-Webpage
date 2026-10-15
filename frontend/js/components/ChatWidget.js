@@ -124,6 +124,10 @@
     panel.setAttribute('role', 'dialog');
     panel.setAttribute('aria-modal', 'false');
     panel.setAttribute('aria-label', 'Asistente Magic');
+    // El panel es hermano de .site-shell (hijo de <body>), fuera del scroller
+    // de la página: marcarlo evita que Lenis intercepte el wheel del chat
+    // (así .chat-body rueda de forma nativa y la página no se mueve).
+    panel.setAttribute('data-lenis-prevent', '');
     panel.innerHTML =
       '<div class="chat-topbar">' +
         '<div class="chat-topbar-id">' +
@@ -276,6 +280,15 @@
     return innerEl;
   }
 
+  // Marca/desmarca el scroller de la ventana (.site-shell-inner) para que
+  // Lenis ignore su wheel/touch mientras la sidebar está abierta.
+  function setInnerLenisGate(on) {
+    var shellInner = getInner();
+    if (!shellInner) return;
+    if (on) shellInner.setAttribute('data-lenis-prevent', '');
+    else shellInner.removeAttribute('data-lenis-prevent');
+  }
+
   function applyMode(mirrorFrom) {
     // Capturar la posición del doc ANTES de togglear chat-shell: al fijar la
     // ventana el documento deja de rodar y el navegador clampa scrollY a 0.
@@ -286,6 +299,10 @@
     lastSidebar = sidebar;
     document.body.classList.toggle('chat-shell', sidebar);
     panel.classList.toggle('chat-panel--sidebar', sidebar);
+    // En modo ventana el scroll vive en .site-shell-inner: marcarlo para que
+    // Lenis ignore el wheel/touch que nace dentro (rueda nativo). Fuera de la
+    // ventana el shell-inner es neutro (display: contents), así que se quita.
+    setInnerLenisGate(sidebar);
     if (sidebar) {
       expandBtn.setAttribute('aria-label', 'Convertir en ventana flotante');
       expandBtn.title = 'Convertir en ventana flotante';
@@ -307,64 +324,47 @@
 
   function restoreDocScroll() {
     var s = savedDocScroll;
+    var lenis = getLenis();
     requestAnimationFrame(function () {
+      // Preferimos Lenis (deja su estado interno coherente con el scroll real);
+      // si no está, scroll nativo.
+      if (lenis && typeof lenis.scrollTo === 'function') {
+        try { lenis.scrollTo(s, { immediate: true }); return; } catch (err) { /* cae al nativo */ }
+      }
       try { window.scrollTo(0, s); } catch (err) { /* sin salto */ }
     });
   }
 
-  // Con la sidebar, la ventana interna del shell es el scroller: el doc ya
-  // no roda, así que Lenis (home/magicos) se detiene POR COMPLETO
-  // (destroy desacopla el wheel y permite scroll nativo dentro de la
-  // ventana — stop() no sirve: esta versión hace preventDefault del wheel
-  // aun estando stopped). Al salir se recrea Lenis con sus opciones y se
-  // refrescan los triggers de GSAP.
+  // Con la sidebar, la ventana interna del shell (.site-shell-inner) es el
+  // scroller y el documento deja de rodar. Lenis (home/magicos) NO se
+  // destruye: en modo ventana marcamos el shell-inner con data-lenis-prevent
+  // y Lenis ignora el wheel/touch que nace dentro de él (ver onVirtualScroll
+  // del vendor: si algún elemento de la ruta tiene el atributo, retorna sin
+  // preventDefault), dejando que el contenedor ruede de forma nativa. Así la
+  // instancia de Lenis sigue viva e intacta para la página: al cerrar no hay
+  // nada que recrear ni scroll que se rompa.
   //
   // En ventana tampoco hay reveals de scroll: ScrollTrigger no volverá a
   // dispararse (el scroll del doc está congelado), así que todo lo que
   // quedaría oculto/invisible se fuerza a su estado final.
+  function getLenis() {
+    return window.__homeLenis || window.__pageLenis || null;
+  }
+
   function syncScrollLock(locked) {
     if (locked) {
-      haltLenis();
       completeReveals();
-    } else {
-      resumeLenis();
-      if (window.ScrollTrigger && typeof window.ScrollTrigger.refresh === 'function') {
-        try { window.ScrollTrigger.refresh(); } catch (err) { /* opcional */ }
-      }
+      return;
     }
-  }
-
-  function haltLenis() {
-    var name = window.__homeLenis ? '__homeLenis' : (window.__pageLenis ? '__pageLenis' : null);
-    var lenis = name ? window[name] : null;
-    if (!lenis) return;
-    if (lenis.__chatTicker && window.gsap) {
-      try { window.gsap.ticker.remove(lenis.__chatTicker); } catch (err) { /* opcional */ }
+    // Al salir, el documento vuelve a ser scroller: re-medimos Lenis (el doc
+    // cambió de alto mientras estaba congelado) y refrescamos los triggers.
+    var lenis = getLenis();
+    if (lenis && typeof lenis.resize === 'function') {
+      try { lenis.resize(); } catch (err) { /* opcional */ }
     }
-    window.__chatScrollBackup = {
-      name: name,
-      options: lenis.options || { duration: 1.1, smoothWheel: true }
-    };
-    try { lenis.destroy(); } catch (err) { /* opcional */ }
-    window[name] = null;
-  }
-
-  function resumeLenis() {
-    var backup = window.__chatScrollBackup;
-    if (!backup || !window.Lenis || window[backup.name]) return;
-    try {
-      var lenis = new Lenis(backup.options);
-      window[backup.name] = lenis;
-      if (window.gsap && window.ScrollTrigger) {
-        lenis.on('scroll', window.ScrollTrigger.update);
-        var tickFn = (function (l) {
-          return function (time) { l.raf(time * 1000); };
-        })(lenis);
-        window.gsap.ticker.add(tickFn);
-        window.gsap.ticker.lagSmoothing(0);
-        lenis.__chatTicker = tickFn;
-      }
-    } catch (err) { /* Lenis opcional */ }
+    if (window.ScrollTrigger && typeof window.ScrollTrigger.refresh === 'function') {
+      try { window.ScrollTrigger.refresh(); } catch (err) { /* opcional */ }
+    }
   }
 
   // Estado final de los reveals atados al scroll (ScrollTrigger). Solo a los
@@ -432,6 +432,7 @@
     panel.classList.remove('chat-panel--open');
     var wasSidebar = lastSidebar;
     document.body.classList.remove('chat-shell');
+    setInnerLenisGate(false);
     lastSidebar = false;
     syncScrollLock(false);
     if (wasSidebar) restoreDocScroll();
