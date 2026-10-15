@@ -4327,6 +4327,8 @@ html.reveal-js [data-reveal].revealed {
 	visibility: hidden;
 	pointer-events: none;
 	transition:
+		right 0.3s ease,
+		bottom 0.3s ease,
 		width 0.3s ease,
 		height 0.3s ease,
 		transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1),
@@ -4682,12 +4684,21 @@ html.reveal-js [data-reveal].revealed {
    MODO SIDEBAR (≥1024px) — la página se vuelve "ventana"
    ───────────────────────────────────────────────────── */
 @media (min-width: 1024px) {
+	/* Gutter exterior del modo sidebar: separación pantalla <-> ventana,
+	   ventana <-> sidebar y sidebar <-> pantalla. Los tres huecos salen de
+	   aquí, para que no se desincronicen (antes eran 24px en cada uno). */
+	body {
+		--sidebar-gutter: 12px;
+	}
+
 	/* El panel deja de ser tarjeta y ocupa la altura completa a la
-	   derecha. Sigue anclado abajo como la card (bottom: 24px base):
+	   derecha. Sigue anclado abajo como la card (bottom base + gutter):
 	   la transición de altura crece hacia arriba dentro del gutter. */
 	.chat-panel--sidebar {
 		width: 420px;
-		height: calc(100dvh - 48px);
+		right: var(--sidebar-gutter);
+		bottom: var(--sidebar-gutter);
+		height: calc(100dvh - (var(--sidebar-gutter) * 2));
 		border-radius: 12px;
 	}
 
@@ -4698,7 +4709,7 @@ html.reveal-js [data-reveal].revealed {
 
 	/* La página pasa a ser una "ventana" fija en pantalla: el doc deja de
 	   rodar y el contenido rueda DENTRO del rectángulo (siempre visible,
-	   con gutters de 24px y gap de 24px frente a la sidebar). */
+	   con el mismo gutter frente a la pantalla y a la sidebar). */
 	body.chat-shell {
 		padding: 0;
 		overflow: hidden; /* el scroll vive adentro de la ventana */
@@ -4706,10 +4717,11 @@ html.reveal-js [data-reveal].revealed {
 
 	body.chat-shell .site-shell {
 		position: fixed;
-		top: 24px;
-		left: 24px;
-		right: calc(420px + 48px); /* 24 (gap) + 420 (sidebar) + 24 (gutter) */
-		bottom: 24px;
+		top: var(--sidebar-gutter);
+		left: var(--sidebar-gutter);
+		/* gutter + 420 (sidebar) + gutter */
+		right: calc(420px + (var(--sidebar-gutter) * 2));
+		bottom: var(--sidebar-gutter);
 		display: flex;
 		flex-direction: column;
 		border-radius: 12px;
