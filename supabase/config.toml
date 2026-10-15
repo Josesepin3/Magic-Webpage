@@ -4,5 +4,6 @@ project_id = "magic-webpage"
 
 # Edge Function "magic-chat" exige un JWT válido del proyecto antes de invocarse
 # (una capa más además de la verificación de usuario dentro de la función).
-[functions.magic_chat]
+# La clave de la sección es el nombre de la función (carpeta), con guion.
+[functions.magic-chat]
 verify_jwt = true

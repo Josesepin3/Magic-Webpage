@@ -1,0 +1,8 @@
+# Estado local que escribe la CLI (link, deploy): no se versiona.
+.temp
+.branches
+
+# Variables con las que la CLI puede cargar secretos localmente.
+.env
+.env.local
+.env.*.local
