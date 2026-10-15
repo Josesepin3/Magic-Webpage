@@ -1372,6 +1372,17 @@ footer p {
   gap: 24px;
 }
 
+/* En inicio cada tarjeta va dentro de un wrapper .hm-reveal (animación por
+   scroll). El grid estira el wrapper a la altura de la fila, pero la tarjeta
+   conservaba su altura de contenido: cuando una descripción envolvía una
+   línea más, la tarjeta más corta quedaba desalineada por abajo. Con
+   display:grid la tarjeta llena su wrapper y todas las de una fila quedan
+   igualadas, sin tocar /productos (ahí las tarjetas son hijas directas del
+   grid y ya se estiraban solas). */
+.productos-grid > .hm-reveal {
+  display: grid;
+}
+
 .producto-card {
   display: flex;
   flex-direction: column;
@@ -4667,9 +4678,14 @@ html.reveal-js [data-reveal].revealed {
 		flex: 0 0 auto;
 	}
 
-	/* Reemplaza el padding lateral que daba <body> (24px) */
+	/* Reemplaza SOLO el padding lateral que daba <body> (24px). Se usan
+	   padding-left/right y no el atajo `padding`, porque `body.chat-shell
+	   main` (0,1,2) le ganaba a `.productos-page` (0,1,0) y le borraba su
+	   padding vertical: con la sidebar abierta las cards quedaban pegadas
+	   al footer y el hero pegado a la cabecera. */
 	body.chat-shell main {
-		padding: 0 var(--page-padding);
+		padding-left: var(--page-padding);
+		padding-right: var(--page-padding);
 	}
 }
 
