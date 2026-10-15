@@ -4346,7 +4346,56 @@ html.reveal-js [data-reveal].revealed {
 	transition: none;
 }
 
+/* ─────────────────────────────────────────────────────
+   Scrim (solo mobile ≤640px): oscurece la página y bloquea su scroll
+   mientras la hoja inferior está abierta. En desktop no existe.
+   ───────────────────────────────────────────────────── */
+.chat-scrim {
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 205; /* justo por debajo del panel (210) */
+	background: rgba(0, 0, 0, 0.5);
+	touch-action: none; /* el gesto no arrastra la página de atrás */
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.28s ease;
+}
+
+.chat-scrim--open {
+	opacity: 1;
+	pointer-events: auto;
+}
+
 /* ── Cabecera ──────────────────────────────────────── */
+
+/* Asa de arrastre de la hoja inferior (solo mobile): una línea que
+   indica que la hoja se puede arrastrar. En desktop no se muestra. */
+.chat-handle {
+	display: none;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 0 6px;
+	touch-action: none;
+	cursor: grab;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.chat-handle::before {
+	content: "";
+	width: 40px;
+	height: 4px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.28);
+	transition: background-color 0.2s ease;
+}
+
+.chat-handle:active::before {
+	background: rgba(255, 255, 255, 0.5);
+}
+
 .chat-topbar {
 	display: flex;
 	align-items: center;
@@ -4708,7 +4757,10 @@ html.reveal-js [data-reveal].revealed {
 }
 
 /* ─────────────────────────────────────────────────────
-   MOBILE (≤640px) — sheet de ancho completo.
+   MOBILE (≤640px) — hoja inferior arrastrable (bottom sheet).
+   Tres estados: cerrada (fuera de pantalla) / por defecto (60svh) /
+   pantalla completa (100dvh). Se entra y se sale por abajo con
+   translateY (no con scale como la tarjeta de desktop).
    (Separado del sidebar de desktop a propósito: el chat mobile se
    refina aparte, sin tocar el modo de escritorio.)
    ───────────────────────────────────────────────────── */
@@ -4719,9 +4771,53 @@ html.reveal-js [data-reveal].revealed {
 		bottom: 0;
 		top: auto;
 		width: 100%;
-		height: min(86svh, 700px);
+		height: 60svh;
 		border-radius: 12px 12px 0 0;
+		transform: translateY(100%);
 		transform-origin: 50% 100%;
+		transition:
+			height 0.3s cubic-bezier(0.2, 0.7, 0.3, 1),
+			border-radius 0.3s ease,
+			transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1),
+			opacity 0.22s ease,
+			visibility 0.32s;
+	}
+
+	.chat-panel--open {
+		transform: translateY(0);
+	}
+
+	/* Pantalla completa: cubre también la cabecera del sitio. */
+	.chat-panel--full {
+		height: 100dvh;
+		border-radius: 0;
+	}
+
+	/* Mientras el dedo arrastra, la geometría es la del dedo: sin transición. */
+	.chat-panel--dragging {
+		transition: none;
+	}
+
+	.chat-handle {
+		display: flex;
+	}
+
+	/* La barra superior también es zona de agarre. */
+	.chat-topbar {
+		touch-action: none;
+		cursor: grab;
+		user-select: none;
+		-webkit-user-select: none;
+	}
+
+	/* ...pero los botones conservan su comportamiento normal. */
+	.chat-topbar .chat-btn {
+		touch-action: auto;
+		cursor: pointer;
+	}
+
+	.chat-scrim {
+		display: block;
 	}
 
 	.chat-input {
@@ -4746,7 +4842,10 @@ html.reveal-js [data-reveal].revealed {
 	body.chat-shell .mop-card-icon { width: clamp(90px, 24vw, 140px); }
 }
 
-@media (max-width: 1023px) {
+/* El botón de la cabecera existe en desktop (sidebar / ventana flotante) y
+   en mobile (maximizar la hoja); se oculta solo en el tramo intermedio, donde
+   el chat sigue siendo una tarjeta flotante y no hay nada que alternar. */
+@media (min-width: 641px) and (max-width: 1023px) {
 	.chat-expand-btn {
 		display: none;
 	}
@@ -4757,6 +4856,8 @@ html.reveal-js [data-reveal].revealed {
 	.chat-panel,
 	.chat-panel--sidebar,
 	.chat-panel--no-anim,
+	.chat-scrim,
+	.chat-handle::before,
 	body.chat-shell .site-shell {
 		transition: none;
 	}
