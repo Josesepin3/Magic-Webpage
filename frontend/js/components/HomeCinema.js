@@ -43,7 +43,8 @@
       window.__homeLenis = lenis;
       if (hasST) {
         lenis.on('scroll', ScrollTrigger.update);
-        gsap.ticker.add((time) => lenis.raf(time * 1000));
+        const lenisTick = (time) => lenis.raf(time * 1000);
+        gsap.ticker.add(lenisTick);
         gsap.ticker.lagSmoothing(0);
       }
     } catch (e) { /* Lenis opcional */ }
@@ -57,8 +58,19 @@
       const target = document.querySelector(id);
       if (!target) return;
       e.preventDefault();
-      if (window.__homeLenis) window.__homeLenis.scrollTo(target, { offset: 0 });
-      else target.scrollIntoView({ behavior: 'smooth' });
+      // Dentro de la "ventana" del chat (body.chat-shell) el scroller es
+      // .site-shell-inner (el documento está congelado y Lenis no aplica ahí).
+      const inner = document.body.classList.contains('chat-shell')
+        ? document.querySelector('.site-shell-inner')
+        : null;
+      if (inner) {
+        const delta = target.getBoundingClientRect().top - inner.getBoundingClientRect().top;
+        inner.scrollTo({ top: inner.scrollTop + delta, behavior: 'smooth' });
+      } else if (window.__homeLenis) {
+        window.__homeLenis.scrollTo(target, { offset: 0 });
+      } else {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
     });
   });
 

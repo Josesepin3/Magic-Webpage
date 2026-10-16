@@ -41,7 +41,8 @@
       window.__pageLenis = lenis;
       if (hasST) {
         lenis.on('scroll', ScrollTrigger.update);
-        gsap.ticker.add((time) => lenis.raf(time * 1000));
+        const lenisTick = (time) => lenis.raf(time * 1000);
+        gsap.ticker.add(lenisTick);
         gsap.ticker.lagSmoothing(0);
       }
     } catch (e) { /* Lenis opcional */ }
@@ -165,7 +166,23 @@
       const visuals = cards.map((c) => c && c.querySelector('.mop-card-visual'));
       const numEl = carousel.querySelector('.mop-counter-num');
       const barEl = carousel.querySelector('.mop-progress-bar');
-      const isMobile = () => window.matchMedia('(max-width: 640px)').matches;
+      const isChatShell = () => document.body.classList.contains('chat-shell');
+      // "Ventana de layout": cuando el chat está en modo sidebar la página se
+      // vuelve una ventana fija; la geometría del carousel debe medirse contra
+      // esa ventana, no contra el viewport (que sigue siendo el real).
+      const viewportBox = () => {
+        if (isChatShell()) {
+          const sc = document.querySelector('.site-shell-inner') || document.querySelector('.site-shell');
+          if (sc) {
+            const r = sc.getBoundingClientRect();
+            return { w: r.width, h: r.height };
+          }
+        }
+        return { w: window.innerWidth, h: window.innerHeight };
+      };
+      // Dentro de la ventana (ancha pero limitada) usamos la disposición móvil:
+      // píldoras arriba/abajo y una sola columna vertical.
+      const isMobile = () => window.matchMedia('(max-width: 640px)').matches || isChatShell();
       const lerp = (a, b, t) => a + (b - a) * t;
       const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
       const SMOOTH = (t) => t * t * (3 - 2 * t);
@@ -189,7 +206,9 @@
       }
 
       function measure() {
-        lastVw = window.innerWidth;
+        const v = viewportBox();
+        lastVw = v.w;
+        lastVh = v.h;
         const PAD = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--page-padding')) || 24;
         W = carousel.getBoundingClientRect().width - PAD * 2;
         let ch;
@@ -200,8 +219,7 @@
           // centro hacia abajo.
           ps = 40;
           cw = W;
-          lastVh = window.innerHeight;
-          const vh = window.innerHeight;
+          const vh = v.h;
           const HDR = 96;
           const M = 12;
           centerY = (HDR + M - PAD) / 2;
@@ -215,7 +233,7 @@
           ps = 64;
           cw = clamp(W * 0.66, 520, 900);
           gap = Math.max(14, (W - cw - 2 * ps) / 2);
-          ch = Math.min(window.innerHeight * 0.62, 520);
+          ch = Math.min(v.h * 0.62, 520);
           centerY = 0;
           leftPill = -W / 2 + ps / 2;
           rightPill = W / 2 - ps / 2;
@@ -343,7 +361,8 @@
       }
 
       function drive(q) {
-        if (window.innerWidth !== lastVw || (isMobile() && window.innerHeight !== lastVh)) measure();
+        const v = viewportBox();
+        if (v.w !== lastVw || (isMobile() && v.h !== lastVh)) measure();
         const idx = Math.round(Math.max(0, Math.min(n - 1, q)));
         if (idx === state) return;
         if (Math.abs(idx - state) > 1) { killStep(); state = idx; applyState(state); return; }
@@ -353,7 +372,7 @@
       const st = ScrollTrigger.create({
         trigger: carousel,
         start: 'center center',
-        end: () => '+=' + (n - 1) * Math.round(window.innerHeight * 0.9),
+        end: () => '+=' + (n - 1) * Math.round(viewportBox().h * 0.9),
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
@@ -364,7 +383,9 @@
       function goToStep(target) {
         target = Math.max(0, Math.min(n - 1, target));
         const pos = st.start + (st.end - st.start) * (target / (n - 1));
-        if (window.__pageLenis) window.__pageLenis.scrollTo(pos);
+        const scroller = isChatShell() ? document.querySelector('.site-shell-inner') : null;
+        if (scroller) scroller.scrollTo({ top: pos, behavior: 'smooth' });
+        else if (window.__pageLenis) window.__pageLenis.scrollTo(pos);
         else window.scrollTo({ top: pos, behavior: 'smooth' });
       }
 
@@ -380,6 +401,18 @@
 
       measure();
       applyState(0);
+
+      // Al abrir/cerrar la "ventana" del chat (body.chat-shell) el carousel
+      // alterna entre la disposición desktop y la móvil: recalculamos la
+      // geometría contra la ventana y re-sincronizamos el pin.
+      let lastShell = isChatShell();
+      new MutationObserver(function () {
+        if (isChatShell() === lastShell) return;
+        lastShell = isChatShell();
+        measure();
+        applyState(state);
+        ScrollTrigger.refresh();
+      }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
     }
   }
 

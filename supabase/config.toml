@@ -1,0 +1,16 @@
+# Configuración de Supabase para el proyecto local.
+# `supabase link --project-ref ukfbueqhnxehifisidan` fija el proyecto real.
+project_id = "magic-webpage"
+
+# Edge Function "magic-chat" exige un JWT válido del proyecto antes de invocarse
+# (una capa más además de la verificación de usuario dentro de la función).
+# La clave de la sección es el nombre de la función (carpeta), con guion.
+[functions.magic-chat]
+verify_jwt = true
+# Los .md no se pueden importar (el empaquetador rechaza `with { type: "text" }`):
+# viajan como static_files y `loadAssets()` de lib.ts los lee en tiempo de
+# ejecución desde la raíz de la función. Rutas relativas a supabase/.
+static_files = [
+  "./functions/magic-chat/site-map.md",
+  "./functions/magic-chat/system-prompt.md",
+]
