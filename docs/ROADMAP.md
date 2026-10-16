@@ -41,6 +41,21 @@
 > **prueba final** local y (opcional) Google OAuth.
 > **Siguiente: Fase 5 (IA con Edge Functions).**
 
+> **Estado (15 oct 2026):** **Fase 5 (IA) cerrada y en producción.** El chat
+> corre como Edge Function de Supabase (`magic-chat`) con la clave de Mistral
+> solo del lado servidor, el catálogo se arma por request con una query de
+> allow-list, `callMistral` reintenta ante 429/503 y el modelo es
+> `ministral-14b-latest` (el plan gratuito solo sirve modelos abiertos). El
+> widget renderiza un subset de Markdown después de escapar el HTML, la hoja
+> inferior es arrastrable en móvil y el botón de enviar apunta hacia arriba. El
+> favicon pasó a ser solo la galaxia de Magic, con color según el tema del
+> navegador. `dev` y `main` sincronizadas y el deploy de Pages verificado en el
+> sitio publicado.
+> **Queda:** los tres estados de la Fase 6 (carga, error y vacío), el Google
+> OAuth opcional, la confirmación visual del chat en el sitio publicado con una
+> sesión real, y rotar `MISTRAL_API_KEY` (estuvo en texto plano) junto con el
+> `JWT_SECRET`, que sigue siendo recuperable del historial de git.
+
 ---
 
 ## Stack Tecnológico
@@ -480,7 +495,10 @@ en el deploy estático de GitHub Pages, sin backend Express.
 - [x] Dashboard de Supabase → Auth → URL Configuration: redirects
       `http://localhost:3000/**` y `https://josesepin3.github.io/Magic-Webpage/**`
 - [ ] Google OAuth en Supabase (opcional) y poner `GOOGLE: true` en `config.js`
-- [ ] Probar local (`npm run dev` + `npx serve dist`) y desplegar a `main`
+- [x] Probar local (`npm run dev` + `npx serve dist`) y desplegar a `main`
+      (**hecho:** el sitio publicado corre 100% contra Supabase —cuentas,
+      carrito, servicios y admin— y antes de cada merge se verificó el `dist/`
+      generado servido aparte, incluido el catálogo que se arma por request)
 
 ### Fase 5 — IA
 
@@ -539,6 +557,11 @@ en el deploy estático de GitHub Pages, sin backend Express.
       HTML: lo que queda fuera del subset se muestra como texto
 - [x] Servicio `services/ai.js` — invoca la Edge Function con la sesión del usuario
 - [x] Estados: loading (puntos animados), error (reintentar), vacío (placeholder)
+- [x] Detalle del formulario: el botón de enviar apunta hacia **arriba** (antes
+      dibujaba la flecha hacia abajo, que se lee como "descargar")
+- [ ] Confirmar en el sitio publicado, con una sesión real, que la respuesta se
+      ve con negritas y viñetas (el render está verificado en local, 23/23;
+      falta la comprobación visual en producción)
 
 ### Fase 6 — Refinamiento UX
 
@@ -547,6 +570,15 @@ en el deploy estático de GitHub Pages, sin backend Express.
 - [ ] Estados de carga en todas las páginas (skeleton screens o spinners)
 - [ ] Estados de error con mensajes claros y acción de reintentar
 - [ ] Estados vacío ("No hay productos", "No hay mensajes")
+- [x] Identidad en la pestaña: **favicon propio** —solo la galaxia de Magic, sin
+      el texto— con el color adaptado al tema del navegador
+      (`prefers-color-scheme`): oscuro sobre pestañas claras y blanco sobre
+      oscuras, así contrasta en los dos casos (antes se usaba el logo completo
+      en su versión oscura)
+- [x] Pulido del layout: franja de un solo desenfoque en el header móvil (antes
+      eran capas de glass progresivo), gutter de la sidebar unificado en
+      `--sidebar-gutter: 12px` y tarjetas de inicio alineadas con el padding de
+      página
 - [~] Animaciones CSS: hover en cards ✅, scroll reveal ✅ (Fase 2)
 - [x] Validación en tiempo real en formularios (Fase 3 — ContactForm.js)
 - [~] Responsive real probado en mobile/tablet/desktop (Sirius y MagicOS ajustados ✔)
