@@ -62,6 +62,23 @@
 > (las conversaciones no salen de esta máquina) y el render del chat en el sitio
 > publicado ya está confirmado.
 
+> **Estado (16 oct 2026):** **hero de la página de Sirius pulido.** La banda es
+> ahora un degradado normal de dos paradas (`#2b3d4a` arriba, ese mismo color
+> transparente abajo) a ancho completo, sin la máscara de trapecio y sin los
+> glows en CSS; el brillo es la imagen `sirius-glow.svg` como primer hijo del
+> hero, siempre al ancho de este y pegada al borde superior de la página, al 70%
+> de opacidad (`opacity`, sin tocar el SVG) y recortada por el `overflow` del
+> hero. El título ya no es la palabra "Sirius": es `sirius-logo.svg`, un trazado
+> (no texto, así no depende de Adwaita Sans) con el viewBox ajustado a su tinta,
+> y sobre él desaparece el eyebrow. El logo queda centrado en el hueco entre la
+> navbar y la laptop: el `padding-bottom` de la copia resta el `margin-top` que
+> ya trae la laptop, así el hueco es 38px arriba y 38px abajo en cualquier ancho.
+> Verificado midiendo píxeles sobre capturas de Chromium: banda al 100% del ancho
+> en todas las filas con `mask-image: none`, glow de 1265×755 (escritorio) y
+> 390×233 (móvil), logo de 282×91 y 130×42 con la tinta dentro del viewBox (sin
+> recortes), 0px de desborde horizontal y `npm test` **7/7**. `dev` y `main`
+> sincronizadas y deploy de Pages verificado en el sitio publicado.
+
 ---
 
 ## Stack Tecnológico
