@@ -533,7 +533,10 @@ en el deploy estático de GitHub Pages, sin backend Express.
       en todas las páginas
 - [x] Componente JS `ChatWidget.js` — FAB + panel del chat: toggle, burbujas
       usuario/asistente, envío con Enter/Shift+Enter y, en móvil (≤640px), hoja
-      inferior arrastrable con tres estados (cerrada / por defecto / completa)
+      inferior arrastrable con tres estados (cerrada / por defecto / completa).
+      Las respuestas del asistente pasan por un subset de Markdown renderizado
+      en el cliente (negrita, cursiva, `código` y listas) después de escapar el
+      HTML: lo que queda fuera del subset se muestra como texto
 - [x] Servicio `services/ai.js` — invoca la Edge Function con la sesión del usuario
 - [x] Estados: loading (puntos animados), error (reintentar), vacío (placeholder)
 

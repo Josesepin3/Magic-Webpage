@@ -4568,6 +4568,25 @@ html.reveal-js [data-reveal].revealed {
 	color: #ffffff;
 }
 
+/* Markdown mínimo del asistente: negrita, cursiva, código y listas */
+.chat-msg--assistant strong { font-weight: 700; }
+.chat-msg--assistant em { font-style: italic; }
+.chat-msg--assistant code {
+	font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+	font-size: 0.9em;
+	padding: 1px 5px;
+	border-radius: 4px;
+	background: rgba(255, 255, 255, 0.14);
+}
+.chat-msg--assistant ul,
+.chat-msg--assistant ol {
+	margin: 3px 0;
+	padding-left: 20px;
+}
+.chat-msg--assistant ul { list-style: disc; }
+.chat-msg--assistant ol { list-style: decimal; }
+.chat-msg--assistant li + li { margin-top: 2px; }
+
 /* Indicador de escritura (3 puntos Adwaita) */
 .chat-msg--typing {
 	align-self: flex-start;
