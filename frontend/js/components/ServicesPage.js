@@ -5,6 +5,9 @@
   const supabase = window.MagicOS && window.MagicOS.supabase;
   if (!supabase) return;
 
+  // Bloques compartidos de carga / error / vacío (js/components/AsyncState.js).
+  const ui = window.MagicOS.ui;
+
   function redirectLogin() {
     window.location.href = MagicOS.url('/cuenta/login') + '?next=' + encodeURIComponent(MagicOS.currentPath());
   }
@@ -17,14 +20,14 @@
 
   function render(subs) {
     if (!subs.length) {
-      body.innerHTML =
-        '<div class="cart-empty">' +
-          '<p>Aún no tienes servicios.</p>' +
-          '<a class="btn-primary" href="' + MagicOS.url('/productos') + '">Ver productos</a>' +
-        '</div>';
+      ui.empty(body, {
+        text: 'Aún no tienes servicios.',
+        action: { label: 'Ver productos', href: MagicOS.url('/productos') }
+      });
       return;
     }
 
+    ui.ready(body);
     body.innerHTML =
       '<div class="services-grid">' +
         subs.map((sub) => {
@@ -49,19 +52,31 @@
       '</div>';
   }
 
-  supabase.auth.getSession().then((res) => {
-    const user = (res.data && res.data.session && res.data.session.user) || null;
-    if (!user) {
-      redirectLogin();
-      return;
-    }
+  // Carga de los servicios, reutilizable por el botón "Reintentar".
+  function load() {
+    ui.loading(body, 'cards', 2);
+    supabase.auth.getSession().then((res) => {
+      const user = (res.data && res.data.session && res.data.session.user) || null;
+      if (!user) {
+        redirectLogin();
+        return;
+      }
 
-    supabase.from('subscriptions')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .then((res2) => {
-        render(res2.data || []);
-      });
-  });
+      supabase.from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .then((res2) => {
+          if (res2.error) {
+            ui.error(body, 'No se pudieron cargar tus servicios.', load, res2.error.message);
+            return;
+          }
+          render(res2.data || []);
+        });
+    }).catch(() => {
+      ui.error(body, 'No se pudieron cargar tus servicios.', load);
+    });
+  }
+
+  load();
 })();

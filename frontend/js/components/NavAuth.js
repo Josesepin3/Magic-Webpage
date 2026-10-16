@@ -165,6 +165,13 @@
 
   window.MagicOS.refreshNav = refresh;
 
+  // Mientras se resuelve la sesión (y el perfil) el hueco de la cuenta muestra
+  // un círculo esqueleto: así el botón no aparece de golpe empujando el navbar.
+  // Los bloques de estado son los mismos que usan carrito, servicios y perfil.
+  [desktopSlot, mobileSlot].forEach(function (slot) {
+    if (slot) MagicOS.ui.loading(slot, 'avatar', 1);
+  });
+
   supabase.auth.onAuthStateChange(handleAuthState);
   refresh();
 })();

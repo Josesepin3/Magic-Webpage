@@ -41,17 +41,23 @@
 > **prueba final** local y (opcional) Google OAuth.
 > **Siguiente: Fase 5 (IA con Edge Functions).**
 
-> **Estado (15 oct 2026):** **Fase 5 (IA) cerrada y en producción.** El chat
-> corre como Edge Function de Supabase (`magic-chat`) con la clave de Mistral
-> solo del lado servidor, el catálogo se arma por request con una query de
-> allow-list, `callMistral` reintenta ante 429/503 y el modelo es
-> `ministral-14b-latest` (el plan gratuito solo sirve modelos abiertos). El
-> widget renderiza un subset de Markdown después de escapar el HTML, la hoja
-> inferior es arrastrable en móvil y el botón de enviar apunta hacia arriba. El
-> favicon pasó a ser solo la galaxia de Magic, con color según el tema del
-> navegador. `dev` y `main` sincronizadas y el deploy de Pages verificado en el
-> sitio publicado.
-> **Queda:** los tres estados de la Fase 6 (carga, error y vacío).
+> **Estado (15 oct 2026):** **Fases 5 (IA) y 6 (refinamiento UX) cerradas y en
+> producción.** El chat corre como Edge Function de Supabase (`magic-chat`) con la
+> clave de Mistral solo del lado servidor, el catálogo se arma por request con una
+> query de allow-list, `callMistral` reintenta ante 429/503 y el modelo es
+> `ministral-14b-latest` (el plan gratuito solo sirve modelos abiertos). El widget
+> renderiza un subset de Markdown después de escapar el HTML, la hoja inferior es
+> arrastrable en móvil y el botón de enviar apunta hacia arriba.
+> En la Fase 6: el favicon es solo la galaxia de Magic, con color según el tema del
+> navegador, y las páginas con datos (carrito, servicios, perfil y panel) comparten
+> los tres estados del módulo `frontend/js/components/AsyncState.js`: esqueleto al
+> cargar, error con detalle y **Reintentar**, y vacío con acción; el hueco de la
+> cuenta del navbar también carga en esqueleto. Verificado con un doble de Supabase
+> que fuerza los tres estados: **88/88** comprobaciones (marcado, `aria`, reintento
+> real, estilos calculados, sin desbordes y con `prefers-reduced-motion`).
+> `dev` y `main` sincronizadas y el deploy de Pages verificado en el sitio publicado.
+> **Queda:** nada bloqueante; opcionales el pulido de animaciones y la pasada
+> responsive guiada (los dos puntos `[~]` de la Fase 6).
 > **Decidido:** el acceso con Google queda cancelado; las claves no se rotan
 > (las conversaciones no salen de esta máquina) y el render del chat en el sitio
 > publicado ya está confirmado.
@@ -568,9 +574,26 @@ en el deploy estático de GitHub Pages, sin backend Express.
 
 **Objetivo:** Pulir toda la experiencia.
 
-- [ ] Estados de carga en todas las páginas (skeleton screens o spinners)
-- [ ] Estados de error con mensajes claros y acción de reintentar
-- [ ] Estados vacío ("No hay productos", "No hay mensajes")
+- [x] Estados de carga en todas las páginas (skeleton screens o spinners):
+      `frontend/js/components/AsyncState.js` centraliza los tres estados
+      (`MagicOS.ui.loading / ready / error / empty`). Carrito, servicios, perfil,
+      panel y el hueco de la cuenta del navbar muestran un **esqueleto** mientras
+      llegan los datos (región `aria-live`, `aria-busy` y barras ocultas a los
+      lectores de pantalla). El panel ya no imprime "Cargando…" en texto
+- [x] Estados de error con mensajes claros y acción de reintentar: cada bloque
+      dice qué falló ("No se pudo cargar tu carrito."), deja el detalle del
+      backend en gris y trae un botón **Reintentar** que repite la petición (al
+      reintentar vuelve a verse el esqueleto). Cubre además los fallos que antes
+      pasaban en silencio: cantidad y borrado en el carrito, "añadir al carrito"
+      del configurador (con "Añadiendo…" en el botón) y el formulario de perfil,
+      que queda bloqueado si su carga falló. De paso se corrigió un fallo real:
+      el aviso de "¡Pedido confirmado!" buscaba un elemento que ya no existía al
+      vaciarse el carrito y lanzaba una excepción
+- [x] Estados vacío ("No hay productos", "No hay mensajes"): bloque con icono y
+      acción — carrito ("Tu carrito está vacío" → Ver productos), servicios
+      ("Aún no tienes servicios"), panel ("No hay mensajes todavía" y "No hay
+      productos. Crea el primero" → abre el diálogo) y la página de productos,
+      cuyo vacío ya no sale como texto suelto sin estilo
 - [x] Identidad en la pestaña: **favicon propio** —solo la galaxia de Magic, sin
       el texto— con el color adaptado al tema del navegador
       (`prefers-color-scheme`): oscuro sobre pestañas claras y blanco sobre
