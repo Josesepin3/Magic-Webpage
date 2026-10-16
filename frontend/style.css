@@ -432,56 +432,36 @@ input, textarea, button {
 	content: none;
 }
 
-/* Banda azul que cubre todo el alto del hero, cortada en trapecio y fundida
-   a transparente. Queda por debajo del navbar (z-index 100) gracias al
-   margin-top.
-   El tope arranca con un brillo #5cc5f9 que cae enseguida a #329fff: la
-   franja clara se queda en los primeros 43px (el alto del navbar). De ahí
-   baja más rápido que antes hasta el azul de fondo #0050a8 (250px, antes
-   295px) y sigue oscureciendo con un ease-out de siete paradas de alfa que
-   llega a transparente en el borde inferior del hero.
-   Las paradas de color van en px, que el navbar mide lo mismo en cualquier
-   ancho; las de alfa mezclan ese px con el resto del alto en %, así cubren
-   el hero entero en cualquier viewport sin invertir el orden de las
-   paradas. */
+/* Banda del hero: dos paradas, arriba el gris azulado #2b3d4a y abajo ese
+   mismo color con transparencia total. A ancho completo, sin máscara ni
+   cortes, y cubre todo el alto del hero; queda por debajo del navbar
+   (z-index 100) gracias al margin-top. El brillo por encima de esta banda
+   es la imagen sirius-glow.svg. */
 .sirius-hero::before {
 	content: '';
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(
-		180deg,
-		#5cc5f9 0px,
-		#49b4fc 14px,
-		#3aa7fe 33px,
-		#329fff 43px,
-		#309bfb 69px,
-		#2991f0 95px,
-		#2184e1 120px,
-		#1774d0 146px,
-		#0d65bf 172px,
-		#0659b2 198px,
-		#0151a9 224px,
-		#0050a8 250px,
-		rgba(0, 79, 166, 0.9) calc(250px + (100% - 250px) * 0.05),
-		rgba(0, 74, 155, 0.68) calc(250px + (100% - 250px) * 0.15),
-		rgba(0, 66, 139, 0.46) calc(250px + (100% - 250px) * 0.28),
-		rgba(0, 58, 120, 0.28) calc(250px + (100% - 250px) * 0.44),
-		rgba(0, 50, 104, 0.15) calc(250px + (100% - 250px) * 0.64),
-		rgba(0, 45, 94, 0.06) calc(250px + (100% - 250px) * 0.84),
-		rgba(0, 42, 88, 0) 100%
-	);
-	/* Corte en trapecio: ancho completo arriba y base más estrecha abajo
-	   (28%-72%), con la base apoyada en el borde inferior del hero. Es una
-	   máscara SVG con el trapecio desenfocado, no un clip-path: la geometría
-	   es porcentual (llega a las esquinas sea cual sea el ancho) y los
-	   costados quedan fundidos sin ninguna línea visible. El desenfoque es
-	   el 7% del ancho/alto (antes 4% con el triángulo). */
-	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='d' x='-30%25' y='-30%25' width='160%25' height='160%25'%3E%3CfeGaussianBlur stdDeviation='7'/%3E%3C/filter%3E%3C/defs%3E%3Cpolygon points='0,0 100,0 72,100 28,100' fill='%23ffffff' filter='url(%23d)'/%3E%3C/svg%3E");
-	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='d' x='-30%25' y='-30%25' width='160%25' height='160%25'%3E%3CfeGaussianBlur stdDeviation='7'/%3E%3C/filter%3E%3C/defs%3E%3Cpolygon points='0,0 100,0 72,100 28,100' fill='%23ffffff' filter='url(%23d)'/%3E%3C/svg%3E");
-	-webkit-mask-size: 100% 100%;
-	mask-size: 100% 100%;
-	-webkit-mask-repeat: no-repeat;
-	mask-repeat: no-repeat;
+	background: linear-gradient(180deg, #2b3d4a 0%, rgba(43, 61, 74, 0) 100%);
+	pointer-events: none;
+	z-index: 0;
+}
+
+/* Glow SVG del hero: sirius-glow.svg a ancho completo del hero y pegado al
+   borde superior de la página (el hero arranca en y=0 por el margin-top).
+   Va ENCIMA de la banda: el ::before es el primer hijo, así que este img
+   se pinta después con el mismo z-index. Y por debajo de todo lo demás:
+   la copia lleva z-index 2, el fundido 1 y el bloque de la laptop viene
+   después en el árbol. La altura la fija el aspecto del SVG (1448x864) y
+   el overflow del .hero la recorta al final del hero en cualquier ancho.
+   Opacidad al 70% para que no compita con la banda ni con el logo. */
+.sirius-hero-glow {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: auto;
+	display: block;
+	opacity: 0.7;
 	pointer-events: none;
 	z-index: 0;
 }
@@ -489,53 +469,30 @@ input, textarea, button {
 .sirius-hero-copy {
 	position: relative;
 	z-index: 2;
-	padding: calc(var(--header-height) + 26px) var(--page-padding) 0;
+	/* padding-top = navbar + 26px, más los 12px del margin del título: el
+	   hueco de arriba del logo mide 38px. El de abajo se iguala restando el
+	   margin-top que ya trae la laptop (clamp(8px, 2vw, 24px)), porque ese
+	   hueco es padding + ese margin y el logo empuja a la laptop en el flujo:
+	   así el logo queda centrado entre la navbar y la laptop a cualquier
+	   ancho (14px en escritorio, 30px en móvil). */
+	padding: calc(var(--header-height) + 26px) var(--page-padding)
+		calc(38px - clamp(8px, 2vw, 24px));
 	text-align: center;
 }
 
-/* Glow del título: nace justo bajo "Sirius" (donde acaba el bloque de
-   copia) y sube hasta el borde superior de la página. Un solo tono, el azul
-   del halo (#329fff) y sin núcleo más claro: el brillo #5cc5f9 que llevaba
-   centraba su punto más luminoso en el borde inferior de la capa, justo
-   donde la máscara la recortaba, y sobre el negro del hero se veía el aro.
-   Queda dentro del contexto del bloque de copia: por encima de la banda y
-   por debajo del texto. */
-.sirius-hero-copy::before {
-	content: '';
-	position: absolute;
-	inset: 0;
-	background: radial-gradient(
-		46% 150% at 50% 100%,
-		rgba(50, 159, 255, 0.42) 0%,
-		rgba(50, 159, 255, 0.26) 30%,
-		rgba(50, 159, 255, 0.11) 64%,
-		rgba(50, 159, 255, 0) 100%
-	);
-	/* La capa acaba justo donde acaba el título: sin esto el glow cortaría
-	   en seco con una línea horizontal. */
-	-webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 88%, transparent 100%);
-	mask-image: linear-gradient(to bottom, #000 0%, #000 88%, transparent 100%);
-	pointer-events: none;
-	z-index: -1;
-}
+/* El bloque de copia ya no lleva glow (::before con el radial azul #329fff):
+   el brillo del hero es ahora la imagen sirius-glow.svg. Solo se mantiene
+   el contexto de apilado: por encima de la banda y del fundido. */
 
-.sirius-eyebrow {
-	display: block;
-	font-size: 0.8rem;
-	font-weight: 700;
-	letter-spacing: 0.3em;
-	text-transform: uppercase;
-	color: rgba(255, 255, 255, 0.88);
-}
-
+/* El título es el logo SVG. El archivo trae el viewBox ajustado a su tinta,
+   así que aquí solo se fija el ancho (22vw con 130-290px de tope): el
+   display, el ancho 100% y el alto automático ya los pone .hero img, y la
+   altura sale del aspecto del propio SVG. Los márgenes automáticos centran
+   el bloque, que al ser más estrecho que su contenedor no lo centra el
+   text-align del padre. */
 .sirius-title {
-	margin: 12px 0 0;
-	font-size: clamp(3rem, 9vw, 6.5rem);
-	font-weight: 900;
-	line-height: 1;
-	letter-spacing: -0.03em;
-	color: #ffffff;
-	text-shadow: 0 2px 18px rgba(0, 0, 0, 0.3);
+	width: clamp(130px, 22vw, 290px);
+	margin: 12px auto 0;
 }
 
 /* Laptop full-bleed: el contenedor se extiende de borde a borde y la
