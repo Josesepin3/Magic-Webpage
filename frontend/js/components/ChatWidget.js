@@ -32,8 +32,9 @@
       '<rect x="1" y="3" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/>' +
       '<rect x="8.6" y="6.6" width="5" height="4" rx="1" fill="currentColor"/>' +
       '</svg>',
+    // La flecha apunta hacia ARRIBA (enviar): punta en y=4, cola a y=14.
     send: '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">' +
-      '<path d="M8 2v10M8 12L4.5 8.5M8 12l3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<path d="M8 14V4M8 4L4.5 7.5M8 4l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' +
       '</svg>',
     // Maximizar / restaurar la hoja mobile. Ojo: tienen que verse CLARAMENTE
     // distintos. maximize apoya los codos en las esquinas del lienzo (marco
