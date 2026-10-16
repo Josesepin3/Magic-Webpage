@@ -432,9 +432,12 @@ input, textarea, button {
 	content: none;
 }
 
-/* Banda azul cielo desde el borde superior, fundida a transparente.
+/* Banda azul desde el borde superior, fundida a transparente.
    Queda por debajo del navbar (z-index 100) gracias al margin-top.
-   Plateau sólido hasta ~55% para que el título quede sobre el azul. */
+   Plateau sólido hasta ~55% para que el título quede sobre el azul.
+   El color (#428cd9) es un intermedio más saturado y algo más oscuro
+   entre el celeste anterior (#5699c9) y el azul de acento (#3584e4)
+   (aprox. 60 % acento / 40 % celeste). */
 .sirius-hero::before {
 	content: '';
 	position: absolute;
@@ -442,7 +445,7 @@ input, textarea, button {
 	left: 0;
 	right: 0;
 	height: calc(var(--header-height) + 250px);
-	background: linear-gradient(180deg, #5699c9 0%, #5699c9 55%, rgba(86, 153, 201, 0) 100%);
+	background: linear-gradient(180deg, #428cd9 0%, #428cd9 55%, rgba(66, 140, 217, 0) 100%);
 	pointer-events: none;
 	z-index: 0;
 }
