@@ -1,8 +1,41 @@
 // Lógica pura de la Edge Function "magic-chat" (testeable sin servidor).
 // index.ts se encarga solo del HTTP; todo lo que pueda probarse vive acá.
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
-import siteMap from "./site-map.md" with { type: "text" };
-import systemPrompt from "./system-prompt.md" with { type: "text" };
+
+// Los .md no se pueden importar (el empaquetador de Supabase rechaza el import
+// attribute `type: "text"`). Viajan como static_files -- ver supabase/config.toml
+// -- y se leen acá en tiempo de ejecución.
+export const SITE_MAP_FILE = "site-map.md";
+export const SYSTEM_PROMPT_FILE = "system-prompt.md";
+
+export type ChatAssets = { siteMap: string; systemPrompt: string };
+
+let assetsCache: ChatAssets | null = null;
+
+// Dos rutas: junto a este archivo (deno run local y e2e) y en el cwd (en
+// Supabase el directorio de trabajo es la raíz de la función).
+async function readAsset(name: string): Promise<string> {
+  const rutas = [new URL(name, import.meta.url).pathname, `./${name}`];
+  for (const ruta of rutas) {
+    try {
+      return await Deno.readTextFile(ruta);
+    } catch {
+      // se prueba la siguiente
+    }
+  }
+  throw new Error(`No se pudo leer el asset ${name}`);
+}
+
+/** Mapa del sitio y system prompt, leídos una sola vez por instancia. */
+export async function loadAssets(): Promise<ChatAssets> {
+  if (!assetsCache) {
+    assetsCache = {
+      siteMap: await readAsset(SITE_MAP_FILE),
+      systemPrompt: await readAsset(SYSTEM_PROMPT_FILE),
+    };
+  }
+  return assetsCache;
+}
 
 export const MAX_HISTORY = 20; // mensajes del historial que entran al contexto
 export const MAX_MESSAGE_CHARS = 4000; // recorte por mensaje
@@ -191,6 +224,3 @@ export async function callMistral(opts: MistralOptions): Promise<string> {
 
   throw lastError ?? new Error("Mistral no respondió");
 }
-
-/** Export para que index.ts inyecte los assets .md sin duplicar imports. */
-export { siteMap, systemPrompt };

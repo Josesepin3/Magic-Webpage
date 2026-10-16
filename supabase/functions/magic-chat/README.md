@@ -16,7 +16,8 @@ En cada request:
    - `CATÁLOGO` → query con **allow-list de columnas públicas** de
      `products` + `product_options`, generada en vivo (lo que ve el admin es lo
      que responde el chat; sin redeploy al cambiar un precio).
-3. Llama a Mistral (`mistral-small-latest`) y devuelve `{ reply }`.
+3. Llama a Mistral (`ministral-14b-latest` por defecto; se cambia con
+   `MISTRAL_MODEL` sin tocar el código) y devuelve `{ reply }`.
 
 ## Requisitos
 
@@ -35,7 +36,8 @@ supabase secrets set \
 npm run deploy:chat
 ```
 
-`npm run deploy:chat` = `supabase functions deploy magic-chat`.
+`npm run deploy:chat` = `supabase functions deploy magic-chat --use-api`, que
+empaqueta en el servidor de Supabase: no hace falta Docker.
 
 Secrets ya configurados por cloud (no hace falta setearlos): `SUPABASE_URL` y
 `SUPABASE_SERVICE_ROLE_KEY` los inyecta la plataforma.
@@ -71,6 +73,8 @@ deno run --allow-net --allow-env --allow-read --env-file=.env \
   supabase/functions/magic-chat/e2e.ts
 ```
 
-Nota: los `.md` se importan como texto (`with { type: "text" }`). Si el CLI de
-Supabase diera un problema al empaquetarlos, la variante con la extensión del
-CLI es `with { type: "text", "supabase": false }`.
+Nota: los `.md` viajan como `static_files` (ver `supabase/config.toml`) y
+`loadAssets()` de `lib.ts` los lee en tiempo de ejecución. No se pueden importar
+con `with { type: "text" }`: el empaquetador de Supabase rechaza ese import
+attribute y el deploy falla con «The import attribute type of "text" is
+unsupported».

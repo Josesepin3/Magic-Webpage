@@ -2,13 +2,13 @@
 // Validación: deno check index.ts (Deno 2).
 // Deploy (desde la máquina del dev): supabase functions deploy magic-chat
 import { createClient } from "npm:@supabase/supabase-js@2";
+import type { ChatAssets } from "./lib.ts";
 import {
   buildCatalog,
   buildSystem,
   callMistral,
+  loadAssets,
   sanitizeMessages,
-  siteMap,
-  systemPrompt,
 } from "./lib.ts";
 
 const corsHeaders = {
@@ -89,7 +89,15 @@ Deno.serve({ port }, async (req: Request): Promise<Response> => {
     return json({ error: "Catálogo temporalmente no disponible" }, 502);
   }
 
-  const system = buildSystem(siteMap, systemPrompt, catalog);
+  let assets: ChatAssets;
+  try {
+    assets = await loadAssets();
+  } catch (err) {
+    console.error("magic-chat: no se pudieron leer los .md", err instanceof Error ? err.message : err);
+    return json({ error: "Configuración incompleta del servidor" }, 500);
+  }
+
+  const system = buildSystem(assets.siteMap, assets.systemPrompt, catalog);
 
   let reply: string;
   try {

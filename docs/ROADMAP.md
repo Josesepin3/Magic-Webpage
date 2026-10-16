@@ -168,7 +168,7 @@ Magic-Webpage/
 | `orders` | el usuario crea su pedido y lo lee; admin lee todos; **total siempre calculado en la BD** | tabla pública + RLS |
 | `subscriptions` | el usuario crea sus servicios y los lee; admin lee todos; **estado resuelto desde `products`** | tabla pública + RLS |
 | `storage.avatars` | subida pública de fotos de perfil (bucket `avatars`) | Storage |
-| Edge Function `magic-chat` | Chat con IA vía Mistral | Supabase Edge Functions | ⏳ |
+| Edge Function `magic-chat` | Chat con IA vía Mistral | Supabase Edge Functions | ✅ |
 
 ---
 
@@ -371,7 +371,8 @@ o copy de marketing.
    - System prompt: `system-prompt.md` + `site-map.md` inyectado (role `system`, nunca visible en el chat)
    - Historial de mensajes del usuario
    - (El mapa es **curado y estático** a propósito: nada interno llega al modelo)
-3. La Edge Function llama a Mistral (`mistral-small-latest`) con ese contexto.
+3. La Edge Function llama a Mistral (`ministral-14b-latest` por defecto,
+   configurable con `MISTRAL_MODEL`) con ese contexto.
 4. Devuelve `{ reply: "..." }` al frontend.
 5. `ChatWidget` muestra la respuesta con estados loading → typing → completo.
 
@@ -503,21 +504,26 @@ en el deploy estático de GitHub Pages, sin backend Express.
       cada request con `SELECT` de allow-list (columnas públicas de `products` +
       `product_options`); `site-map.md` queda sin precios (una sola fuente de
       verdad, sincronizada con lo que ve el admin)
-- [ ] Edge Function `supabase/functions/magic-chat` — CORS, inyecta
+- [x] Edge Function `supabase/functions/magic-chat` — CORS, inyecta
       `site-map.md` + bloque CATÁLOGO (query allow-list) en el system prompt,
       llama a Mistral
-      (secrets: `MISTRAL_API_KEY`, `MISTRAL_MODEL`, `MISTRAL_API_URL`,
-      `SUPABASE_SERVICE_ROLE_KEY`)
-      **Estado:** código listo (`index.ts` + `lib.ts`), `deno check` OK y e2e
+      (secrets: `MISTRAL_API_KEY`, `MISTRAL_MODEL`, `MISTRAL_API_URL`;
+      `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` los inyecta la plataforma)
+      **Estado:** código listo (`index.ts` + `lib.ts`), `deno check` OK, e2e
       local 30/30 verdes (`supabase/functions/magic-chat/e2e.ts`: auth 401/400,
       sanitize, catálogo vivo con sus 13 opciones, reintento ante 429 con
-      servidor falso y round-trip real a Mistral). `MISTRAL_API_KEY` ya está en
-      el `.env` local (chmod 600, ignorado por git). El plan de Mistral es el
-      gratuito: solo sirve modelos abiertos, así que `DEFAULT_MODEL` pasó a
-      `ministral-14b-latest` (`mistral-small-*` y `mistral-medium-*` responden
-      `429 rate_limited`) y `callMistral` reintenta ante 429/503 respetando
-      `Retry-After`. Pendiente: deploy con CLI (`supabase secrets set` +
-      `npm run deploy:chat`); en esta máquina no hay CLI de Supabase ni Docker.
+      servidor falso y round-trip real a Mistral) y **desplegada** en el
+      proyecto `ukfbueqhnxehifisidan` (`supabase functions deploy magic-chat
+      --use-api`, sin Docker; preflight 200 y POST sin credenciales 401).
+      `MISTRAL_API_KEY` vive en el `.env` local (chmod 600, ignorado por git) y
+      en Supabase como secret, junto con `MISTRAL_MODEL` y `MISTRAL_API_URL`.
+      Los `.md` **no** se importan con `with { type: "text" }` — el empaquetador
+      de Supabase rechaza ese import attribute al desplegar: viajan como
+      `static_files` en `supabase/config.toml` y `loadAssets()` de `lib.ts` los
+      lee en tiempo de ejecución. El plan de Mistral es el gratuito: solo sirve
+      modelos abiertos, así que `DEFAULT_MODEL` pasó a `ministral-14b-latest`
+      (`mistral-small-*` y `mistral-medium-*` responden `429 rate_limited`) y
+      `callMistral` reintenta ante 429/503 respetando `Retry-After`.
       `verify_jwt = true` en `supabase/config.toml`; `CHAT_REQUIRE_AUTH=true`
       por defecto (chat solo con sesión iniciada).
 - [x] Botón flotante del chat (FAB) implementado en `ChatWidget.js` —
@@ -525,10 +531,11 @@ en el deploy estático de GitHub Pages, sin backend Express.
       `suggested-action` de Adwaita (#3584e4), transformación "Aura"
       (degradado vivo + glow en hover, ícono con contraste), siempre visible
       en todas las páginas
-- [~] Componente JS `ChatWidget.js` — FAB listo; pendiente el panel del chat
-      (el toggle queda como stub: abre/cierra el estado visual)
-- [ ] Servicio `services/ai.js` — invoca la Edge Function con la sesión del usuario
-- [ ] Estados: loading (puntos animados), error (reintentar), vacío (placeholder)
+- [x] Componente JS `ChatWidget.js` — FAB + panel del chat: toggle, burbujas
+      usuario/asistente, envío con Enter/Shift+Enter y, en móvil (≤640px), hoja
+      inferior arrastrable con tres estados (cerrada / por defecto / completa)
+- [x] Servicio `services/ai.js` — invoca la Edge Function con la sesión del usuario
+- [x] Estados: loading (puntos animados), error (reintentar), vacío (placeholder)
 
 ### Fase 6 — Refinamiento UX
 
