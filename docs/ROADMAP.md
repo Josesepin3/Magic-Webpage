@@ -51,10 +51,10 @@
 > favicon pasó a ser solo la galaxia de Magic, con color según el tema del
 > navegador. `dev` y `main` sincronizadas y el deploy de Pages verificado en el
 > sitio publicado.
-> **Queda:** los tres estados de la Fase 6 (carga, error y vacío), el Google
-> OAuth opcional, la confirmación visual del chat en el sitio publicado con una
-> sesión real, y rotar `MISTRAL_API_KEY` (estuvo en texto plano) junto con el
-> `JWT_SECRET`, que sigue siendo recuperable del historial de git.
+> **Queda:** los tres estados de la Fase 6 (carga, error y vacío).
+> **Decidido:** el acceso con Google queda cancelado; las claves no se rotan
+> (las conversaciones no salen de esta máquina) y el render del chat en el sitio
+> publicado ya está confirmado.
 
 ---
 
@@ -494,7 +494,9 @@ en el deploy estático de GitHub Pages, sin backend Express.
 - [x] `npm run seed:supabase` (requiere el schema aplicado)
 - [x] Dashboard de Supabase → Auth → URL Configuration: redirects
       `http://localhost:3000/**` y `https://josesepin3.github.io/Magic-Webpage/**`
-- [ ] Google OAuth en Supabase (opcional) y poner `GOOGLE: true` en `config.js`
+- [x] Google OAuth en Supabase — **cancelado** (decisión del proyecto: el sitio
+      no usará Google como proveedor de acceso; `GOOGLE` queda en `false` en
+      `config.js`)
 - [x] Probar local (`npm run dev` + `npx serve dist`) y desplegar a `main`
       (**hecho:** el sitio publicado corre 100% contra Supabase —cuentas,
       carrito, servicios y admin— y antes de cada merge se verificó el `dist/`
@@ -559,9 +561,8 @@ en el deploy estático de GitHub Pages, sin backend Express.
 - [x] Estados: loading (puntos animados), error (reintentar), vacío (placeholder)
 - [x] Detalle del formulario: el botón de enviar apunta hacia **arriba** (antes
       dibujaba la flecha hacia abajo, que se lee como "descargar")
-- [ ] Confirmar en el sitio publicado, con una sesión real, que la respuesta se
-      ve con negritas y viñetas (el render está verificado en local, 23/23;
-      falta la comprobación visual en producción)
+- [x] Confirmado en el sitio publicado: la respuesta se ve con negritas y
+      viñetas (el render ya se había verificado en local, 23/23)
 
 ### Fase 6 — Refinamiento UX
 
@@ -620,7 +621,7 @@ en el deploy estático de GitHub Pages, sin backend Express.
 - [x] Re-ejecutar `supabase/schema.sql` en el SQL Editor — **aplicado y
       verificado** (probes con limpieza: precios recalculados, opciones
       inventadas rechazadas, anti-spam activo). Resta la **prueba final** local
-      y (opcional) Google OAuth
+      (el Google OAuth quedó cancelado, ver Fase 4b)
 
 ---
 
