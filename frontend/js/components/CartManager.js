@@ -5,12 +5,15 @@
   const supabase = window.MagicOS && window.MagicOS.supabase;
   if (!supabase) return;
 
+  // Bloques compartidos de carga / error / vacío (js/components/AsyncState.js).
+  const ui = window.MagicOS.ui;
+
   let user = null;
   let items = [];
   let productsStatus = {};
 
-  function redirectLogin() {
-    window.location.href = MagicOS.url('/cuenta/login') + '?next=' + encodeURIComponent(MagicOS.currentPath());
+  function loginUrl() {
+    return MagicOS.url('/cuenta/login') + '?next=' + encodeURIComponent(MagicOS.currentPath());
   }
 
   function fmt(n) {
@@ -25,14 +28,14 @@
 
   function render() {
     if (!items.length) {
-      body.innerHTML =
-        '<div class="cart-empty">' +
-          '<p>Tu carrito está vacío.</p>' +
-          '<a class="btn-primary" href="' + MagicOS.url('/productos') + '">Ver productos</a>' +
-        '</div>';
+      ui.empty(body, {
+        text: 'Tu carrito está vacío.',
+        action: { label: 'Ver productos', href: MagicOS.url('/productos') }
+      });
       return;
     }
 
+    ui.ready(body);
     const total = items.reduce((sum, i) => sum + Number(i.unit_price) * Number(i.quantity), 0);
 
     body.innerHTML =
@@ -68,10 +71,19 @@
         const row = btn.closest('.cart-item');
         const id = row.getAttribute('data-item-id');
         const item = items.find((i) => i.id === id);
-        const qty = Math.max(1, item.quantity + Number(btn.getAttribute('data-qty')));
-        if (qty === item.quantity) return;
+        const antes = item.quantity;
+        const qty = Math.max(1, antes + Number(btn.getAttribute('data-qty')));
+        if (qty === antes) return;
+        // Optimista: se pinta ya y, si el guardado falla, se deshace y se avisa.
         item.quantity = qty;
-        supabase.from('cart_items').update({ quantity: qty }).eq('id', id).then(() => render());
+        render();
+        supabase.from('cart_items').update({ quantity: qty }).eq('id', id).then((res) => {
+          if (res.error) {
+            item.quantity = antes;
+            render();
+            setStatus('No se pudo guardar la cantidad. Revisa tu conexión e inténtalo de nuevo.', true);
+          }
+        });
       });
     });
 
@@ -79,9 +91,17 @@
       btn.addEventListener('click', () => {
         const row = btn.closest('.cart-item');
         const id = row.getAttribute('data-item-id');
-        supabase.from('cart_items').delete().eq('id', id).then(() => {
-          items = items.filter((i) => i.id !== id);
-          render();
+        const quitado = items.find((i) => i.id === id);
+        const posicion = items.indexOf(quitado);
+        items = items.filter((i) => i.id !== id);
+        render();
+        supabase.from('cart_items').delete().eq('id', id).then((res) => {
+          if (res.error) {
+            items.splice(posicion, 0, quitado);
+            render();
+            setStatus('No se pudo eliminar el producto. Revisa tu conexión e inténtalo de nuevo.', true);
+            return;
+          }
           if (window.MagicOS.refreshNav) window.MagicOS.refreshNav();
         });
       });
@@ -92,6 +112,8 @@
 
   function setStatus(message, isError) {
     const el = body.querySelector('.checkout-status');
+    // El carrito puede haberse quedado vacío: su marcado no tiene este hueco.
+    if (!el) return;
     el.textContent = message;
     el.hidden = false;
     el.className = 'form-status checkout-status' + (isError ? ' is-error' : ' is-ok');
@@ -140,36 +162,60 @@
         }
         supabase.from('cart_items').delete().eq('user_id', user.id).then(() => {
           items = [];
-          render();
+          // El carrito queda vacío: el estado de vacío hace de confirmación (el
+          // aviso de siempre buscaba un .checkout-status que ya no existe en el
+          // marcado del carrito vacío y fallaba).
+          ui.empty(body, {
+            text: '¡Pedido confirmado! Tus servicios ya están registrados.',
+            action: { label: 'Ver mis servicios', href: MagicOS.url('/cuenta/servicios') }
+          });
           if (window.MagicOS.refreshNav) window.MagicOS.refreshNav();
-          setStatus('¡Pedido confirmado! Revisa tus servicios en <a href="' + MagicOS.url('/cuenta/servicios') + '">Mis servicios</a>.', false);
         });
       });
     });
   }
 
-  supabase.auth.getSession().then((res) => {
-    user = (res.data && res.data.session && res.data.session.user) || null;
-    if (!user) {
-      body.innerHTML =
-        '<div class="cart-empty">' +
-          '<p>Necesitas iniciar sesión para ver tu carrito.</p>' +
-          '<a class="btn-primary" href="' + MagicOS.url('/cuenta/login') + '?next=' + encodeURIComponent(MagicOS.currentPath()) + '">Iniciar sesión</a>' +
-        '</div>';
-      return;
-    }
-
-    supabase.from('products').select('slug,status').then((prodRes) => {
-      (prodRes.data || []).forEach((p) => { productsStatus[p.slug] = p.status; });
-    });
-
+  // Carga del carrito, reutilizable por el botón "Reintentar" del error.
+  function loadCart() {
+    ui.loading(body, 'rows', items.length || 2);
     supabase.from('cart_items')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
-      .then((res2) => {
-        items = res2.data || [];
+      .then((res) => {
+        if (res.error) {
+          ui.error(body, 'No se pudo cargar tu carrito.', loadCart, res.error.message);
+          return;
+        }
+        items = res.data || [];
         render();
       });
-  });
+  }
+
+  function start() {
+    ui.loading(body, 'rows', 2);
+    supabase.auth.getSession().then((res) => {
+      user = (res.data && res.data.session && res.data.session.user) || null;
+      if (!user) {
+        ui.empty(body, {
+          text: 'Necesitas iniciar sesión para ver tu carrito.',
+          action: { label: 'Iniciar sesión', href: loginUrl() }
+        });
+        return;
+      }
+
+      // El estado de cada producto decide si el servicio nace activo o
+      // "próximamente" al pagar. Si esta consulta falla, el pedido se puede
+      // completar igual: se deja el estado por defecto.
+      supabase.from('products').select('slug,status').then((prodRes) => {
+        (prodRes.data || []).forEach((p) => { productsStatus[p.slug] = p.status; });
+      });
+
+      loadCart();
+    }).catch(() => {
+      ui.error(body, 'No se pudo comprobar tu sesión.', start);
+    });
+  }
+
+  start();
 })();

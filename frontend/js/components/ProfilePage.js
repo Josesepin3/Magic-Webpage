@@ -5,6 +5,10 @@
   const supabase = window.MagicOS && window.MagicOS.supabase;
   if (!supabase) return;
 
+  // Bloques compartidos de carga / error / vacío (js/components/AsyncState.js).
+  const ui = window.MagicOS.ui;
+  const stateEl = document.getElementById('profile-state');
+
   const avatarBox = document.getElementById('profile-avatar');
   const avatarInput = document.getElementById('profile-avatar-input');
   const avatarHint = document.getElementById('profile-avatar-hint');
@@ -46,6 +50,15 @@
   function setHint(message) {
     avatarHint.textContent = message;
     avatarHint.hidden = !message;
+  }
+
+  // Mientras los datos no lleguen (o si fallan), el formulario no se puede
+  // usar: guardar sobre un perfil que no se cargó solo puede sorprender.
+  function setFormEnabled(on) {
+    form.setAttribute('aria-busy', on ? 'false' : 'true');
+    nameInput.disabled = !on;
+    avatarInput.disabled = !on;
+    saveBtn.disabled = !on;
   }
 
   function uploadAvatar(file) {
@@ -102,19 +115,34 @@
     });
   }
 
-  supabase.auth.getSession().then((res) => {
-    user = (res.data && res.data.session && res.data.session.user) || null;
-    if (!user) {
-      redirectLogin();
-      return;
-    }
-    supabase.from('profiles').select('*').eq('id', user.id).maybeSingle().then((res2) => {
-      profile = res2.data || {};
-      nameInput.value = profile.full_name || '';
-      emailInput.value = user.email;
-      renderAvatar();
+  // Carga del perfil, reutilizable por el botón "Reintentar" del error.
+  function loadProfile() {
+    ui.loading(stateEl, 'profile', 1);
+    setFormEnabled(false);
+    supabase.auth.getSession().then((res) => {
+      user = (res.data && res.data.session && res.data.session.user) || null;
+      if (!user) {
+        redirectLogin();
+        return;
+      }
+      supabase.from('profiles').select('*').eq('id', user.id).maybeSingle().then((res2) => {
+        if (res2.error) {
+          ui.error(stateEl, 'No se pudo cargar tu perfil.', loadProfile, res2.error.message);
+          return;
+        }
+        profile = res2.data || {};
+        nameInput.value = profile.full_name || '';
+        emailInput.value = user.email || '';
+        renderAvatar();
+        if (stateEl) stateEl.innerHTML = '';
+        setFormEnabled(true);
+      });
+    }).catch(() => {
+      ui.error(stateEl, 'No se pudo cargar tu perfil.', loadProfile);
     });
-  });
+  }
+
+  loadProfile();
 
   avatarInput.addEventListener('change', () => {
     if (avatarInput.files && avatarInput.files[0]) {

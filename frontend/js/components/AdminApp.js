@@ -36,12 +36,6 @@
     try { return JSON.parse(p.features_json); } catch (e) { return []; }
   }
 
-  function renderListError(list) {
-    return function (err) {
-      list.innerHTML = '<p class="empty-note is-error">' + esc(err.message) + '</p>';
-    };
-  }
-
   function showInlineError(err) {
     console.error(err);
   }
@@ -75,20 +69,21 @@
   }
 
   function loadMessages() {
-    messagesList.innerHTML = '<p class="empty-note">Cargando mensajes…</p>';
+    MagicOS.ui.loading(messagesList, 'rows', 3);
     supabase.from('messages').select('*').order('created_at', { ascending: false }).then(function (res) {
       if (res.error) {
-        messagesList.innerHTML = '<p class="empty-note is-error">' + esc(res.error.message) + '</p>';
+        MagicOS.ui.error(messagesList, 'No se pudieron cargar los mensajes.', loadMessages, res.error.message);
         return;
       }
       var messages = res.data || [];
       if (!messages.length) {
-        messagesList.innerHTML = '<p class="empty-note">No hay mensajes todavía.</p>';
         setCount(0, 0);
+        MagicOS.ui.empty(messagesList, { text: 'No hay mensajes todavía.' });
         return;
       }
       var unread = messages.filter(function (m) { return !m.read; }).length;
       setCount(messages.length, unread);
+      MagicOS.ui.ready(messagesList);
       messagesList.innerHTML = messages.map(renderMessage).join('');
     });
   }
@@ -131,17 +126,21 @@
   }
 
   function loadProducts() {
-    productsList.innerHTML = '<p class="empty-note">Cargando productos…</p>';
+    MagicOS.ui.loading(productsList, 'rows', 3);
     supabase.from('products').select('*').order('category', { ascending: true }).order('name', { ascending: true }).then(function (res) {
       if (res.error) {
-        productsList.innerHTML = '<p class="empty-note is-error">' + esc(res.error.message) + '</p>';
+        MagicOS.ui.error(productsList, 'No se pudieron cargar los productos.', loadProducts, res.error.message);
         return;
       }
       var products = res.data || [];
       if (!products.length) {
-        productsList.innerHTML = '<p class="empty-note">No hay productos. Crea el primero.</p>';
+        MagicOS.ui.empty(productsList, {
+          text: 'No hay productos. Crea el primero.',
+          action: { label: 'Crear producto', onClick: function () { openDialog(null); } }
+        });
         return;
       }
+      MagicOS.ui.ready(productsList);
       productsList.innerHTML = products.map(renderProduct).join('');
     });
   }
@@ -221,7 +220,10 @@
         renderOptionRows();
         dialog.showModal();
       }).catch(function (err) {
-        console.error(err);
+        // El diálogo ni siquiera llegó a abrirse: el aviso va en la lista, con
+        // "Reintentar" para volver a pedir los datos.
+        showInlineError(err);
+        MagicOS.ui.error(productsList, 'No se pudo abrir el producto.', loadProducts, err.message);
       });
     } else {
       dialogTitle.textContent = 'Nuevo producto';

@@ -3172,17 +3172,172 @@ html.reveal-js [data-reveal].revealed {
 	color: rgba(255, 255, 255, 0.5);
 }
 
-.cart-empty {
+/* ═══════════════════════════════════════════════════
+   22b. ESTADOS DE CARGA / ERROR / VACÍO (compartidos)
+   Marcado generado por MagicOS.ui (frontend/js/components/AsyncState.js):
+   carrito, servicios, perfil y panel usan estos mismos bloques, así los tres
+   estados se ven igual en todas las páginas.
+   ═══════════════════════════════════════════════════ */
+
+.skeleton-stack {
+	display: grid;
+	gap: 12px;
+}
+
+.skeleton-stack--cards {
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.skeleton-stack--avatar {
+	display: flex;
+	justify-content: center;
+}
+
+/* Contenedor del esqueleto: el marco de la tarjeta, sin brillo propio. */
+.skeleton-box {
+	display: grid;
+	gap: 10px;
+	padding: 18px 20px;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 14px;
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.skeleton-box--row {
+	min-height: 68px;
+	align-content: center;
+}
+
+.skeleton-box--card {
+	min-height: 112px;
+	align-content: center;
+}
+
+.skeleton-box--profile {
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	gap: 8px 16px;
+	padding: 20px;
+}
+
+/* Barras y círculos que "respiran" mientras llega la respuesta. */
+.skeleton-line,
+.skeleton-avatar {
+	background: rgba(255, 255, 255, 0.1);
+}
+
+.skeleton-line {
+	display: block;
+	height: 10px;
+	border-radius: 999px;
+}
+
+.skeleton-lines {
+	display: grid;
+	gap: 10px;
+}
+
+.skeleton-line--title {
+	width: 42%;
+}
+
+.skeleton-line--meta {
+	width: 72%;
+}
+
+.skeleton-avatar {
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+}
+
+/* En el navbar el hueco de la cuenta es un círculo de 36px. */
+.nav-user .skeleton-avatar {
+	width: 36px;
+	height: 36px;
+}
+
+.nav-user .skeleton-stack {
+	place-items: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.skeleton-line,
+	.skeleton-avatar {
+		animation: skeleton-pulse 1.4s ease-in-out infinite;
+	}
+}
+
+@keyframes skeleton-pulse {
+	0%,
+	100% {
+		opacity: 0.55;
+	}
+
+	50% {
+		opacity: 1;
+	}
+}
+
+.state-block {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 16px;
-	padding: 48px 16px;
+	gap: 14px;
+	padding: 44px 16px;
 	text-align: center;
 }
 
-.cart-empty p {
+.state-icon {
+	width: 28px;
+	height: 28px;
+	color: rgba(255, 255, 255, 0.4);
+}
+
+.state-block--error .state-icon {
+	color: #ff6b60;
+}
+
+.state-text {
 	margin: 0;
+	max-width: 46ch;
+	font-size: 0.92rem;
+	line-height: 1.55;
+	color: rgba(255, 255, 255, 0.6);
+}
+
+.state-block--error .state-text {
+	color: #ff6b60;
+}
+
+/* Detalle técnico de un error (mensaje del backend), secundario y discreto. */
+.state-detail {
+	margin: -6px 0 0;
+	max-width: 46ch;
+	font-size: 0.78rem;
+	line-height: 1.5;
+	color: rgba(255, 255, 255, 0.35);
+	word-break: break-word;
+}
+
+.state-action {
+	margin-top: 2px;
+}
+
+.state-action[disabled] {
+	opacity: 0.6;
+	cursor: default;
+}
+
+/* La página de productos se genera en el servidor: su vacío ("Próximamente…")
+   se pinta en el EJS y comparte el aspecto de los bloques de estado. */
+.empty-state {
+	grid-column: 1 / -1;
+	margin: 0;
+	padding: 44px 16px;
+	text-align: center;
+	font-size: 0.92rem;
 	color: rgba(255, 255, 255, 0.6);
 }
 
