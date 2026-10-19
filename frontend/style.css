@@ -4233,7 +4233,7 @@ html.reveal-js [data-reveal].revealed {
 	max-width: none;
 	margin: 0 0 76px calc(50% - 50vw);
 	padding: 0;
-	height: var(--mop-card-h);
+	height: var(--mop-stage-h, var(--mop-card-h));
 }
 
 .mop-carousel.is-mop-active .mop-slides {

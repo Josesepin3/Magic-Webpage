@@ -196,7 +196,7 @@
       // elementos en cada instante de la transición.
       let ps = 64, cw = 720, W = 0, gap = 0, pitch = 0;
       let leftPill = 0, rightPill = 0, offL = 0, offR = 0;
-      let centerY = 0, lastVw = 0, lastVh = 0;
+      let centerY = 0, lastVw = 0, lastVh = 0, pinShift = 0;
 
       // Desktop: row horizontal (píldora izquierda + tarjeta + píldora
       // derecha). Móvil: columna vertical (píldora arriba + tarjeta +
@@ -216,19 +216,28 @@
         // de modo y romper el tamaño de las tarjetas).
         W = v.w - PAD * 2;
         let ch;
+        let stage;
         if (isMobile()) {
-          // Columna vertical: la píldora superior queda por debajo de la
-          // navbar fija (--header-height) y el conjunto (píldora arriba +
-          // tarjeta + píldora abajo) se mantiene simétrico desplazando su
-          // centro hacia abajo.
+          // Columna vertical (móvil y ventana del chat): píldora arriba,
+          // tarjeta y píldora abajo. El "escenario" es todo el hueco entre la
+          // cabecera fija y el borde inferior de la ventana, y la caja del
+          // carrusel mide justo eso: si solo midiera la tarjeta, las píldoras
+          // se saldrían por arriba y por abajo y taparían los titulares
+          // vecinos al rodar (el de arriba se metía bajo la primera tarjeta y
+          // el de abajo bajo la última).
           ps = 40;
           cw = W;
           const vh = v.h;
           const HDR = 96;
           const M = 12;
-          centerY = (HDR + M - PAD) / 2;
-          leftPill = -(vh / 2) + HDR + M + ps / 2;
-          rightPill = vh / 2 - PAD - ps / 2;
+          // El escenario va simétrico respecto al centro de la ventana; el
+          // hueco que pide la cabecera se recupera desplazando el pin
+          // (pinShift), no la tarjeta dentro de la caja.
+          pinShift = (HDR + M - PAD) / 2;
+          stage = Math.max(240, vh - PAD - HDR - M);
+          centerY = 0;
+          leftPill = -stage / 2 + ps / 2;
+          rightPill = stage / 2 - ps / 2;
           const span = rightPill - leftPill;
           ch = Math.min(vh * 0.62, 560);
           gap = Math.max(18, (span - ch - 2 * ps) / 2);
@@ -239,6 +248,8 @@
           gap = Math.max(14, (W - cw - 2 * ps) / 2);
           ch = Math.min(v.h * 0.62, 520);
           centerY = 0;
+          pinShift = 0;
+          stage = ch;
           leftPill = -W / 2 + ps / 2;
           rightPill = W / 2 - ps / 2;
         }
@@ -248,6 +259,7 @@
         offR = rightPill + pitch;
         carousel.style.setProperty('--mop-card-w', cw + 'px');
         carousel.style.setProperty('--mop-card-h', ch + 'px');
+        carousel.style.setProperty('--mop-stage-h', stage + 'px');
         carousel.style.setProperty('--mop-pill-size', ps + 'px');
       }
 
@@ -400,7 +412,12 @@
       function buildTrigger() {
         st = ScrollTrigger.create({
           trigger: carousel,
-          start: 'center center',
+          // En móvil/ventana el escenario ocupa el hueco entre la cabecera y
+          // el borde inferior pero va simétrico, así que el pin se desplaza
+          // pinShift hacia abajo para no tapar la navbar (antes ese hueco se
+          // compensaba moviendo la tarjeta dentro de una caja más pequeña,
+          // que es lo que desbordaba sobre los titulares).
+          start: () => 'center center' + (pinShift > 0 ? '+=' + Math.round(pinShift) : pinShift < 0 ? '-=' + Math.round(-pinShift) : ''),
           end: () => '+=' + (n - 1) * Math.round(viewportBox().h * 0.9),
           pin: true,
           anticipatePin: 1,
