@@ -38,8 +38,8 @@ existe para ti.
 1. **MagicOS** — Sistema operativo · **Disponible**.
    "El sistema operativo que pone tu privacidad primero."
    Construido sobre cuatro pilares: *Resiliencia atómica* (núcleo inmutable de
-   solo lectura), *Privacidad de élite* (cifrado GPG automático), *Borealis*
-   (mensajería abierta, con puentes a Matrix y XMPP) y *Magic Circle*
+   solo lectura), *Privacidad de élite* (cifrado GPG automático), *Interfaz
+   GNOME* (escritorio intuitivo y familiar, basado en GNOME) y *Magic Circle*
    (desarrollo abierto y auditable). Incluye *Horizon*, su motor de
    compatibilidad: cerca del 90 % de las aplicaciones más usadas funcionan
    desde el primer día. Sin opciones configurables (configuración estándar).

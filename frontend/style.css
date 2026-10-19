@@ -4213,7 +4213,7 @@ html.reveal-js [data-reveal].revealed {
 }
 .mop-slide--ui .mop-card-text::before { content: '01 — Privacidad'; }
 .mop-slide--security .mop-card-text::before { content: '02 — Resiliencia'; }
-.mop-slide--performance .mop-card-text::before { content: '03 — Borealis'; }
+.mop-slide--performance .mop-card-text::before { content: '03 — Interfaz'; }
 .mop-slide--open .mop-card-text::before { content: '04 — Magic Circle'; }
 .mop-slide--compat .mop-card-text::before { content: '05 — Horizon'; }
 .mop-card-title {

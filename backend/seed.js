@@ -51,7 +51,7 @@ const productsData = [
     id: 1,
     name: 'MagicOS', slug: 'magicos',
     tagline: 'El sistema operativo que pone tu privacidad primero.',
-    description: 'MagicOS es un sistema operativo premium construido sobre cuatro pilares: un núcleo inmutable, cifrado invisible, mensajería abierta y una comunidad que audita cada línea. Procesamiento estrictamente local, sin telemetría.',
+    description: 'MagicOS es un sistema operativo premium construido sobre cuatro pilares: un núcleo inmutable, cifrado invisible, una interfaz basada en GNOME y una comunidad que audita cada línea. Procesamiento estrictamente local, sin telemetría.',
     base_price: 0, category: 'os', status: 'available', image_url: '/img/MagicOS White.svg',
     features: [
       { title: 'Privacidad de élite', description: 'Cifrado GPG automático y cero telemetría. Tus datos se cifran solos.', img: '' },
