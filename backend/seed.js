@@ -51,11 +51,12 @@ const productsData = [
     id: 1,
     name: 'MagicOS', slug: 'magicos',
     tagline: 'El sistema operativo que pone tu privacidad primero.',
-    description: 'MagicOS es un sistema operativo premium con núcleo diseñado para el procesamiento estrictamente local. Interfaz minimalista, seguridad radical y cero dependencia de la nube.',
+    description: 'MagicOS es un sistema operativo premium construido sobre cuatro pilares: un núcleo inmutable, cifrado invisible, mensajería abierta y una comunidad que audita cada línea. Procesamiento estrictamente local, sin telemetría.',
     base_price: 0, category: 'os', status: 'available', image_url: '/img/MagicOS White.svg',
     features: [
-      { title: 'Privacidad Radical', description: 'Procesamiento 100% local. Sin telemetría, sin rastreo.', img: '' },
-      { title: 'Interfaz Minimalista', description: 'Diseñado para la productividad sin distracciones.', img: '' }
+      { title: 'Privacidad de élite', description: 'Cifrado GPG automático y cero telemetría. Tus datos se cifran solos.', img: '' },
+      { title: 'Resiliencia atómica', description: 'Núcleo inmutable de solo lectura: el sistema no se corrompe ni se degrada.', img: '' },
+      { title: 'Horizon', description: 'Cerca del 90 % de las aplicaciones más usadas funcionan desde el primer día.', img: '' }
     ],
     options: []
   },
@@ -63,11 +64,11 @@ const productsData = [
     id: 2,
     name: 'Sirius Laptop', slug: 'sirius-laptop',
     tagline: 'Hardware modular. Potencia que te pertenece.',
-    description: 'La laptop Sirius está diseñada bajo la filosofía de bloques de Lego: componentes fácilmente reparables y actualizables. Con el Chip N1 Kinetic integrado para un rendimiento local sin concesiones.',
+    description: 'La laptop Sirius es modular por diseño: cada componente se reemplaza y actualiza por separado, sin ventiladores y con batería para todo el día. Arquitectura ARM con el Chip N1 Kinetic y MagicOS de fábrica.',
     base_price: 1999, category: 'hardware', status: 'coming_soon', image_url: '',
     features: [
       { title: 'Diseño Modular', description: 'Cada componente se reemplaza individualmente. Adiós a la obsolescencia programada.', img: '' },
-      { title: 'Chip N1 Kinetic', description: 'Arquitectura de silicio propia optimizada para ejecutar tareas complejas de forma local.', img: '' },
+      { title: 'Chip N1 Kinetic', description: 'Arquitectura ARM de alta eficiencia: rendimiento local sin ventilador y con consumo mínimo.', img: '' },
       { title: 'Privacidad por Defecto', description: 'Sin backdoors, sin telemetría. Tu máquina, tus reglas.', img: '' }
     ],
     options: [
@@ -90,7 +91,7 @@ const productsData = [
     id: 3,
     name: 'Chip N1 Kinetic', slug: 'chip-n1-kinetic',
     tagline: 'Silicio propio. Rendimiento sin compromisos.',
-    description: 'Arquitectura de silicio propietaria diseñada exclusivamente para MagicOS. Ejecuta tareas complejas de forma local, eficiente y veloz.',
+    description: 'Arquitectura ARM de alta eficiencia diseñada junto a MagicOS: ejecuta tareas complejas de forma local, sin ventiladores y con el mínimo consumo de batería.',
     base_price: 0, category: 'silicon', status: 'coming_soon', image_url: '',
     features: [],
     options: []
@@ -99,7 +100,7 @@ const productsData = [
     id: 4,
     name: 'BlackBox Cloud', slug: 'blackbox-cloud',
     tagline: 'El puente seguro entre tus dispositivos.',
-    description: 'Almacenamiento en la nube con cifrado de extremo a extremo. Tan intuitivo como Google Drive, pero blindado con llaves que solo tú posees.',
+    description: 'Tus archivos cifrados de extremo a extremo y sincronizados entre tus dispositivos. Tan simple como una nube, pero con llaves que solo tú posees.',
     base_price: 0, category: 'cloud', status: 'coming_soon', image_url: '',
     features: [],
     options: []

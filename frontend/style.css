@@ -4211,11 +4211,11 @@ html.reveal-js [data-reveal].revealed {
 	text-transform: uppercase;
 	opacity: 0.62;
 }
-.mop-slide--ui .mop-card-text::before { content: '01 — Interfaz'; }
-.mop-slide--security .mop-card-text::before { content: '02 — Privacidad'; }
-.mop-slide--performance .mop-card-text::before { content: '03 — Rendimiento'; }
-.mop-slide--open .mop-card-text::before { content: '04 — Open Source'; }
-.mop-slide--compat .mop-card-text::before { content: '05 — Compatibilidad'; }
+.mop-slide--ui .mop-card-text::before { content: '01 — Privacidad'; }
+.mop-slide--security .mop-card-text::before { content: '02 — Resiliencia'; }
+.mop-slide--performance .mop-card-text::before { content: '03 — Borealis'; }
+.mop-slide--open .mop-card-text::before { content: '04 — Magic Circle'; }
+.mop-slide--compat .mop-card-text::before { content: '05 — Horizon'; }
 .mop-card-title {
 	margin: 0 0 12px;
 	font-size: clamp(1.35rem, 2.6vw, 1.9rem);
