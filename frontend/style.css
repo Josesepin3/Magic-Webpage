@@ -5031,24 +5031,28 @@ html.reveal-js [data-reveal].revealed {
 	.chat-input {
 		padding-bottom: max(12px, env(safe-area-inset-bottom));
 	}
-
-	/* Dentro de la ventana, el carousel de funciones usa la disposición
-	   vertical (como en móvil) pero con el ancho de la ventana. */
-	body.chat-shell .mop-carousel.is-mop-active {
-		width: 100%;
-		margin: 0 0 76px;
-	}
-	body.chat-shell .mop-carousel.is-mop-active .mop-meta {
-		display: none;
-	}
-	body.chat-shell .mop-card {
-		grid-template-columns: 1fr;
-		grid-template-areas: "text" "visual";
-		text-align: left;
-	}
-	body.chat-shell .mop-card-img { max-height: 120px; }
-	body.chat-shell .mop-card-icon { width: clamp(90px, 24vw, 140px); }
 }
+
+/* Dentro de la ventana, el carousel de funciones usa la disposición
+   vertical (como en móvil) pero con el ancho de la ventana. Fuera del
+   @media de móvil a propósito: body.chat-shell solo existe en desktop
+   (≥1024px), así que dentro del media nunca llegaba a aplicarse y el
+   carrusel conservaba el full-bleed `width: 100vw` (1440px dentro de una
+   ventana de 984: desbordaba y se salía de la sidebar). */
+body.chat-shell .mop-carousel.is-mop-active {
+	width: 100%;
+	margin: 0 0 76px;
+}
+body.chat-shell .mop-carousel.is-mop-active .mop-meta {
+	display: none;
+}
+body.chat-shell .mop-card {
+	grid-template-columns: 1fr;
+	grid-template-areas: "text" "visual";
+	text-align: left;
+}
+body.chat-shell .mop-card-img { max-height: 120px; }
+body.chat-shell .mop-card-icon { width: clamp(90px, 24vw, 140px); }
 
 /* El botón de la cabecera existe en desktop (sidebar / ventana flotante) y
    en mobile (maximizar la hoja); se oculta solo en el tramo intermedio, donde

@@ -210,7 +210,11 @@
         lastVw = v.w;
         lastVh = v.h;
         const PAD = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--page-padding')) || 24;
-        W = carousel.getBoundingClientRect().width - PAD * 2;
+        // El ancho se toma del viewport (o de la ventana del chat), nunca del
+        // propio carrusel: mientras está pineado su rect es el inline que dejó
+        // ScrollTrigger, con la medida del modo anterior (obsoleta al cambiar
+        // de modo y romper el tamaño de las tarjetas).
+        W = v.w - PAD * 2;
         let ch;
         if (isMobile()) {
           // Columna vertical: la píldora superior queda por debajo de la
@@ -364,26 +368,54 @@
         const v = viewportBox();
         if (v.w !== lastVw || (isMobile() && v.h !== lastVh)) measure();
         const idx = Math.round(Math.max(0, Math.min(n - 1, q)));
-        if (idx === state) return;
-        if (Math.abs(idx - state) > 1) { killStep(); state = idx; applyState(state); return; }
+        // El objetivo es el paso pendiente si hay uno en vuelo: comparar solo
+        // con `state` dejaba que un tween arrancado con un progreso obsoleto
+        // terminase en un paso viejo y pisara el correcto.
+        const objetivo = pending !== null ? pending : state;
+        if (idx === objetivo) return;
+        if (Math.abs(idx - objetivo) > 1) { killStep(); state = idx; applyState(state); return; }
         playStep(idx);
       }
 
-      const st = ScrollTrigger.create({
-        trigger: carousel,
-        start: 'center center',
-        end: () => '+=' + (n - 1) * Math.round(viewportBox().h * 0.9),
-        pin: true,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => drive(self.progress * (n - 1)),
-        onRefresh: function () { measure(); applyState(state); }
-      });
+      // Fija el paso mostrado al progreso real sin animar. Se usa al
+      // alternar la ventana del chat: el progreso cambia de golpe (el
+      // scroller pasa de documento a .site-shell-inner) y no hay un "paso"
+      // que animar.
+      function syncStep() {
+        killStep();
+        state = Math.round(Math.max(0, Math.min(n - 1, st.progress * (n - 1))));
+        applyState(state);
+      }
+
+      // El pin necesita el scroller del modo actual: en la ventana del chat
+      // (body.chat-shell) el documento queda congelado y el que rueda es
+      // .site-shell-inner, así que el trigger se recrea al alternar (el
+      // anterior se mata, revirtiendo su pin, y se repina contra el nuevo).
+      const shellScroller = () => {
+        if (!isChatShell()) return null;
+        const sc = document.querySelector('.site-shell-inner');
+        return sc && getComputedStyle(sc).display !== 'contents' ? sc : null;
+      };
+      let st = null;
+      function buildTrigger() {
+        st = ScrollTrigger.create({
+          trigger: carousel,
+          start: 'center center',
+          end: () => '+=' + (n - 1) * Math.round(viewportBox().h * 0.9),
+          pin: true,
+          anticipatePin: 1,
+          scroller: shellScroller() || undefined,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => drive(self.progress * (n - 1)),
+          onRefresh: function () { measure(); applyState(state); }
+        });
+      }
+      buildTrigger();
 
       function goToStep(target) {
         target = Math.max(0, Math.min(n - 1, target));
         const pos = st.start + (st.end - st.start) * (target / (n - 1));
-        const scroller = isChatShell() ? document.querySelector('.site-shell-inner') : null;
+        const scroller = shellScroller();
         if (scroller) scroller.scrollTo({ top: pos, behavior: 'smooth' });
         else if (window.__pageLenis) window.__pageLenis.scrollTo(pos);
         else window.scrollTo({ top: pos, behavior: 'smooth' });
@@ -403,15 +435,26 @@
       applyState(0);
 
       // Al abrir/cerrar la "ventana" del chat (body.chat-shell) el carousel
-      // alterna entre la disposición desktop y la móvil: recalculamos la
-      // geometría contra la ventana y re-sincronizamos el pin.
+      // alterna entre la disposición desktop y la móvil: el pin se recrea con
+      // el scroller del modo actual (documento o .site-shell-inner), la
+      // geometría se recalcula contra la ventana y el paso se fija al
+      // progreso real (el refresh no siempre emite onUpdate).
       let lastShell = isChatShell();
       new MutationObserver(function () {
         if (isChatShell() === lastShell) return;
-        lastShell = isChatShell();
+        const abriendo = isChatShell();
+        lastShell = abriendo;
+        if (st) st.kill(true); // revierte el pin y devuelve el carrusel al flujo
+        buildTrigger();
         measure();
         applyState(state);
         ScrollTrigger.refresh();
+        // Al abrir el espejo del scroll es síncrono, así que el paso se fija
+        // ya. Al cerrar, el documento recupera su scroll en un rAF
+        // (restoreDocScroll del chat): se re-sincroniza después, con el
+        // scroll definitivo, para no mostrar un paso intermedio.
+        if (abriendo) syncStep();
+        else requestAnimationFrame(syncStep);
       }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
     }
   }
