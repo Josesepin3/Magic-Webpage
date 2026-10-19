@@ -196,7 +196,7 @@
       // elementos en cada instante de la transición.
       let ps = 64, cw = 720, W = 0, gap = 0, pitch = 0;
       let leftPill = 0, rightPill = 0, offL = 0, offR = 0;
-      let centerY = 0, lastVw = 0, lastVh = 0;
+      let centerY = 0, lastVw = 0, lastVh = 0, pinShift = 0;
 
       // Desktop: row horizontal (píldora izquierda + tarjeta + píldora
       // derecha). Móvil: columna vertical (píldora arriba + tarjeta +
@@ -210,21 +210,34 @@
         lastVw = v.w;
         lastVh = v.h;
         const PAD = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--page-padding')) || 24;
-        W = carousel.getBoundingClientRect().width - PAD * 2;
+        // El ancho se toma del viewport (o de la ventana del chat), nunca del
+        // propio carrusel: mientras está pineado su rect es el inline que dejó
+        // ScrollTrigger, con la medida del modo anterior (obsoleta al cambiar
+        // de modo y romper el tamaño de las tarjetas).
+        W = v.w - PAD * 2;
         let ch;
+        let stage;
         if (isMobile()) {
-          // Columna vertical: la píldora superior queda por debajo de la
-          // navbar fija (--header-height) y el conjunto (píldora arriba +
-          // tarjeta + píldora abajo) se mantiene simétrico desplazando su
-          // centro hacia abajo.
+          // Columna vertical (móvil y ventana del chat): píldora arriba,
+          // tarjeta y píldora abajo. El "escenario" es todo el hueco entre la
+          // cabecera fija y el borde inferior de la ventana, y la caja del
+          // carrusel mide justo eso: si solo midiera la tarjeta, las píldoras
+          // se saldrían por arriba y por abajo y taparían los titulares
+          // vecinos al rodar (el de arriba se metía bajo la primera tarjeta y
+          // el de abajo bajo la última).
           ps = 40;
           cw = W;
           const vh = v.h;
           const HDR = 96;
           const M = 12;
-          centerY = (HDR + M - PAD) / 2;
-          leftPill = -(vh / 2) + HDR + M + ps / 2;
-          rightPill = vh / 2 - PAD - ps / 2;
+          // El escenario va simétrico respecto al centro de la ventana; el
+          // hueco que pide la cabecera se recupera desplazando el pin
+          // (pinShift), no la tarjeta dentro de la caja.
+          pinShift = (HDR + M - PAD) / 2;
+          stage = Math.max(240, vh - PAD - HDR - M);
+          centerY = 0;
+          leftPill = -stage / 2 + ps / 2;
+          rightPill = stage / 2 - ps / 2;
           const span = rightPill - leftPill;
           ch = Math.min(vh * 0.62, 560);
           gap = Math.max(18, (span - ch - 2 * ps) / 2);
@@ -235,6 +248,8 @@
           gap = Math.max(14, (W - cw - 2 * ps) / 2);
           ch = Math.min(v.h * 0.62, 520);
           centerY = 0;
+          pinShift = 0;
+          stage = ch;
           leftPill = -W / 2 + ps / 2;
           rightPill = W / 2 - ps / 2;
         }
@@ -244,6 +259,7 @@
         offR = rightPill + pitch;
         carousel.style.setProperty('--mop-card-w', cw + 'px');
         carousel.style.setProperty('--mop-card-h', ch + 'px');
+        carousel.style.setProperty('--mop-stage-h', stage + 'px');
         carousel.style.setProperty('--mop-pill-size', ps + 'px');
       }
 
@@ -364,26 +380,59 @@
         const v = viewportBox();
         if (v.w !== lastVw || (isMobile() && v.h !== lastVh)) measure();
         const idx = Math.round(Math.max(0, Math.min(n - 1, q)));
-        if (idx === state) return;
-        if (Math.abs(idx - state) > 1) { killStep(); state = idx; applyState(state); return; }
+        // El objetivo es el paso pendiente si hay uno en vuelo: comparar solo
+        // con `state` dejaba que un tween arrancado con un progreso obsoleto
+        // terminase en un paso viejo y pisara el correcto.
+        const objetivo = pending !== null ? pending : state;
+        if (idx === objetivo) return;
+        if (Math.abs(idx - objetivo) > 1) { killStep(); state = idx; applyState(state); return; }
         playStep(idx);
       }
 
-      const st = ScrollTrigger.create({
-        trigger: carousel,
-        start: 'center center',
-        end: () => '+=' + (n - 1) * Math.round(viewportBox().h * 0.9),
-        pin: true,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => drive(self.progress * (n - 1)),
-        onRefresh: function () { measure(); applyState(state); }
-      });
+      // Fija el paso mostrado al progreso real sin animar. Se usa al
+      // alternar la ventana del chat: el progreso cambia de golpe (el
+      // scroller pasa de documento a .site-shell-inner) y no hay un "paso"
+      // que animar.
+      function syncStep() {
+        killStep();
+        state = Math.round(Math.max(0, Math.min(n - 1, st.progress * (n - 1))));
+        applyState(state);
+      }
+
+      // El pin necesita el scroller del modo actual: en la ventana del chat
+      // (body.chat-shell) el documento queda congelado y el que rueda es
+      // .site-shell-inner, así que el trigger se recrea al alternar (el
+      // anterior se mata, revirtiendo su pin, y se repina contra el nuevo).
+      const shellScroller = () => {
+        if (!isChatShell()) return null;
+        const sc = document.querySelector('.site-shell-inner');
+        return sc && getComputedStyle(sc).display !== 'contents' ? sc : null;
+      };
+      let st = null;
+      function buildTrigger() {
+        st = ScrollTrigger.create({
+          trigger: carousel,
+          // En móvil/ventana el escenario ocupa el hueco entre la cabecera y
+          // el borde inferior pero va simétrico, así que el pin se desplaza
+          // pinShift hacia abajo para no tapar la navbar (antes ese hueco se
+          // compensaba moviendo la tarjeta dentro de una caja más pequeña,
+          // que es lo que desbordaba sobre los titulares).
+          start: () => 'center center' + (pinShift > 0 ? '+=' + Math.round(pinShift) : pinShift < 0 ? '-=' + Math.round(-pinShift) : ''),
+          end: () => '+=' + (n - 1) * Math.round(viewportBox().h * 0.9),
+          pin: true,
+          anticipatePin: 1,
+          scroller: shellScroller() || undefined,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => drive(self.progress * (n - 1)),
+          onRefresh: function () { measure(); applyState(state); }
+        });
+      }
+      buildTrigger();
 
       function goToStep(target) {
         target = Math.max(0, Math.min(n - 1, target));
         const pos = st.start + (st.end - st.start) * (target / (n - 1));
-        const scroller = isChatShell() ? document.querySelector('.site-shell-inner') : null;
+        const scroller = shellScroller();
         if (scroller) scroller.scrollTo({ top: pos, behavior: 'smooth' });
         else if (window.__pageLenis) window.__pageLenis.scrollTo(pos);
         else window.scrollTo({ top: pos, behavior: 'smooth' });
@@ -403,15 +452,26 @@
       applyState(0);
 
       // Al abrir/cerrar la "ventana" del chat (body.chat-shell) el carousel
-      // alterna entre la disposición desktop y la móvil: recalculamos la
-      // geometría contra la ventana y re-sincronizamos el pin.
+      // alterna entre la disposición desktop y la móvil: el pin se recrea con
+      // el scroller del modo actual (documento o .site-shell-inner), la
+      // geometría se recalcula contra la ventana y el paso se fija al
+      // progreso real (el refresh no siempre emite onUpdate).
       let lastShell = isChatShell();
       new MutationObserver(function () {
         if (isChatShell() === lastShell) return;
-        lastShell = isChatShell();
+        const abriendo = isChatShell();
+        lastShell = abriendo;
+        if (st) st.kill(true); // revierte el pin y devuelve el carrusel al flujo
+        buildTrigger();
         measure();
         applyState(state);
         ScrollTrigger.refresh();
+        // Al abrir el espejo del scroll es síncrono, así que el paso se fija
+        // ya. Al cerrar, el documento recupera su scroll en un rAF
+        // (restoreDocScroll del chat): se re-sincroniza después, con el
+        // scroll definitivo, para no mostrar un paso intermedio.
+        if (abriendo) syncStep();
+        else requestAnimationFrame(syncStep);
       }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
     }
   }

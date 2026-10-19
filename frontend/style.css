@@ -4132,6 +4132,18 @@ html.reveal-js [data-reveal].revealed {
 	left: 20px;
 }
 
+/* En móvil el hero baja de alto: con la medida de desktop (88svh) quedaba
+   tanto aire bajo el logo que el titular de la sección siguiente
+   ("Un sistema operativo que pone tu privacidad primero.") y su texto
+   arrancaban por debajo del pliegue. Con 58svh el hero sigue siendo
+   cinemático (glow a sangre) y la cabecera de #funciones entra completa. */
+@media (max-width: 640px) {
+	.magicos-hero {
+		min-height: 58svh;
+		padding-bottom: 24px;
+	}
+}
+
 /* Encabezados de sección estilo homepage */
 .mop-head {
 	margin-bottom: 44px;
@@ -4233,7 +4245,7 @@ html.reveal-js [data-reveal].revealed {
 	max-width: none;
 	margin: 0 0 76px calc(50% - 50vw);
 	padding: 0;
-	height: var(--mop-card-h);
+	height: var(--mop-stage-h, var(--mop-card-h));
 }
 
 .mop-carousel.is-mop-active .mop-slides {
@@ -5031,24 +5043,25 @@ html.reveal-js [data-reveal].revealed {
 	.chat-input {
 		padding-bottom: max(12px, env(safe-area-inset-bottom));
 	}
-
-	/* Dentro de la ventana, el carousel de funciones usa la disposición
-	   vertical (como en móvil) pero con el ancho de la ventana. */
-	body.chat-shell .mop-carousel.is-mop-active {
-		width: 100%;
-		margin: 0 0 76px;
-	}
-	body.chat-shell .mop-carousel.is-mop-active .mop-meta {
-		display: none;
-	}
-	body.chat-shell .mop-card {
-		grid-template-columns: 1fr;
-		grid-template-areas: "text" "visual";
-		text-align: left;
-	}
-	body.chat-shell .mop-card-img { max-height: 120px; }
-	body.chat-shell .mop-card-icon { width: clamp(90px, 24vw, 140px); }
 }
+
+/* Dentro de la ventana, el carousel de funciones usa la disposición
+   vertical (como en móvil) pero con el ancho de la ventana. Fuera del
+   @media de móvil a propósito: body.chat-shell solo existe en desktop
+   (≥1024px), así que dentro del media nunca llegaba a aplicarse y el
+   carrusel conservaba el full-bleed `width: 100vw` (1440px dentro de una
+   ventana de 984: desbordaba y se salía de la sidebar). */
+body.chat-shell .mop-carousel.is-mop-active {
+	width: 100%;
+	margin: 0 0 76px;
+}
+body.chat-shell .mop-carousel.is-mop-active .mop-meta {
+	display: none;
+}
+/* Las píldoras sí van en columna (lo lleva el JS con la ventana), pero la
+   tarjeta conserva la disposición horizontal de desktop (texto | visual):
+   la ventana es ancha (≥1024px) y en una sola columna el texto queda
+   apretado contra el visual. */
 
 /* El botón de la cabecera existe en desktop (sidebar / ventana flotante) y
    en mobile (maximizar la hoja); se oculta solo en el tramo intermedio, donde
