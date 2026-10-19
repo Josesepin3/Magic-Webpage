@@ -4132,6 +4132,18 @@ html.reveal-js [data-reveal].revealed {
 	left: 20px;
 }
 
+/* En móvil el hero baja de alto: con la medida de desktop (88svh) quedaba
+   tanto aire bajo el logo que el titular de la sección siguiente
+   ("Un sistema operativo que pone tu privacidad primero.") y su texto
+   arrancaban por debajo del pliegue. Con 58svh el hero sigue siendo
+   cinemático (glow a sangre) y la cabecera de #funciones entra completa. */
+@media (max-width: 640px) {
+	.magicos-hero {
+		min-height: 58svh;
+		padding-bottom: 24px;
+	}
+}
+
 /* Encabezados de sección estilo homepage */
 .mop-head {
 	margin-bottom: 44px;
