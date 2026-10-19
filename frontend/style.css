@@ -5046,13 +5046,10 @@ body.chat-shell .mop-carousel.is-mop-active {
 body.chat-shell .mop-carousel.is-mop-active .mop-meta {
 	display: none;
 }
-body.chat-shell .mop-card {
-	grid-template-columns: 1fr;
-	grid-template-areas: "text" "visual";
-	text-align: left;
-}
-body.chat-shell .mop-card-img { max-height: 120px; }
-body.chat-shell .mop-card-icon { width: clamp(90px, 24vw, 140px); }
+/* Las píldoras sí van en columna (lo lleva el JS con la ventana), pero la
+   tarjeta conserva la disposición horizontal de desktop (texto | visual):
+   la ventana es ancha (≥1024px) y en una sola columna el texto queda
+   apretado contra el visual. */
 
 /* El botón de la cabecera existe en desktop (sidebar / ventana flotante) y
    en mobile (maximizar la hoja); se oculta solo en el tramo intermedio, donde
