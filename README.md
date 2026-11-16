@@ -73,6 +73,11 @@ La plataforma web de Magic, estructurada como una aplicación **Full-Stack** con
 └── .github/workflows/   # Deploy automático a GitHub Pages
 ```
 
+### 📚 Documentación
+
+- [`docs/GUIA-PRESENTACION-Y-ARQUITECTURA.md`](docs/GUIA-PRESENTACION-Y-ARQUITECTURA.md) — Cómo presentar el proyecto y cómo funciona cada página, cada flujo de datos y cada capa de seguridad.
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — Fases, decisiones y estado del proyecto.
+
 ### 💻 Tecnologías
 
 - **Front-End:** HTML5 semántico, CSS3 avanzado (gradientes oscuros, resplandores Kinetic™ y diseño premium responsivo) y JavaScript.
