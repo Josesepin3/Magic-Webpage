@@ -164,6 +164,16 @@
       const pills = slides.map((s) => s.querySelector('.mop-pill'));
       const texts = cards.map((c) => c && c.querySelector('.mop-card-text'));
       const visuals = cards.map((c) => c && c.querySelector('.mop-card-visual'));
+
+      // Semántica de carrusel para lectores de pantalla: cada slide es un
+      // grupo con posición ("3 de 5: ...") y la tarjeta activa se marca con
+      // aria-current. Las píldoras invisibles quedan fuera del árbol.
+      slides.forEach((slide, i) => {
+        const title = slide.querySelector('.mop-card-title');
+        slide.setAttribute('role', 'group');
+        slide.setAttribute('aria-roledescription', 'slide');
+        slide.setAttribute('aria-label', (i + 1) + ' de ' + n + ': ' + (title ? title.textContent.trim() : ''));
+      });
       const numEl = carousel.querySelector('.mop-counter-num');
       const barEl = carousel.querySelector('.mop-progress-bar');
       const isChatShell = () => document.body.classList.contains('chat-shell');
@@ -274,6 +284,7 @@
         slide.classList.toggle('is-card', !!s.isCard);
         slide.classList.toggle('is-pill', !s.isCard);
         slide.classList.toggle('is-hidden', s.o <= 0);
+        slide.setAttribute('aria-hidden', s.o <= 0 ? 'true' : 'false');
       }
 
       function updateMeta(k) {
@@ -300,6 +311,11 @@
           const d = signed(i, k);
           const vis = (d === 1 && k !== n - 1) || (d === -1 && k !== 0);
           p.tabIndex = vis ? 0 : -1;
+          p.setAttribute('aria-hidden', vis ? 'false' : 'true');
+        });
+        slides.forEach((slide, i) => {
+          if (i === k) slide.setAttribute('aria-current', 'true');
+          else slide.removeAttribute('aria-current');
         });
         updateMeta(k);
       }
@@ -446,6 +462,14 @@
           if (d === 1) goToStep(base + 1);
           else if (d === -1) goToStep(base - 1);
         });
+      });
+
+      // Navegación por teclado cuando el foco está dentro del carrusel.
+      carousel.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        e.preventDefault();
+        const base = pending !== null ? pending : state;
+        goToStep(base + (e.key === 'ArrowRight' ? 1 : -1));
       });
 
       measure();

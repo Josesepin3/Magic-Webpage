@@ -1,6 +1,6 @@
 <%- include('../partials/header') %>
 
-    <main class="magicos-cinema">
+    <main id="main-content" tabindex="-1" class="magicos-cinema">
 
         <section id="que_es">
             <div class="hero magicos-hero">
@@ -14,7 +14,7 @@
                             <span class="magicos-glow-halo"></span>
                             <span class="magicos-glow-core"></span>
                         </div>
-                        <img class="magicos-hero-logo" src="/img/MagicOS White.svg" alt="MagicOS Logo" width="4558" height="976" fetchpriority="high">
+                        <img class="magicos-hero-logo" src="/img/MagicOS White.svg" alt="MagicOS Logo" width="4558" height="976" fetchpriority="high" decoding="async">
                     </div>
                     <p class="magicos-hero-tagline">Seguridad invisible. Privacidad real.</p>
                 </div>
@@ -27,85 +27,31 @@
                 <h2>Un sistema operativo que pone tu privacidad primero.</h2>
                 <p>Cuatro pilares y un motor de compatibilidad: privacidad de élite, núcleo inmutable, interfaz GNOME y una comunidad que audita cada línea.</p>
             </div>
-            <div class="mop-carousel" data-mop-carousel aria-roledescription="carousel">
+            <div class="mop-carousel" data-mop-carousel role="region" aria-roledescription="carousel" aria-label="Funciones de MagicOS" tabindex="0">
                 <div class="mop-slides" data-mop-slides>
-                    <article class="mop-slide mop-slide--ui" data-mop-slide>
-                        <button type="button" class="mop-pill" data-mop-pill="0" aria-label="Ir a: Privacidad de élite">
-                            <svg class="mop-pill-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="m 2 0 c -0.550781 0 -1 0.449219 -1 1 v 8 c 0 2.5 1.816406 4.246094 3.445312 5.332031 c 1.628907 1.085938 3.238282 1.617188 3.238282 1.617188 c 0.207031 0.070312 0.425781 0.070312 0.632812 0 c 0 0 1.609375 -0.53125 3.238282 -1.617188 c 1.628906 -0.085937 3.445312 -2.832031 3.445312 -5.332031 v -8 c 0 -0.550781 -0.449219 -1 -1 -1 z m 1 2 h 10 v 7 c 0 1.5 -1.183594 2.753906 -2.554688 3.667969 c -1.214843 0.808593 -2.179687 1.128906 -2.445312 1.226562 c -0.265625 -0.097656 -1.230469 -0.417969 -2.445312 -1.226562 c -1.371094 -0.914063 -2.554688 -2.167969 -2.554688 -3.667969 z m 1 1 v 6 c 0 1 0.867188 2.007812 2.109375 2.835938 c 0.933594 0.621093 1.472656 0.785156 1.890625 0.949218 v -9.785156 z m 0 0" fill="currentColor"/></svg>
-                        </button>
-                        <div class="mop-card">
-                            <div class="mop-card-text">
-                                <h3 class="mop-card-title">Privacidad de élite</h3>
-                                <p class="mop-card-desc">Cifrado GPG activo desde el primer arranque: tus archivos y tus mensajes se cifran solos, sin configurar nada.</p>
+                    <% (features || []).forEach((feature, index) => { %>
+                        <article class="mop-slide mop-slide--<%= feature.theme || 'ui' %>" data-mop-slide>
+                            <button type="button" class="mop-pill" data-mop-pill="<%= index %>" aria-label="Ir a: <%= feature.title %>">
+                                <%- include('../partials/feature-icon', { icon: feature.icon || 'spark', className: 'mop-pill-icon' }) %>
+                            </button>
+                            <div class="mop-card">
+                                <div class="mop-card-text">
+                                    <h3 class="mop-card-title"><%= feature.title %></h3>
+                                    <p class="mop-card-desc"><%= feature.description %></p>
+                                </div>
+                                <div class="mop-card-visual">
+                                    <% if (feature.image) { %>
+                                        <img class="mop-card-img" src="<%= feature.image %>" alt="<%= feature.image_alt || feature.title %>" loading="lazy" decoding="async">
+                                    <% } else { %>
+                                        <%- include('../partials/feature-icon', { icon: feature.icon || 'spark', className: 'mop-card-icon' }) %>
+                                    <% } %>
+                                </div>
                             </div>
-                            <div class="mop-card-visual">
-                                <svg class="mop-card-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="m 2 0 c -0.550781 0 -1 0.449219 -1 1 v 8 c 0 2.5 1.816406 4.246094 3.445312 5.332031 c 1.628907 1.085938 3.238282 1.617188 3.238282 1.617188 c 0.207031 0.070312 0.425781 0.070312 0.632812 0 c 0 0 1.609375 -0.53125 3.238282 -1.617188 c 1.628906 -0.085937 3.445312 -2.832031 3.445312 -5.332031 v -8 c 0 -0.550781 -0.449219 -1 -1 -1 z m 1 2 h 10 v 7 c 0 1.5 -1.183594 2.753906 -2.554688 3.667969 c -1.214843 0.808593 -2.179687 1.128906 -2.445312 1.226562 c -0.265625 -0.097656 -1.230469 -0.417969 -2.445312 -1.226562 c -1.371094 -0.914063 -2.554688 -2.167969 -2.554688 -3.667969 z m 1 1 v 6 c 0 1 0.867188 2.007812 2.109375 2.835938 c 0.933594 0.621093 1.472656 0.785156 1.890625 0.949218 v -9.785156 z m 0 0" fill="currentColor"/></svg>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="mop-slide mop-slide--security" data-mop-slide>
-                        <button type="button" class="mop-pill" data-mop-pill="1" aria-label="Ir a: Resiliencia atómica">
-                            <svg class="mop-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                        </button>
-                        <div class="mop-card">
-                            <div class="mop-card-text">
-                                <h3 class="mop-card-title">Resiliencia atómica</h3>
-                                <p class="mop-card-desc">Núcleo inmutable de solo lectura: si algo falla, el sistema vuelve a su estado original. No se corrompe ni se degrada.</p>
-                            </div>
-                            <div class="mop-card-visual">
-                                <svg class="mop-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="mop-slide mop-slide--performance" data-mop-slide>
-                        <button type="button" class="mop-pill" data-mop-pill="2" aria-label="Ir a: Interfaz GNOME">
-                            <svg class="mop-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                        </button>
-                        <div class="mop-card">
-                            <div class="mop-card-text">
-                                <h3 class="mop-card-title">Interfaz GNOME</h3>
-                                <p class="mop-card-desc">La interfaz de GNOME, pulida para MagicOS: intuitiva, coherente y familiar desde el primer arranque, sin curva de aprendizaje.</p>
-                            </div>
-                            <div class="mop-card-visual">
-                                <img class="mop-card-img" src="/img/shell.svg" alt="Escritorio de MagicOS basado en GNOME">
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="mop-slide mop-slide--open" data-mop-slide>
-                        <button type="button" class="mop-pill" data-mop-pill="3" aria-label="Ir a: Magic Circle">
-                            <svg class="mop-pill-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10 0 4.13-2.504 7.676-6.077 9.201l-2.518-6.55C14.354 14.148 15 13.15 15 12c0-1.657-1.343-3-3-3s-3 1.343-3 3c0 1.15.647 2.148 1.596 2.652l-2.518 6.55C4.504 19.675 2 16.13 2 12 2 6.477 6.477 2 12 2z"/></svg>
-                        </button>
-                        <div class="mop-card">
-                            <div class="mop-card-text">
-                                <h3 class="mop-card-title">Magic Circle</h3>
-                                <p class="mop-card-desc">Desarrollo abierto y auditable: cualquiera puede revisar el código, reportar fallos y proponer mejoras.</p>
-                            </div>
-                            <div class="mop-card-visual">
-                                <svg class="mop-card-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="currentColor" d="M12 2c5.523 0 10 4.477 10 10 0 4.13-2.504 7.676-6.077 9.201l-2.518-6.55C14.354 14.148 15 13.15 15 12c0-1.657-1.343-3-3-3s-3 1.343-3 3c0 1.15.647 2.148 1.596 2.652l-2.518 6.55C4.504 19.675 2 16.13 2 12 2 6.477 6.477 2 12 2z"/></svg>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="mop-slide mop-slide--compat" data-mop-slide>
-                        <button type="button" class="mop-pill" data-mop-pill="4" aria-label="Ir a: Horizon">
-                            <svg class="mop-pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
-                        </button>
-                        <div class="mop-card">
-                            <div class="mop-card-text">
-                                <h3 class="mop-card-title">Horizon</h3>
-                                <p class="mop-card-desc">Compatibilidad real desde el primer día: cerca del 90 % de las aplicaciones más usadas funcionan sin reinstalar el sistema.</p>
-                            </div>
-                            <div class="mop-card-visual">
-                                <img class="mop-card-img" src="/img/apps.svg" alt="apps">
-                            </div>
-                        </div>
-                    </article>
+                        </article>
+                    <% }) %>
                 </div>
-                <div class="mop-meta" aria-hidden="true">
-                    <span class="mop-counter"><span class="mop-counter-num">1</span><span class="mop-counter-div"> / </span><span class="mop-counter-total">5</span></span>
+                <div class="mop-meta" aria-live="polite" aria-atomic="true">
+                    <span class="mop-counter"><span class="mop-counter-num">1</span><span class="mop-counter-div"> / </span><span class="mop-counter-total"><%= (features || []).length %></span></span>
                     <span class="mop-progress"><span class="mop-progress-bar"></span></span>
                 </div>
             </div>

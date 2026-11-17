@@ -40,7 +40,10 @@
   function setFieldError(name, message) {
     var input = getField(name);
     var errorEl = getErrorEl(name);
-    if (input) input.classList.toggle('is-invalid', Boolean(message));
+    if (input) {
+      input.classList.toggle('is-invalid', Boolean(message));
+      input.setAttribute('aria-invalid', message ? 'true' : 'false');
+    }
     if (errorEl) errorEl.textContent = message || '';
   }
 
@@ -107,13 +110,24 @@
     setStatus('error', 'No pudimos enviar tu mensaje. Inténtalo de nuevo en unos segundos.');
   }
 
-  function submit() {
-    setLoading(true);
-    clearStatus();
+  function sendToSupabase() {
+    var supabase = window.MagicOS && window.MagicOS.supabase;
+    if (!supabase) return Promise.resolve(false);
+    return supabase.from('messages').insert({
+      name: getField('name').value.trim(),
+      email: getField('email').value.trim(),
+      subject: getField('subject').value.trim(),
+      message: getField('message').value.trim()
+    }).then(function (res) {
+      return !res.error;
+    }).catch(function () {
+      return false;
+    });
+  }
 
+  function sendToFormSubmit() {
     var payload = new URLSearchParams(new FormData(form));
-
-    var formSubmit = fetch(form.action, {
+    return fetch(form.action, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -129,24 +143,20 @@
     }).catch(function () {
       return false;
     });
+  }
 
-    var supabaseInsert = Promise.resolve(false);
-    var supabase = window.MagicOS && window.MagicOS.supabase;
-    if (supabase) {
-      supabaseInsert = supabase.from('messages').insert({
-        name: getField('name').value.trim(),
-        email: getField('email').value.trim(),
-        subject: getField('subject').value.trim(),
-        message: getField('message').value.trim()
-      }).then(function (res) {
-        return !res.error;
-      }).catch(function () {
-        return false;
-      });
-    }
+  function submit() {
+    setLoading(true);
+    clearStatus();
 
-    Promise.all([formSubmit, supabaseInsert]).then(function (results) {
-      if (results[0] || results[1]) showSuccess();
+    // Un solo destino efectivo: Supabase es la fuente principal (el panel de
+    // admin ve el mensaje) y FormSubmit queda como respaldo si la inserción
+    // falla. Así un envío exitoso no genera un duplicado correo + panel.
+    sendToSupabase().then(function (ok) {
+      if (ok) return true;
+      return sendToFormSubmit();
+    }).then(function (ok) {
+      if (ok) showSuccess();
       else showError();
     });
   }

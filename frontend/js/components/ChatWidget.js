@@ -6,10 +6,11 @@
 // través de body.chat-shell (CSS: @media min-width 1024px, separado de
 // mobile).
 //
-// Persistencia (solo sesión): sessionStorage guarda { open, mode,
-// messages, draft, conversation_id } para que la conversación y el modo
-// sobrevivan a la navegación entre páginas (re-montaje sin re-animar).
-// El envío real lo hace services/ai.js contra la Edge Function magic-chat.
+// Persistencia (solo sesión): sessionStorage guarda { open, mode, messages,
+// draft } para que la conversación y el modo sobrevivan a la navegación entre
+// páginas (re-montaje sin re-animar). No hay historial en servidor: es una
+// decisión de privacidad, no un olvido. El envío real lo hace services/ai.js
+// contra la Edge Function magic-chat.
 (function () {
   'use strict';
 
@@ -62,7 +63,6 @@
     mode: 'card', // 'card' | 'sidebar'
     messages: [],
     draft: '',
-    conversation_id: null,
   };
 
   var fab = null;
@@ -92,7 +92,6 @@
       if (Array.isArray(data.messages)) state.messages = data.messages;
       if (data.mode === 'sidebar' || data.mode === 'card') state.mode = data.mode;
       if (typeof data.draft === 'string') state.draft = data.draft;
-      if (typeof data.conversation_id === 'string') state.conversation_id = data.conversation_id;
       state.open = !!data.open;
     } catch (err) {
       // sessionStorage no disponible: se sigue sin persistencia.
@@ -120,6 +119,7 @@
     fab.title = 'Asistente Magic';
     fab.setAttribute('aria-label', 'Abrir asistente Magic');
     fab.setAttribute('aria-haspopup', 'dialog');
+    fab.setAttribute('aria-controls', 'magic-chat');
     fab.setAttribute('aria-expanded', 'false');
     fab.innerHTML = SVG.fab;
     fab.addEventListener('click', function () {
@@ -139,7 +139,7 @@
     panel.id = 'magic-chat';
     panel.setAttribute('role', 'dialog');
     panel.setAttribute('aria-modal', 'false');
-    panel.setAttribute('aria-label', 'Asistente Magic');
+    panel.setAttribute('aria-labelledby', 'magic-chat-title');
     // El panel es hermano de .site-shell (hijo de <body>), fuera del scroller
     // de la página: marcarlo evita que Lenis intercepte el wheel del chat
     // (así .chat-body rueda de forma nativa y la página no se mueve).
@@ -150,7 +150,7 @@
         '<div class="chat-topbar-id">' +
           '<span class="chat-status-dot" aria-hidden="true"></span>' +
           '<div class="chat-topbar-titles">' +
-            '<span class="chat-title">Asistente Magic</span>' +
+            '<span class="chat-title" id="magic-chat-title">Asistente Magic</span>' +
             '<span class="chat-status">En línea</span>' +
           '</div>' +
         '</div>' +
@@ -159,7 +159,7 @@
           '<button type="button" class="chat-btn chat-close-btn" title="Cerrar" aria-label="Cerrar"></button>' +
         '</div>' +
       '</div>' +
-      '<div class="chat-body" role="log" aria-live="polite" aria-relevant="additions"></div>' +
+      '<div class="chat-body" role="log" aria-live="polite" aria-relevant="additions" aria-busy="false"></div>' +
       '<form class="chat-input" novalidate>' +
         '<input type="text" class="chat-entry" placeholder="Escribe tu consulta…" autocomplete="off" maxlength="1000" aria-label="Escribe tu consulta">' +
         '<button type="submit" class="chat-send-btn" aria-label="Enviar mensaje" disabled></button>' +
@@ -214,66 +214,20 @@
 
   /* ── Render de la conversación ──────────────────── */
 
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
+  // El markdown mínimo vive en js/lib/markdown.js (testeable con Node sin
+  // DOM). Se mantiene un fallback por si el script no llegó a cargar.
+  var markdown = (window.MagicOS && window.MagicOS.markdown) || {};
 
-  // Markdown mínimo del asistente: **negrita**, *cursiva*, `código` y listas
-  // con guion o numeradas. El texto se escapa ANTES de insertar las etiquetas,
-  // así que nada de lo que devuelve el modelo se interpreta: ni etiquetas ni
-  // atributos (un intento de inyección se ve como texto).
-  function inlineMd(str) {
-    return str
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-      .replace(/(^|\s)\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
+  function escapeHtml(str) {
+    if (markdown.escapeHtml) return markdown.escapeHtml(str);
+    return String(str).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
   }
 
   function mdToHtml(text) {
-    var out = [];
-    var lista = null; // 'ul' | 'ol' mientras haya una lista abierta
-
-    function cerrarLista() {
-      if (lista) {
-        out.push('</' + lista + '>');
-        lista = null;
-      }
-    }
-
-    escapeHtml(text || '').split('\n').forEach(function (linea) {
-      var vineta = linea.match(/^\s*[-*•]\s+(.*)$/);
-      var numerada = vineta ? null : linea.match(/^\s*\d+[.)]\s+(.*)$/);
-
-      if (vineta || numerada) {
-        var tipo = vineta ? 'ul' : 'ol';
-        if (lista !== tipo) {
-          cerrarLista();
-          out.push('<' + tipo + '>');
-          lista = tipo;
-        }
-        out.push('<li>' + inlineMd(vineta ? vineta[1] : numerada[1]) + '</li>');
-        return;
-      }
-
-      cerrarLista();
-      var limpia = linea.replace(/^\s+/, '');
-      if (!limpia) {
-        out.push('\n');
-        return;
-      }
-      // Los encabezados no se usan en el chat: si aparecen, van en negrita.
-      var sinTitulo = limpia.replace(/^#{1,6}\s+/, '');
-      var cuerpo = inlineMd(sinTitulo);
-      out.push((sinTitulo === limpia ? cuerpo : '<strong>' + cuerpo + '</strong>') + '\n');
-    });
-
-    cerrarLista();
-    // Sin saltos de sobra al principio ni al final (el globo usa pre-wrap).
-    return out.join('').replace(/^\n+/, '').replace(/\n+$/, '');
+    if (markdown.mdToHtml) return markdown.mdToHtml(text);
+    return escapeHtml(text || '');
   }
 
   function renderEmpty() {
@@ -335,6 +289,7 @@
     typingEl.className = 'chat-msg chat-msg--typing';
     typingEl.innerHTML = '<i></i><i></i><i></i>';
     typingEl.setAttribute('aria-label', 'El asistente está escribiendo');
+    bodyEl.setAttribute('aria-busy', 'true');
     bodyEl.appendChild(typingEl);
     scrollToBottom();
   }
@@ -342,6 +297,7 @@
   function removeTyping() {
     if (typingEl && typingEl.parentNode) typingEl.parentNode.removeChild(typingEl);
     typingEl = null;
+    if (bodyEl) bodyEl.setAttribute('aria-busy', 'false');
   }
 
   function showError(message) {
@@ -351,6 +307,7 @@
 
     var el = document.createElement('div');
     el.className = 'chat-error';
+    el.setAttribute('role', 'alert');
     el.innerHTML =
       '<span class="chat-error-text"></span>' +
       '<button type="button" class="chat-retry">Reintentar</button>';

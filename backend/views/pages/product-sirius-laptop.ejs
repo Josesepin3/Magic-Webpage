@@ -1,6 +1,6 @@
 <%- include('../partials/header') %>
 
-    <main class="product-page">
+    <main id="main-content" tabindex="-1" class="product-page">
 
         <section id="que_es">
             <div class="hero sirius-hero">
@@ -9,7 +9,7 @@
                     <h1 class="sirius-title"><img src="/img/sirius-logo.svg" alt="Sirius"></h1>
                 </div>
                 <div class="sirius-hero-visual">
-                    <img src="/img/laptop.svg" alt="Sirius Laptop" fetchpriority="high">
+                    <img src="/img/laptop.svg" alt="Sirius Laptop" fetchpriority="high" decoding="async">
                     <div class="sirius-hero-fade" aria-hidden="true"></div>
                     <div class="sirius-hero-caption">
                         <p class="sirius-tagline"><%= product.tagline %></p>
@@ -50,7 +50,7 @@
                 <h2><%= modularFeature ? modularFeature.title : 'Diseño Modular' %></h2>
                 <p class="sirius-modular-sub"><%= modularFeature ? modularFeature.description : 'Cada componente se reemplaza individualmente. Adiós a la obsolescencia programada.' %></p>
             </div>
-            <img src="/img/modular-device.svg" alt="Módulos intercambiables de la Sirius Laptop">
+            <img src="/img/modular-device.svg" alt="Módulos intercambiables de la Sirius Laptop" loading="lazy" decoding="async">
         </section>
 
         <% if (features.length > 0) { %>

@@ -10,7 +10,6 @@
 
   let user = null;
   let items = [];
-  let productsStatus = {};
 
   function loginUrl() {
     return MagicOS.url('/cuenta/login') + '?next=' + encodeURIComponent(MagicOS.currentPath());
@@ -121,57 +120,41 @@
 
   function checkout() {
     const btn = document.getElementById('checkout-btn');
+    if (!btn) return;
     btn.disabled = true;
+    btn.textContent = 'Procesando…';
+    setStatus('Confirmando pedido y registrando servicios…', false);
 
-    const orderRows = items.map((i) => ({
-      product_id: i.product_id,
-      product_name: i.product_name,
-      product_slug: i.product_slug,
-      options: i.options,
-      quantity: i.quantity,
-      unit_price: i.unit_price,
-      line_total: Number(i.unit_price) * Number(i.quantity)
-    }));
-    const total = orderRows.reduce((s, r) => s + r.line_total, 0);
-
-    supabase.from('orders').insert({
-      user_id: user.id,
-      items: orderRows,
-      total,
-      status: 'confirmed'
-    }).then((res) => {
+    // RPC transaccional (supabase/schema.sql): pedido + servicios + carrito
+    // vacío ocurren en una sola transacción de PostgreSQL. Si algo falla, no
+    // queda un pedido sin servicios ni un carrito a medio limpiar.
+    supabase.rpc('checkout').then((res) => {
       if (res.error) {
         btn.disabled = false;
-        setStatus('No se pudo confirmar el pedido.', true);
+        btn.textContent = 'Pagar ahora (simulado)';
+        const vacio = /carrito.*vac/i.test(res.error.message || '');
+        setStatus(vacio
+          ? 'Tu carrito está vacío.'
+          : 'No se pudo confirmar el pedido. Revisa tu conexión e inténtalo de nuevo.', true);
+        if (/checkout/i.test(res.error.message || '')) {
+          console.error('Falta aplicar la función public.checkout() en Supabase:', res.error.message);
+        }
         return;
       }
 
-      const subs = orderRows.map((r) => ({
-        user_id: user.id,
-        product_id: r.product_id,
-        product_name: r.product_name,
-        plan: r.options,
-        status: productsStatus[r.product_slug] === 'available' ? 'active' : 'proximamente'
-      }));
-
-      supabase.from('subscriptions').insert(subs).then((res2) => {
-        if (res2.error) {
-          btn.disabled = false;
-          setStatus('Pedido confirmado, pero hubo un problema al registrar tus servicios.', true);
-          return;
-        }
-        supabase.from('cart_items').delete().eq('user_id', user.id).then(() => {
-          items = [];
-          // El carrito queda vacío: el estado de vacío hace de confirmación (el
-          // aviso de siempre buscaba un .checkout-status que ya no existe en el
-          // marcado del carrito vacío y fallaba).
-          ui.empty(body, {
-            text: '¡Pedido confirmado! Tus servicios ya están registrados.',
-            action: { label: 'Ver mis servicios', href: MagicOS.url('/cuenta/servicios') }
-          });
-          if (window.MagicOS.refreshNav) window.MagicOS.refreshNav();
-        });
+      const data = res.data || {};
+      const total = Number(data.total) || 0;
+      items = [];
+      ui.empty(body, {
+        text: '¡Pedido confirmado! Tus servicios ya están registrados.' +
+          (total ? ' Total: ' + fmt(total) + '.' : ''),
+        action: { label: 'Ver mis servicios', href: MagicOS.url('/cuenta/servicios') }
       });
+      if (window.MagicOS.refreshNav) window.MagicOS.refreshNav();
+    }).catch(() => {
+      btn.disabled = false;
+      btn.textContent = 'Pagar ahora (simulado)';
+      setStatus('No se pudo confirmar el pedido. Revisa tu conexión e inténtalo de nuevo.', true);
     });
   }
 
@@ -203,13 +186,6 @@
         });
         return;
       }
-
-      // El estado de cada producto decide si el servicio nace activo o
-      // "próximamente" al pagar. Si esta consulta falla, el pedido se puede
-      // completar igual: se deja el estado por defecto.
-      supabase.from('products').select('slug,status').then((prodRes) => {
-        (prodRes.data || []).forEach((p) => { productsStatus[p.slug] = p.status; });
-      });
 
       loadCart();
     }).catch(() => {

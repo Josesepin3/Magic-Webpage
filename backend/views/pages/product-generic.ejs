@@ -1,0 +1,44 @@
+<%- include('../partials/header') %>
+
+    <main id="main-content" tabindex="-1" class="product-page">
+      <section class="product-hero">
+        <div class="product-hero-content">
+          <div class="product-hero-visual" data-reveal>
+            <% if (product.image_url) { %>
+              <img src="<%= product.image_url %>" alt="<%= product.name %>" width="320" height="320" decoding="async">
+            <% } else { %>
+              <span class="product-badge"><%= product.category %></span>
+            <% } %>
+          </div>
+          <h1 class="product-name" data-reveal><%= product.name %></h1>
+          <% if (product.tagline) { %>
+            <p class="product-tagline" data-reveal data-reveal-delay="60"><%= product.tagline %></p>
+          <% } %>
+          <% if (product.status === 'coming_soon') { %>
+            <span class="product-badge" data-reveal data-reveal-delay="120">Próximamente</span>
+          <% } %>
+          <% if (product.description) { %>
+            <p class="product-description" data-reveal data-reveal-delay="180"><%= product.description %></p>
+          <% } %>
+          <div class="product-actions" data-reveal data-reveal-delay="240">
+            <% if (product.options && product.options.length) { %>
+              <a href="/productos/<%= product.slug %>/configure" class="btn btn-primary">Configurar</a>
+            <% } %>
+            <a href="/productos" class="btn btn-secondary">Ver todos los productos</a>
+          </div>
+        </div>
+      </section>
+
+      <% if (features && features.length > 0) { %>
+        <section class="product-features">
+          <% features.forEach((feature, index) => { %>
+            <article class="feature-section" data-reveal data-reveal-delay="<%= index * 80 %>">
+              <h2><%= feature.title %></h2>
+              <p><%= feature.description %></p>
+            </article>
+          <% }) %>
+        </section>
+      <% } %>
+    </main>
+
+<%- include('../partials/footer') %>

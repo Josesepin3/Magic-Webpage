@@ -23,6 +23,23 @@
     }
   }
 
+  function markCurrentNav() {
+    const current = (window.location.pathname.replace(/\/+$/, '') || '/');
+    document.querySelectorAll('.navbar a[href]').forEach((link) => {
+      let target;
+      try {
+        target = new URL(link.href, window.location.href).pathname.replace(/\/+$/, '') || '/';
+      } catch (err) {
+        return;
+      }
+      const active = target === '/'
+        ? current === '/'
+        : (current === target || current.startsWith(target + '/'));
+      if (active) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+  }
+
   function alignMenuToggleToTitle() {
     const siteHeader = document.querySelector('.site-header');
     const siteTitle = document.querySelector('.site-title');
@@ -50,6 +67,7 @@
 
   function init() {
     initMenuToggle();
+    markCurrentNav();
     window.addEventListener('load', alignMenuToggleToTitle);
     window.addEventListener('resize', (() => {
       let t;

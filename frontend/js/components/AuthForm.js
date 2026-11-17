@@ -14,7 +14,6 @@
   const submitBtn = document.getElementById('auth-submit');
   const switchText = document.getElementById('auth-switch-text');
   const toggleBtn = document.getElementById('auth-toggle');
-  const googleBtn = document.getElementById('auth-google');
   const statusEl = form.querySelector('.form-status');
 
   const params = new URLSearchParams(window.location.search);
@@ -22,10 +21,6 @@
   const next = params.get('next') || '/cuenta/perfil';
   const preview = params.get('preview');
   let submitting = false;
-
-  if (window.MagicOSConfig && MagicOSConfig.GOOGLE) {
-    googleBtn.hidden = false;
-  }
 
   function setMode(newMode) {
     mode = newMode;
@@ -65,6 +60,7 @@
     const err = form.querySelector('[data-error-for="' + input.name + '"]');
     if (err) err.textContent = message;
     input.classList.toggle('is-invalid', !!message);
+    input.setAttribute('aria-invalid', message ? 'true' : 'false');
   }
 
   function validate() {
@@ -158,20 +154,6 @@
       }).then(finish);
     }
   }
-
-  googleBtn.addEventListener('click', () => {
-    clearStatus();
-    googleBtn.disabled = true;
-    supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin + MagicOS.url('/cuenta/login') + '?next=' + encodeURIComponent(next) }
-    }).then((res) => {
-      if (res.error) {
-        googleBtn.disabled = false;
-        setStatus('No se pudo iniciar con Google. Revisa que esté configurado.', true);
-      }
-    });
-  });
 
   toggleBtn.addEventListener('click', () => setMode(mode === 'login' ? 'register' : 'login'));
   form.addEventListener('submit', handleSubmit);

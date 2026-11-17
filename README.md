@@ -50,7 +50,7 @@ Nuestra solución no es solo una aplicación; es un ecosistema cerrado de hardwa
 La plataforma web de Magic, estructurada como una aplicación **Full-Stack** con JavaScript como lenguaje principal:
 
 - **Producción:** sitio estático generado con `scripts/build-static.js` (prerender de las vistas EJS → `dist/`) y desplegado en **GitHub Pages**, con **Supabase** como backend de servicios (cuentas, carrito y panel de administración).
-- **Desarrollo local:** servidor **Express** (`backend/app.js`) que sirve las vistas EJS y el frontend, con SQLite para datos locales.
+- **Desarrollo local:** servidor **Express** (`backend/app.js`) que sirve las vistas EJS y el frontend. El catálogo se lee de `backend/data/products.json`, la misma fuente que usa el build.
 
 ### 📁 Estructura del Proyecto
 ```text
@@ -58,16 +58,16 @@ La plataforma web de Magic, estructurada como una aplicación **Full-Stack** con
 │   ├── img/             # Assets (logo, galaxia, productos)
 │   ├── js/
 │   │   ├── components/  # Módulos: NavAuth, HomeCinema, CartManager, ...
-│   │   └── services/    # api.js, supabase.js
+│   │   └── services/    # supabase.js, ai.js
 │   ├── vendor/          # Librerías locales (GSAP, ScrollTrigger, Lenis, Supabase)
 │   └── style.css        # Diseño premium (tema oscuro, resplandores)
 ├── backend/             # App Express para desarrollo local
 │   ├── views/           # Plantillas EJS (prerender en el build)
 │   ├── routes/          # home, productos, contacto, cuenta, admin
-│   ├── middleware/      # autenticación
-│   ├── data/            # products.json (+ SQLite en dev)
-│   └── app.js / seed.js
-├── scripts/             # build-static.js, seed-supabase.js
+│   ├── middleware/      # seguridad y errores
+│   ├── data/            # products.json + catalog.js (fuente única)
+│   └── app.js
+├── scripts/             # build-static.js, pull-catalog.js, seed-supabase.js
 ├── supabase/            # schema.sql (backend de producción)
 ├── docs/                # ROADMAP.md y mockups del ecosistema
 └── .github/workflows/   # Deploy automático a GitHub Pages
@@ -90,11 +90,12 @@ La plataforma web de Magic, estructurada como una aplicación **Full-Stack** con
 ### 🚦 Desarrollo y Deploy
 
 ```bash
-npm install        # dependencias
-npm run dev        # Express en http://localhost:3000
-npm run build      # prerender EJS → dist/ (se sirve con: npx serve dist)
-npm run seed       # datos de desarrollo (SQLite)
-npm run seed:supabase   # seed del backend de Supabase
+npm install            # dependencias
+npm run dev            # Express en http://localhost:3000
+npm run build          # prerender EJS → dist/ (se sirve con: npx serve dist)
+npm run catalog:pull   # trae el catálogo de Supabase a products.json (requiere .env)
+npm run seed:supabase  # seed del backend de Supabase
+npm test               # 24 tests: servidor + catálogo + build + markdown
 ```
 
 ### 🛠 Flujo de trabajo (fixes)

@@ -1,14 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
+const {
+  loadProducts,
+  groupedOptions: groupedOptionsFor,
+  productTemplate: pickTemplate
+} = require('../backend/data/catalog');
 
 const ROOT = path.join(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
 const VIEWS = path.join(ROOT, 'backend', 'views');
-const DATA_FILE = path.join(ROOT, 'backend', 'data', 'products.json');
 const BASE_PATH = (process.env.BASE_PATH || '').replace(/\/+$/, '');
-
-const products = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
 
 function renderPage(template, data) {
   const file = path.join(VIEWS, `${template}.ejs`);
@@ -57,16 +59,14 @@ function copyDir(src, dest) {
   }
 }
 
-function groupedOptionsFor(product) {
-  const groupedOptions = {};
-  for (const opt of product.options) {
-    if (!groupedOptions[opt.group_name]) groupedOptions[opt.group_name] = [];
-    groupedOptions[opt.group_name].push(opt);
-  }
-  return groupedOptions;
-}
-
 async function main() {
+  if (process.env.SYNC_CATALOG === '1') {
+    const { pullCatalog } = require('./pull-catalog');
+    await pullCatalog();
+  }
+
+  const products = loadProducts();
+
   const pages = [
     { template: 'pages/home', data: { title: 'Magic', products }, file: 'index.html' },
     { template: 'pages/productos', data: { title: 'Productos - Magic', products }, file: 'productos/index.html' },
@@ -81,8 +81,9 @@ async function main() {
   ];
 
   for (const p of products) {
+    const template = pickTemplate(p.slug);
     pages.push({
-      template: `pages/product-${p.slug}`,
+      template,
       data: { title: `${p.name} - Magic`, product: p, features: p.features },
       file: `productos/${p.slug}/index.html`,
     });
@@ -105,7 +106,18 @@ async function main() {
   console.log('Build estático completado.');
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  prefixBasePaths,
+  prefixCssUrls,
+  prefixSrcset,
+  pickTemplate,
+  groupedOptionsFor,
+  renderPage
+};

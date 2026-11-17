@@ -358,3 +358,66 @@ drop trigger if exists trg_subscriptions_enforce on public.subscriptions;
 create trigger trg_subscriptions_enforce
   before insert on public.subscriptions
   for each row execute function public.subscriptions_enforce();
+
+-- ===================== CHECKOUT TRANSACCIONAL =====================
+-- Una sola llamada RPC: crea el pedido, registra los servicios y vacía el
+-- carrito dentro de la misma transacción. Si cualquier paso falla, PostgreSQL
+-- revierte todo (no quedan pedidos huérfanos ni carritos a medio limpiar).
+-- Es `security invoker`: las políticas RLS de orders/subscriptions/cart_items
+-- siguen aplicándose y solo se tocan filas del usuario autenticado.
+create or replace function public.checkout()
+returns jsonb
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_items jsonb;
+  v_order_id bigint;
+  v_total numeric;
+begin
+  if v_uid is null then
+    raise exception 'No autenticado' using errcode = '28000';
+  end if;
+
+  select coalesce(jsonb_agg(
+      jsonb_build_object(
+        'product_id',   c.product_id,
+        'product_name', c.product_name,
+        'product_slug', c.product_slug,
+        'options',      c.options,
+        'quantity',     c.quantity,
+        'unit_price',   c.unit_price,
+        'line_total',   c.unit_price * c.quantity
+      )
+    ), '[]'::jsonb)
+    into v_items
+    from public.cart_items c
+   where c.user_id = v_uid;
+
+  if v_items = '[]'::jsonb then
+    raise exception 'El carrito está vacío' using errcode = 'P0001';
+  end if;
+
+  insert into public.orders (user_id, items, total, status)
+  values (v_uid, v_items, 0, 'confirmed')
+  returning id, total into v_order_id, v_total;
+
+  insert into public.subscriptions (user_id, product_id, product_name, plan, status)
+  select v_uid, c.product_id, c.product_name, c.options, 'proximamente'
+    from public.cart_items c
+   where c.user_id = v_uid;
+
+  delete from public.cart_items where user_id = v_uid;
+
+  return jsonb_build_object(
+    'order_id', v_order_id,
+    'total', v_total,
+    'line_count', jsonb_array_length(v_items)
+  );
+end;
+$$;
+
+revoke all on function public.checkout() from public;
+grant execute on function public.checkout() to authenticated;

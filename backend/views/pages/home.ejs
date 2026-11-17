@@ -1,6 +1,6 @@
 <%- include('../partials/header') %>
 
-    <main>
+    <main id="main-content" tabindex="-1">
 
       <!-- HERO -->
       <section class="home-hero" id="inicio">
@@ -8,7 +8,7 @@
         <div class="home-hero-glow" aria-hidden="true"></div>
         <div class="home-hero-glow home-hero-glow--tint" aria-hidden="true"></div>
         <div class="home-hero-inner">
-          <img class="home-hero-logo" src="/img/magic-logo-white.svg" alt="Magic" width="3864" height="910" fetchpriority="high">
+          <img class="home-hero-logo" src="/img/magic-logo-white.svg" alt="Magic" width="3864" height="910" fetchpriority="high" decoding="async">
           <h1 class="hm-headline">El ecosistema que pone tu privacidad primero.</h1>
           <p class="hm-sub">Software, hardware y nube diseñados para que tus datos sean solo tuyos. Sin telemetría, sin anuncios, sin letra pequeña.</p>
           <div class="hm-cta">
@@ -32,50 +32,30 @@
           <p>Un sistema operativo, una laptop modular, un chip propio y una nube cifrada. Todo conectado, todo bajo tu control.</p>
         </div>
         <div class="productos-grid">
-          <div class="hm-reveal" data-delay="0">
-            <a href="/productos/magicos" class="producto-card producto-card--os">
-              <div class="producto-card-header">
-                <h2 class="producto-card-title">MagicOS</h2>
-                <span class="producto-badge producto-badge--available">Disponible</span>
+          <% if (!products.length) { %>
+            <p class="empty-state">Próximamente...</p>
+          <% } else { %>
+            <% products.forEach((product, index) => { %>
+              <div class="hm-reveal" data-delay="<%= index * 80 %>">
+                <a href="/productos/<%= product.slug %>" class="producto-card producto-card--<%= product.category %>">
+                  <div class="producto-card-header">
+                    <h2 class="producto-card-title"><%= product.name %></h2>
+                    <span class="producto-badge<%= product.status === 'available' ? ' producto-badge--available' : '' %>"><%= product.status === 'available' ? 'Disponible' : 'Próximamente' %></span>
+                  </div>
+                  <% if (product.tagline) { %>
+                    <p class="producto-tagline"><%= product.tagline %></p>
+                  <% } %>
+                  <p class="producto-desc"><%= product.description %></p>
+                </a>
               </div>
-              <p class="producto-tagline">El sistema operativo que pone tu privacidad primero.</p>
-              <p class="producto-desc">Privacidad de élite, núcleo inmutable y compatibilidad real con tus apps. Sin telemetría y sin dependencia de la nube.</p>
-            </a>
-          </div>
-          <div class="hm-reveal" data-delay="80">
-            <a href="/productos/sirius-laptop" class="producto-card producto-card--hardware">
-              <div class="producto-card-header">
-                <h2 class="producto-card-title">Sirius Laptop</h2>
-                <span class="producto-badge">Próximamente</span>
-              </div>
-              <p class="producto-tagline">Hardware modular. Potencia que te pertenece.</p>
-              <p class="producto-desc">Componentes reparables y actualizables como bloques de Lego, sin ventiladores y con batería para todo el día.</p>
-            </a>
-          </div>
-          <div class="hm-reveal" data-delay="160">
-            <a href="/productos/chip-n1-kinetic" class="producto-card producto-card--silicon">
-              <div class="producto-card-header">
-                <h2 class="producto-card-title">Chip N1 Kinetic</h2>
-                <span class="producto-badge">Próximamente</span>
-              </div>
-              <p class="producto-tagline">Silicio propio. Rendimiento sin compromisos.</p>
-              <p class="producto-desc">Arquitectura ARM de alta eficiencia, diseñada junto a MagicOS para rendir al máximo con el mínimo consumo.</p>
-            </a>
-          </div>
-          <div class="hm-reveal" data-delay="240">
-            <a href="/productos/blackbox-cloud" class="producto-card producto-card--cloud">
-              <div class="producto-card-header">
-                <h2 class="producto-card-title">BlackBox Cloud</h2>
-                <span class="producto-badge">Próximamente</span>
-              </div>
-              <p class="producto-tagline">El puente seguro entre tus dispositivos.</p>
-              <p class="producto-desc">Tus archivos cifrados de extremo a extremo y sincronizados, con llaves que solo tú posees.</p>
-            </a>
-          </div>
+            <% }) %>
+          <% } %>
         </div>
       </section>
 
       <!-- DESTACADO MAGICOS -->
+      <% const magicos = products.find((product) => product.slug === 'magicos'); %>
+      <% if (magicos) { %>
       <section class="hm-section">
         <div class="hm-featured">
           <div class="hm-featured-copy">
@@ -83,18 +63,12 @@
             <h2 class="hm-reveal">MagicOS, el corazón del ecosistema.</h2>
             <p class="hm-reveal" data-delay="60">Cuatro pilares y un motor de compatibilidad: núcleo inmutable, cifrado invisible, interfaz GNOME y una comunidad que audita cada línea. Rápido, minimalista y ajeno a la telemetría.</p>
             <ul class="hm-feature-list">
-              <li class="hm-reveal" data-delay="120">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                <span><strong>Privacidad de élite</strong> — cifrado GPG automático y cero telemetría: tus datos se cifran solos.</span>
-              </li>
-              <li class="hm-reveal" data-delay="180">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                <span><strong>Resiliencia atómica</strong> — núcleo inmutable de solo lectura: si algo falla, vuelve a su estado original.</span>
-              </li>
-              <li class="hm-reveal" data-delay="240">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
-                <span><strong>Horizon</strong> — compatibilidad real: cerca del 90 % de las apps más usadas funcionan desde el primer día.</span>
-              </li>
+              <% (magicos.features || []).forEach((feature, index) => { %>
+                <li class="hm-reveal" data-delay="<%= 120 + index * 60 %>">
+                  <%- include('../partials/feature-icon', { icon: feature.icon || 'spark' }) %>
+                  <span><strong><%= feature.title %></strong> — <%= feature.description %></span>
+                </li>
+              <% }) %>
             </ul>
             <div class="hm-cta hm-reveal" data-delay="300">
               <a href="/productos/magicos" class="hm-btn hm-btn--primary">Conocer MagicOS</a>
@@ -102,10 +76,11 @@
           </div>
           <div class="hm-featured-media" data-parallax="24">
             <div class="hm-featured-glow" aria-hidden="true"></div>
-            <img src="/img/apps.svg" alt="Aplicaciones de MagicOS" width="480" height="480">
+            <img src="/img/apps.svg" alt="Aplicaciones de MagicOS" width="480" height="480" loading="lazy" decoding="async">
           </div>
         </div>
       </section>
+      <% } %>
 
       <!-- VALORES -->
       <section class="hm-section">

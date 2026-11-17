@@ -11,11 +11,11 @@
 > Sirius rediseñada según maqueta, responsive móvil ajustado y **deploy en
 > GitHub Pages funcionando** (requisito del proyecto). Fases 2, 3 y 4 completas. **Migración a Supabase**
 > implementada (Fase 4b): cuentas de cliente (email/contraseña + Google opcional),
-> avatar en el navbar, carrito solo con cuenta, checkout simulado, "Mis
-> servicios" y el admin (login/CRUD/mensajes) ahora corren 100% contra Supabase
-> en GitHub Pages. Pendiente: aplicar `supabase/schema.sql` en el SQL Editor,
-> ejecutar `npm run seed:supabase`, configurar redirects de Auth y Google OAuth,
-> y probar/deploy. Siguiente: Fase 5 (IA con Mistral).
+> avatar en el navbar, carrito solo con cuenta, checkout transaccional con pago
+> simulado, "Mis servicios" y el admin (login/CRUD/mensajes) ahora corren 100%
+> contra Supabase en GitHub Pages. Pendiente: aplicar `supabase/schema.sql` en el
+> SQL Editor, ejecutar `npm run seed:supabase`, configurar redirects de Auth y
+> probar/deploy. Siguiente: Fase 5 (IA con Mistral).
 
 > **Estado (28 ago 2026):** MagicOS ya no está "vacío": se creó la **página de
 > MagicOS** (`/productos/magicos`) siguiendo su maqueta propia — hero con glows
@@ -40,6 +40,16 @@
 > rechazadas, anti-spam activo), redirects de Auth configurados. Restan la
 > **prueba final** local y (opcional) Google OAuth.
 > **Siguiente: Fase 5 (IA con Edge Functions).**
+
+> **Estado (17 nov 2026, rama `dev`):** cierre de deuda técnica de la sección 13
+> de la guía: `public.checkout()` transaccional, catálogo con una sola fuente
+> (`backend/data/products.json`; se eliminó SQLite y `seed.js`), plantilla
+> genérica para productos del admin + `pull-catalog.js`/`SYNC_CATALOG`, contacto
+> con un solo destino efectivo, Google OAuth retirado, `conversation_id`
+> eliminado (historial solo en sesión), home/carrusel de MagicOS data-driven,
+> pasada de accesibilidad (skip link, `aria-current`, carrusel accesible) y
+> **24 tests**. Pendiente: merge a `main`, E2E de navegador y las limitaciones
+> de infraestructura documentadas en la guía (sección 13).
 
 > **Estado (15 oct 2026):** **Fases 5 (IA) y 6 (refinamiento UX) cerradas y en
 > producción.** El chat corre como Edge Function de Supabase (`magic-chat`) con la
@@ -76,7 +86,7 @@
 > Verificado midiendo píxeles sobre capturas de Chromium: banda al 100% del ancho
 > en todas las filas con `mask-image: none`, glow de 1265×755 (escritorio) y
 > 390×233 (móvil), logo de 282×91 y 130×42 con la tinta dentro del viewBox (sin
-> recortes), 0px de desborde horizontal y `npm test` **7/7**. `dev` y `main`
+> recortes), 0px de desborde horizontal y `npm test` **7/7** (hoy 24/24). `dev` y `main`
 > sincronizadas y deploy de Pages verificado en el sitio publicado.
 
 ---
@@ -87,8 +97,8 @@
 |------|-----------|
 | **Frontend** | Vanilla JS + EJS (SSR con Express local / prerender estático en build) |
 | **Backend** | Node.js + Express (dev local, páginas públicas) |
-| **Base de Datos** | SQLite (`better-sqlite3`) — solo dev local |
-| **Autenticación** | **Supabase Auth** (email/contraseña + Google opcional) |
+| **Base de Datos** | `backend/data/products.json` (catálogo) + **Supabase Postgres** (producción) |
+| **Autenticación** | **Supabase Auth** (email/contraseña; Google retirado) |
 | **Persistencia** | **Supabase** (Postgres + RLS + Storage para avatares) |
 | **IA** | Mistral API (modelo open-source gratuito) |
 | **CSS** | Vanilla (sin frameworks) |
@@ -108,11 +118,11 @@ Magic-Webpage/
 │       ├── components/
 │       │   ├── ProductConfigurator.js  # Configurador tipo Apple + "Añadir al carrito" (Supabase)
 │       │   ├── RevealOnScroll.js       # Reveal al scrollear (IntersectionObserver)
-│       │   ├── ContactForm.js          # Validación + envío FormSubmit + insert en Supabase messages
+│       │   ├── ContactForm.js          # Validación + Supabase primero, FormSubmit de respaldo
 │       │   ├── NavAuth.js              # Avatar + menú de cuenta + badge de carrito en el navbar
-│       │   ├── AuthForm.js             # Login/registro de cliente (email + Google opcional)
+│       │   ├── AuthForm.js             # Login/registro de cliente (email/contraseña)
 │       │   ├── ProfilePage.js          # Perfil: subida de avatar a Storage, nombre, logout
-│       │   ├── CartManager.js          # Carrito: cantidad, eliminar, checkout simulado (orders/subscriptions)
+│       │   ├── CartManager.js          # Carrito: cantidad, eliminar, checkout RPC transaccional
 │       │   ├── ServicesPage.js         # "Mis servicios" (subscriptions: activo / próximamente)
 │       │   ├── LoginForm.js            # Login de admin (Supabase, chequea rol admin)
 │       │   ├── SiteHeader.js           # Menú móvil + alineación del toggle (extraído del footer para CSP)
@@ -124,8 +134,9 @@ Magic-Webpage/
 │                                  # + RLS + triggers de integridad (precios server-side) y anti-spam
 ├── backend/
 │   ├── app.js                   # Entry point de Express (dev local): /health, headers, errores
-│   ├── config/
-│   │   └── db.js                # Inicialización SQLite + schemas
+│   ├── data/
+│   │   ├── catalog.js           # Carga/normaliza products.json + plantilla por slug
+│   │   └── products.json        # Fuente única del catálogo (commiteado)
 │   ├── middleware/
 │   │   ├── security.js          # Headers: nosniff, XFO, referrer, permissions-policy
 │   │   └── errors.js            # 404 (JSON/HTML) + error handler sin stack en producción
@@ -134,30 +145,28 @@ Magic-Webpage/
 │   │   ├── products.js          # GET /productos, /productos/:slug, /productos/:slug/configure
 │   │   ├── contact.js           # GET /contacto
 │   │   └── admin.js             # GET /admin/login, /admin/dashboard
-│   ├── test/
-│   │   └── app.test.js          # Smoke tests (node:test): health, 404, headers, payload limits
+│   ├── test/                    # app, catalog, build y markdown (24 tests)
 │   ├── views/
-│   │   ├── partials/            # header.ejs (CSP + referrer), footer.ejs, n1-badge.ejs, blackbox-badge.ejs
+│   │   ├── partials/            # header.ejs (CSP + skip link), footer.ejs, feature-icon.ejs, badges
 │   │   └── pages/
-│   │       ├── home.ejs                  # Vacía — pendiente rediseño del ecosistema (landing en /productos/magicos)
+│   │       ├── home.ejs                  # Landing cinematográfica (productos desde el JSON)
 │   │       ├── productos.ejs          # Grid de productos
-│   │       ├── product-*.ejs          # Página por producto (magicos ✔, sirius-laptop ✔, chip-n1-kinetic, blackbox-cloud)
+│   │       ├── product-*.ejs          # Página por producto (magicos, sirius-laptop, chip-n1-kinetic, blackbox-cloud)
+│   │       ├── product-generic.ejs    # Respaldo para productos nuevos del admin
 │   │       ├── configure.ejs          # Configurador con opciones + "Añadir al carrito"
-│   │       ├── contact.ejs            # Formulario de contacto (FormSubmit + tabla messages)
+│   │       ├── contact.ejs            # Formulario de contacto (Supabase + fallback FormSubmit)
 │   │       ├── cuenta-login.ejs       # Login/registro de cliente (Supabase Auth)
 │   │       ├── cuenta-perfil.ejs      # Perfil: avatar (Storage) + nombre + logout
-│   │       ├── carrito.ejs            # Carrito (solo con cuenta) + checkout simulado
+│   │       ├── carrito.ejs            # Carrito (solo con cuenta) + checkout RPC
 │   │       ├── cuenta-servicios.ejs   # "Mis servicios" (subscriptions)
 │   │       ├── login.ejs              # Login de admin (Supabase, rol admin)
 │   │       ├── dashboard.ejs          # Panel de admin (Supabase: mensajes + CRUD productos)
 │   │       ├── 404.ejs
 │   │       └── 500.ejs
-│   ├── data/
-│   │   ├── magicos.db           # SQLite file (ignorado en git)
-│   │   └── products.json        # Datos de productos para el build estático (commiteado)
-│   └── seed.js                  # Poblar BD local + generar products.json
 ├── scripts/
-│   └── build-static.js          # Prerender EJS → dist/ (build de GitHub Pages)
+│   ├── build-static.js          # Prerender EJS → dist/ (build de GitHub Pages)
+│   ├── pull-catalog.js          # Supabase → products.json (snapshot opcional)
+│   └── seed-supabase.js         # Proyección del JSON a Supabase
 ├── docs/
 │   ├── mockups/                 # Maquetas de diseño (Sirius.svg)
 │   └── ROADMAP.md               # Este archivo
@@ -198,7 +207,7 @@ Magic-Webpage/
 
 | Recurso | Operaciones | Dónde |
 |---------|-------------|-------|
-| `auth.users` + `auth` | signUp, signInWithPassword, signInWithOAuth (Google), signOut | SDK `supabase.auth` |
+| `auth.users` + `auth` | signUp, signInWithPassword, signOut | SDK `supabase.auth` |
 | `profiles` | perfil propio (rol, nombre, avatar_url) — trigger crea fila al registrarse | tabla pública + RLS |
 | `products` / `product_options` | catálogo lectura pública; CRUD admin (rol `admin`) | tabla pública + RLS |
 | `messages` | insert público (contacto) + gestión admin; **anti-spam: máx. 5/email/10min** | tabla pública + RLS |
@@ -210,69 +219,48 @@ Magic-Webpage/
 
 ---
 
-## Modelos de Datos (SQLite)
+## Modelos de Datos
 
-### products
+El catálogo editorial vive en `backend/data/products.json` y se proyecta a
+Supabase con `scripts/seed-supabase.js`. La forma de cada producto es:
 
-```sql
-CREATE TABLE products (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  name        TEXT NOT NULL,
-  slug        TEXT UNIQUE NOT NULL,
-  tagline     TEXT,                  -- Frase corta tipo Apple
-  description TEXT,
-  base_price  REAL,
-  category    TEXT,                  -- 'os', 'hardware', 'cloud', 'silicon'
-  status      TEXT DEFAULT 'available',  -- 'available' | 'coming_soon'
-  image_url   TEXT,
-  features_json TEXT,                -- [{"title":"Diseño","desc":"...","img":"..."}]
-  created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+```json
+{
+  "id": 1,
+  "slug": "magicos",
+  "name": "MagicOS",
+  "tagline": "El sistema que te pertenece",
+  "base_price": 0,
+  "category": "os",
+  "status": "available",
+  "image_url": "/img/...",
+  "features": [
+    {
+      "theme": "ui",
+      "icon": "...",
+      "title": "Interfaz GNOME",
+      "description": "...",
+      "image": "/img/...",
+      "image_alt": "..."
+    }
+  ],
+  "options": [
+    {
+      "group_name": "RAM",
+      "group_order": 2,
+      "label": "16GB",
+      "price_modifier": 0,
+      "is_default": 1
+    }
+  ]
+}
 ```
 
-### product_options (Configuraciones tipo Apple)
-
-```sql
-CREATE TABLE product_options (
-  id              INTEGER PRIMARY KEY AUTOINCREMENT,
-  product_id      INTEGER REFERENCES products(id),
-  group_name      TEXT NOT NULL,     -- 'Procesador', 'RAM', 'Almacenamiento', 'Pantalla'
-  group_order     INTEGER,           -- Orden del grupo en la UI
-  label           TEXT NOT NULL,      -- 'N1 Pro', '16GB', '512GB SSD'
-  description     TEXT,               -- '40% más rápido que el base'
-  price_modifier  REAL,               -- +$200
-  is_default      INTEGER DEFAULT 0, -- Opción seleccionada por defecto
-  sort_order      INTEGER
-);
-```
-
-### messages
-
-```sql
-CREATE TABLE messages (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  name        TEXT NOT NULL,
-  email       TEXT NOT NULL,
-  subject     TEXT,
-  message     TEXT NOT NULL,
-  read        INTEGER DEFAULT 0,
-  created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### users (Admin)
-
-> Solo aplica al dev local. En el deploy se prevé sustituir por Supabase Auth.
-
-```sql
-CREATE TABLE users (
-  id            INTEGER PRIMARY KEY AUTOINCREMENT,
-  username      TEXT UNIQUE NOT NULL,
-  email         TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
+En Supabase, `supabase/schema.sql` define `profiles`, `products`,
+`product_options`, `cart_items`, `orders`, `subscriptions` y `messages`, con RLS,
+triggers de recálculo de precios y la función transaccional `checkout()`. Ese
+archivo es la fuente de verdad de columnas, políticas y funciones; ya no existe
+una base SQLite local.
 
 ---
 
@@ -484,6 +472,11 @@ o copy de marketing.
 
 ### Fase 4b — Migración a Supabase (cuentas + carrito + admin en GitHub Pages)
 
+> **Nota de lectura:** esta fase documenta decisiones de septiembre de 2026. La
+> Fase 9 (nov 2026) retiró Google OAuth, convirtió el checkout en RPC
+> transaccional, unificó el catálogo en `products.json` y cambió el contacto a
+> Supabase-primero. Los checkboxes se conservan como historial.
+
 **Objetivo:** que **todo** (admin, cuentas de cliente, carrito, servicios) funcione
 en el deploy estático de GitHub Pages, sin backend Express.
 
@@ -676,8 +669,9 @@ en el deploy estático de GitHub Pages, sin backend Express.
 
 ### Opciones configurables por producto
 
-> Sirius: las opciones de Procesador, RAM y Almacenamiento ya están sembradas en
-> la BD (`seed.js`) y el configurador las muestra en `/productos/sirius-laptop/configure`.
+> Sirius: las opciones de Procesador, RAM y Almacenamiento viven en
+> `backend/data/products.json` y el configurador las muestra en
+> `/productos/sirius-laptop/configure`.
 
 **Sirius Laptop:**
 - **Procesador N1** (silicio propio, optimizado para MagicOS):
@@ -706,11 +700,11 @@ en el deploy estático de GitHub Pages, sin backend Express.
 ### Ejecución del proyecto
 ```bash
 npm install
-npm run seed          # Poblar BD local (dev) + regenerar backend/data/products.json
+npm run catalog:pull  # (opcional) Supabase → backend/data/products.json; requiere .env
 npm run seed:supabase # Poblar Supabase (admin, productos, opciones, mensajes) — requiere schema aplicado
 npm run dev           # Servidor Express local (nodemon, http://localhost:3000)
-npm test              # Smoke tests del backend (node:test)
-npm run build         # Prerender estático EJS → dist/ (sin SQLite ni módulos nativos)
+npm test              # 24 tests: servidor, catálogo, build y markdown (node:test)
+npm run build         # Prerender estático EJS → dist/
 ```
 
 ### Deploy (GitHub Pages — requerimiento del proyecto)
@@ -726,10 +720,10 @@ npm run build         # Prerender estático EJS → dist/ (sin SQLite ni módulo
   cuando se confirma que el fix resolvió el problema** (squash merge, un commit
   limpio por fix). `main` queda como la versión estable desplegada; los intentos
   fallidos no se mergean.
-- Formularios: FormSubmit (`https://formsubmit.co/josesepint3@gmail.com`) con
-  `data-ajax="true"` + `ContactForm.js`. El envío llega por correo al email de la
-  cuenta; la primera vez que se envía hay que confirmar la activación que llega
-  a la bandeja (GitHub Pages no tiene backend, por eso se usa FormSubmit).
+- Formularios: `ContactForm.js` inserta primero en `messages` de Supabase (visible
+  en el panel admin). Solo si esa inserción falla cae a FormSubmit
+  (`https://formsubmit.co/josesepint3@gmail.com`) como respaldo por correo; la
+  primera vez hay que confirmar la activación que llega a la bandeja.
 
 ### Variables de entorno (`.env`)
 ```
@@ -754,8 +748,28 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...  # solo para el seed (¡nunca al frontend!)
   HTTP). `script-src 'self'` sin `unsafe-inline`: todo el JS es externo.
 - **Express (dev):** headers de seguridad, `GET /health`, límites de payload,
   errores 404/500 sin filtrar internals en `NODE_ENV=production`.
-- **Supabase:** la integridad (triggers) vive en el schema; aplicarlo en el SQL
-  Editor es lo que falta para que todo esto quede activo en el deploy.
+- **Supabase:** la integridad (triggers y `checkout()`) vive en el schema. Ya está
+  aplicado en el proyecto; si se modifica `supabase/schema.sql`, hay que
+  re-ejecutarlo en el SQL Editor.
+
+### Fase 9 — Deuda técnica cerrada (nov 2026)
+
+- **Checkout atómico:** `public.checkout()` reemplaza los tres inserts HTTP.
+- **Catálogo único:** `backend/data/catalog.js` + `products.json`; Express y el
+  build comparten la misma carga. SQLite, `backend/seed.js` y `config/db.js`
+  eliminados.
+- **Publicación desde el admin:** `product-generic.ejs` + `SYNC_CATALOG=1` en el
+  workflow permiten publicar slugs nuevos sin plantilla propia.
+- **Contacto sin duplicados:** Supabase primero, FormSubmit como fallback.
+- **Código muerto:** Google OAuth y `conversation_id` retirados.
+- **Datos en la UI:** home, lista de features y carrusel de MagicOS salen del
+  JSON.
+- **Accesibilidad:** skip link, `main` enfocable, `aria-current`, carrusel con
+  teclado/ARIA, `aria-busy` en chat y `aria-invalid` en formularios.
+- **Tests:** 24 (`app`, `catalog`, `build`, `markdown`).
+- **Pendiente real:** E2E de navegador, rate limiting/captcha, auditoría formal
+  de accesibilidad, historial de chat multidispositivo y pasarela de pago. Ver
+  `docs/GUIA-PRESENTACION-Y-ARQUITECTURA.md`, sección 13.
 
 ### Patrón de componentes (Vanilla JS)
 ```js

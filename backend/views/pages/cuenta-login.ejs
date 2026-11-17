@@ -1,6 +1,6 @@
 <%- include('../partials/header') %>
 
-    <main>
+    <main id="main-content" tabindex="-1">
         <section class="account-page">
             <form id="auth-form" class="account-card" data-reveal novalidate>
                 <h2 id="auth-title">Iniciar sesión</h2>
@@ -26,7 +26,6 @@
 
                 <div class="account-actions">
                     <button type="submit" id="auth-submit">Entrar</button>
-                    <button type="button" class="btn-ghost" id="auth-google" hidden>Continuar con Google</button>
                     <p class="form-status" role="status" aria-live="polite" hidden></p>
                 </div>
 

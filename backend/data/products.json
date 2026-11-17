@@ -12,18 +12,37 @@
     "features": [
       {
         "title": "Privacidad de élite",
-        "description": "Cifrado GPG automático y cero telemetría. Tus datos se cifran solos.",
-        "img": ""
+        "description": "Cifrado GPG activo desde el primer arranque: tus archivos y tus mensajes se cifran solos, sin configurar nada.",
+        "icon": "shield",
+        "theme": "ui"
       },
       {
         "title": "Resiliencia atómica",
-        "description": "Núcleo inmutable de solo lectura: el sistema no se corrompe ni se degrada.",
-        "img": ""
+        "description": "Núcleo inmutable de solo lectura: si algo falla, el sistema vuelve a su estado original. No se corrompe ni se degrada.",
+        "icon": "layers",
+        "theme": "security"
+      },
+      {
+        "title": "Interfaz GNOME",
+        "description": "La interfaz de GNOME, pulida para MagicOS: intuitiva, coherente y familiar desde el primer arranque, sin curva de aprendizaje.",
+        "icon": "layout",
+        "theme": "performance",
+        "image": "/img/shell.svg",
+        "image_alt": "Escritorio de MagicOS basado en GNOME"
+      },
+      {
+        "title": "Magic Circle",
+        "description": "Desarrollo abierto y auditable: cualquiera puede revisar el código, reportar fallos y proponer mejoras.",
+        "icon": "circle",
+        "theme": "open"
       },
       {
         "title": "Horizon",
-        "description": "Cerca del 90 % de las aplicaciones más usadas funcionan desde el primer día.",
-        "img": ""
+        "description": "Compatibilidad real desde el primer día: cerca del 90 % de las aplicaciones más usadas funcionan sin reinstalar el sistema.",
+        "icon": "grid",
+        "theme": "compat",
+        "image": "/img/apps.svg",
+        "image_alt": "Aplicaciones de MagicOS"
       }
     ],
     "options": []
