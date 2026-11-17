@@ -768,8 +768,9 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...  # solo para el seed (¡nunca al frontend!)
   teclado/ARIA, `aria-busy` en chat y `aria-invalid` en formularios.
 - **Tests:** 24 (`app`, `catalog`, `build`, `markdown`).
 - **Pendiente real:** E2E de navegador, rate limiting/captcha, auditoría formal
-  de accesibilidad, historial de chat multidispositivo y pasarela de pago. Ver
-  `docs/GUIA-PRESENTACION-Y-ARQUITECTURA.md`, sección 13.
+  de accesibilidad, historial de chat multidispositivo y pasarela de pago. Está
+  detallado en el documento privado de presentación (sección 13), que no se
+  versiona en el repositorio.
 
 ### Patrón de componentes (Vanilla JS)
 ```js

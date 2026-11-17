@@ -75,7 +75,6 @@ La plataforma web de Magic, estructurada como una aplicación **Full-Stack** con
 
 ### 📚 Documentación
 
-- [`docs/GUIA-PRESENTACION-Y-ARQUITECTURA.md`](docs/GUIA-PRESENTACION-Y-ARQUITECTURA.md) — Cómo presentar el proyecto y cómo funciona cada página, cada flujo de datos y cada capa de seguridad.
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — Fases, decisiones y estado del proyecto.
 
 ### 💻 Tecnologías

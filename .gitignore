@@ -7,3 +7,9 @@ backend/data/*
 !backend/data/products.json
 !backend/data/catalog.js
 dist/
+
+# Documentación privada: se conserva en local, no se publica en el repositorio.
+docs/ENTREGA-CLASSROOM.*
+docs/ENCUESTA-GOOGLE-FORMS.*
+docs/ENTREVISTA-CONSUMIDOR.*
+docs/GUIA-PRESENTACION-Y-ARQUITECTURA.*
